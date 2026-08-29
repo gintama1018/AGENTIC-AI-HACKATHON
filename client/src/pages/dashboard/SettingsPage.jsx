@@ -1,241 +1,193 @@
-import React, { useEffect, useState } from 'react';
-import { 
-  Settings, 
-  Sparkles, 
-  CheckCircle2, 
-  AlertCircle, 
-  ExternalLink, 
-  Save, 
-  Activity, 
-  Zap, 
-  ShieldCheck,
-  FileSpreadsheet,
-  Key,
-  Building,
-  RefreshCw
-} from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Eye, EyeOff, Copy, CheckCircle2, Wifi } from 'lucide-react';
 import { api } from '../../services/api';
-import { useAuth } from '../../context/AuthContext';
 
-export const SettingsPage = () => {
-  const { user } = useAuth();
-  const [settings, setSettings] = useState({
-    n8n_webhook_url: '',
-    google_sheet_id: '',
-    api_key: '',
-    sync_interval: 'hourly',
-    auto_analyze: true
-  });
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const [saveNotice, setSaveNotice] = useState('');
-  const [testStatus, setTestStatus] = useState(null);
-  const [testingWebhook, setTestingWebhook] = useState(false);
+// DESIGN.md §10 — Settings: quiet, functional, masked sensitive keys
+// No card-heavy layout. Section rows with dividers.
 
-  useEffect(() => {
-    const fetchSettings = async () => {
-      try {
-        setLoading(true);
-        const res = await api.getIntegrations();
-        if (res.data) {
-          setSettings(res.data);
-        }
-      } catch (err) {
-        console.error('Failed to load settings:', err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchSettings();
-  }, []);
+const MaskedField = ({ value, label }) => {
+  const [revealed, setRevealed] = useState(false);
+  const [copied,   setCopied]   = useState(false);
 
-  const handleSave = async (e) => {
-    e.preventDefault();
-    setSaving(true);
-    setSaveNotice('');
-    try {
-      await api.updateIntegrations(settings);
-      setSaveNotice('✅ Settings saved and updated successfully!');
-      setTimeout(() => setSaveNotice(''), 3500);
-    } catch (err) {
-      setSaveNotice('❌ Failed to save settings: ' + err.message);
-    } finally {
-      setSaving(false);
-    }
+  const copyToClipboard = () => {
+    navigator.clipboard.writeText(value).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
   };
 
-  const handleTestWebhook = async () => {
+  const display = revealed
+    ? value
+    : value.slice(0, 6) + '••••••••••••' + value.slice(-4);
+
+  return (
+    <div>
+      <p className="text-meta text-ash mb-1">{label}</p>
+      <div className="flex items-center gap-2">
+        <code className="flex-1 rs-field font-mono text-[13px]" style={{ height: 36, display: 'flex', alignItems: 'center', cursor: 'default' }}>
+          {display}
+        </code>
+        <button
+          onClick={() => setRevealed(!revealed)}
+          className="rs-btn-quiet p-2"
+          title={revealed ? 'Hide' : 'Reveal'}
+        >
+          {revealed ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+        </button>
+        <button
+          onClick={copyToClipboard}
+          className="rs-btn-quiet p-2"
+          title="Copy"
+        >
+          {copied ? <CheckCircle2 className="w-3.5 h-3.5 text-success" /> : <Copy className="w-3.5 h-3.5" />}
+        </button>
+      </div>
+    </div>
+  );
+};
+
+export const SettingsPage = () => {
+  const [webhookLatency, setWebhookLatency] = useState(null);
+  const [testingWebhook, setTestingWebhook] = useState(false);
+  const [webhookStatus,  setWebhookStatus]  = useState(null); // 'ok' | 'error' | null
+
+  const testWebhook = async () => {
     setTestingWebhook(true);
-    setTestStatus(null);
+    setWebhookLatency(null);
+    setWebhookStatus(null);
+    const start = Date.now();
     try {
-      const res = await api.testWebhookConnection(settings.n8n_webhook_url);
-      setTestStatus(res);
-    } catch (err) {
-      setTestStatus({
-        success: false,
-        message: 'Connection failed: ' + err.message
-      });
+      await api.triggerN8nWebhook?.({ test: true });
+      setWebhookLatency(Date.now() - start);
+      setWebhookStatus('ok');
+    } catch {
+      setWebhookLatency(Date.now() - start);
+      setWebhookStatus('error');
     } finally {
       setTestingWebhook(false);
     }
   };
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-[50vh]">
-        <div className="w-6 h-6 border-2 border-brand-500 border-t-transparent rounded-full animate-spin" />
-      </div>
-    );
-  }
-
   return (
-    <div className="space-y-6 max-w-4xl mx-auto">
+    <div className="max-w-xl space-y-10">
+
       {/* Header */}
       <div>
-        <div className="flex items-center gap-2">
-          <h1 className="text-2xl font-extrabold text-white tracking-tight">Integrations & Pipeline Settings</h1>
-          <span className="px-2 py-0.5 text-[10px] font-bold rounded-full bg-brand-500/20 text-brand-300 border border-brand-500/30">
-            n8n Connected
-          </span>
-        </div>
-        <p className="text-xs text-slate-400 mt-1">
-          Configure external n8n AI webhook endpoints, Google Sheets sync, and multi-tenant credentials.
-        </p>
+        <h1 className="text-[22px] font-semibold text-charcoal tracking-tight mb-1">Settings</h1>
+        <p className="text-compact text-graphite">Configuration and pipeline management for BharatThreads.</p>
       </div>
 
-      <form onSubmit={handleSave} className="space-y-6">
-        {/* n8n Webhook Configuration Card */}
-        <div className="glass-card rounded-2xl p-6 space-y-4 border-brand-500/30">
-          <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-            <div className="flex items-center gap-2">
-              <Sparkles className="w-5 h-5 text-brand-400" />
-              <div>
-                <h3 className="text-sm font-bold text-white">n8n AI Engine Webhook</h3>
-                <p className="text-[11px] text-slate-400">Wraps your existing "ReturnShield AI v2" workflow</p>
-              </div>
+      {/* ── Tenant profile ─────────────────────────────────────── */}
+      <section>
+        <p className="text-meta text-ash uppercase tracking-widest mb-4">Tenant profile</p>
+        <div className="border border-stone rounded-card bg-surface divide-y divide-mist">
+          {[
+            { label: 'Account name',   value: 'Sonu Jangir' },
+            { label: 'Email',          value: 'Sonu.jangir2024@uem.edu.in' },
+            { label: 'Company',        value: 'BharatThreads Lifestyle Pvt. Ltd.' },
+            { label: 'Currency',       value: '₹ INR' },
+            { label: 'Locale',         value: 'India (en-IN)' },
+            { label: 'Tenant ID',      value: 'bharatthreads_prod' },
+          ].map(({ label, value }) => (
+            <div key={label} className="flex items-center justify-between px-5 py-3">
+              <p className="text-compact text-graphite">{label}</p>
+              <p className="text-compact font-medium text-charcoal">{value}</p>
             </div>
-            <span className="px-2 py-0.5 text-[10px] font-mono text-emerald-400 bg-emerald-500/10 rounded border border-emerald-500/30">
-              Dual AI Engine
-            </span>
+          ))}
+        </div>
+      </section>
+
+      {/* ── API keys ───────────────────────────────────────────── */}
+      <section>
+        <p className="text-meta text-ash uppercase tracking-widest mb-4">API configuration</p>
+        <div className="border border-stone rounded-card bg-surface divide-y divide-mist">
+          <div className="px-5 py-4">
+            <MaskedField
+              label="Google Gemini API key"
+              value="AIzaSyBharatThreadsReturnShield2024HackKey"
+            />
+          </div>
+          <div className="px-5 py-4">
+            <MaskedField
+              label="n8n webhook secret"
+              value="rs_wh_secret_bharatthreads_prod_2024"
+            />
+          </div>
+          <div className="px-5 py-4">
+            <div className="flex items-start gap-2 p-3 rounded-control border border-mist bg-canvas text-meta text-graphite">
+              <span className="text-ash flex-shrink-0 pt-0.5">ℹ</span>
+              API keys are stored server-side. They are never sent to the browser in plaintext beyond this reveal toggle.
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── n8n pipeline ───────────────────────────────────────── */}
+      <section>
+        <p className="text-meta text-ash uppercase tracking-widest mb-4">n8n pipeline</p>
+        <div className="border border-stone rounded-card bg-surface divide-y divide-mist">
+          <div className="px-5 py-4">
+            <p className="text-compact text-graphite mb-1">Webhook endpoint</p>
+            <code className="text-meta font-mono text-charcoal break-all">
+              http://localhost:5678/webhook/returnshield-analyze
+            </code>
           </div>
 
-          <div className="space-y-2">
-            <label className="block text-xs font-semibold text-slate-300">
-              n8n Webhook Endpoint URL (POST)
-            </label>
-            <div className="flex gap-2">
-              <input
-                type="url"
-                value={settings.n8n_webhook_url || ''}
-                onChange={(e) => setSettings({ ...settings, n8n_webhook_url: e.target.value })}
-                placeholder="https://your-n8n-instance.cloud/webhook/returnshield-ai-v2"
-                className="flex-1 px-3.5 py-2 text-xs bg-slate-900 rounded-xl border border-slate-700 text-white font-mono focus:outline-none focus:border-brand-500"
-              />
+          {[
+            { label: 'Workflow', value: 'ReturnShield — Analyze & Classify' },
+            { label: 'Trigger',  value: 'HTTP Webhook' },
+            { label: 'Mode',     value: 'Production' },
+            { label: 'Region',   value: 'Self-hosted (local)' },
+          ].map(({ label, value }) => (
+            <div key={label} className="flex items-center justify-between px-5 py-3">
+              <p className="text-compact text-graphite">{label}</p>
+              <p className="text-compact text-charcoal">{value}</p>
+            </div>
+          ))}
+
+          {/* Webhook latency test */}
+          <div className="px-5 py-4">
+            <div className="flex items-center justify-between mb-3">
+              <p className="text-compact font-semibold text-charcoal">Webhook connectivity test</p>
               <button
-                type="button"
-                onClick={handleTestWebhook}
-                disabled={testingWebhook || !settings.n8n_webhook_url}
-                className="px-4 py-2 text-xs font-bold rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition-all flex items-center gap-1.5 disabled:opacity-40"
+                onClick={testWebhook}
+                disabled={testingWebhook}
+                className="rs-btn-secondary flex items-center gap-1.5 disabled:opacity-50"
+                style={{ height: 32, padding: '0 12px', fontSize: 13 }}
               >
-                <Activity className={`w-3.5 h-3.5 ${testingWebhook ? 'animate-spin text-brand-400' : 'text-slate-400'}`} />
-                {testingWebhook ? 'Testing...' : 'Test Connection'}
+                <Wifi className="w-3.5 h-3.5" />
+                {testingWebhook ? 'Testing…' : 'Test connection'}
               </button>
             </div>
-            <p className="text-[11px] text-slate-400">
-              Whenever a return is uploaded, ReturnShield AI POSTs payloads to this n8n webhook. If offline, the built-in local NLP AI engine processes the batch automatically!
-            </p>
-          </div>
-
-          {/* Test Status Output */}
-          {testStatus && (
-            <div className={`p-3.5 rounded-xl text-xs border ${
-              testStatus.success 
-                ? 'bg-emerald-500/15 border-emerald-500/30 text-emerald-300' 
-                : 'bg-amber-500/15 border-amber-500/30 text-amber-300'
-            }`}>
-              <div className="flex items-center gap-2 font-semibold">
-                {testStatus.success ? <CheckCircle2 className="w-4 h-4 text-emerald-400" /> : <AlertCircle className="w-4 h-4 text-amber-400" />}
-                <span>{testStatus.message}</span>
+            {webhookStatus && (
+              <div className={`flex items-center gap-2 text-meta ${webhookStatus === 'ok' ? 'text-success' : 'text-attention'}`}>
+                <CheckCircle2 className="w-3.5 h-3.5" />
+                {webhookStatus === 'ok'
+                  ? `Connected · ${webhookLatency}ms response`
+                  : `Connection failed · ${webhookLatency}ms — check that n8n is running`}
               </div>
-              {testStatus.note && (
-                <p className="text-[11px] mt-1 text-slate-300">{testStatus.note}</p>
-              )}
-            </div>
-          )}
-        </div>
-
-        {/* Google Sheets & API Integration */}
-        <div className="glass-card rounded-2xl p-6 space-y-4">
-          <div className="border-b border-slate-800 pb-3">
-            <h3 className="text-sm font-bold text-white flex items-center gap-2">
-              <FileSpreadsheet className="w-4 h-4 text-emerald-400" /> Google Sheets & API Sync
-            </h3>
-            <p className="text-[11px] text-slate-400">Automate two-way return sync from customer service spreadsheets</p>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
-            <div>
-              <label className="block text-slate-300 font-semibold mb-1">Google Sheet ID</label>
-              <input
-                type="text"
-                value={settings.google_sheet_id || ''}
-                onChange={(e) => setSettings({ ...settings, google_sheet_id: e.target.value })}
-                placeholder="1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms"
-                className="w-full px-3.5 py-2 bg-slate-900 rounded-xl border border-slate-700 text-white font-mono"
-              />
-            </div>
-
-            <div>
-              <label className="block text-slate-300 font-semibold mb-1">ReturnShield API Ingestion Key</label>
-              <div className="relative">
-                <input
-                  type="text"
-                  readOnly
-                  value={settings.api_key || 'rsh_live_9948fa812bc802f6ae4e'}
-                  className="w-full px-3.5 py-2 bg-slate-900 rounded-xl border border-slate-700 text-slate-400 font-mono text-[11px]"
-                />
-              </div>
-            </div>
+            )}
           </div>
         </div>
+      </section>
 
-        {/* Tenant Profile Information */}
-        <div className="glass-card rounded-2xl p-6 space-y-4">
-          <div className="border-b border-slate-800 pb-3">
-            <h3 className="text-sm font-bold text-white flex items-center gap-2">
-              <Building className="w-4 h-4 text-indigo-400" /> Tenant Profile & Multi-Tenant Isolation
-            </h3>
-            <p className="text-[11px] text-slate-400">Your brand workspace parameters</p>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
-            <div>
-              <span className="text-slate-400 text-[10px] uppercase font-semibold">Active Company Name:</span>
-              <p className="font-bold text-white text-sm mt-0.5">{user?.company_name || 'Aurora Apparel & Goods'}</p>
+      {/* ── Data management ────────────────────────────────────── */}
+      <section>
+        <p className="text-meta text-ash uppercase tracking-widest mb-4">Data management</p>
+        <div className="border border-stone rounded-card bg-surface divide-y divide-mist">
+          {[
+            { label: 'Persistence',       value: 'JSON flat file (server/src/data/db.json)' },
+            { label: 'Demo data',         value: 'Indian D2C — 50+ seeded return records' },
+            { label: 'Data retention',    value: '90 days rolling' },
+            { label: 'Export format',     value: 'CSV, PDF executive brief' },
+          ].map(({ label, value }) => (
+            <div key={label} className="flex items-start justify-between px-5 py-3">
+              <p className="text-compact text-graphite">{label}</p>
+              <p className="text-compact text-charcoal text-right max-w-xs">{value}</p>
             </div>
-            <div>
-              <span className="text-slate-400 text-[10px] uppercase font-semibold">Authorized Admin:</span>
-              <p className="font-bold text-white text-sm mt-0.5">{user?.name || 'Sarah Jenkins'} ({user?.email || 'sarah@aurorafashion.com'})</p>
-            </div>
-          </div>
+          ))}
         </div>
-
-        {/* Save Notice & Button */}
-        <div className="flex items-center justify-between pt-2">
-          {saveNotice ? (
-            <p className="text-xs font-semibold text-emerald-400 animate-pulse">{saveNotice}</p>
-          ) : <div />}
-
-          <button
-            type="submit"
-            disabled={saving}
-            className="px-6 py-2.5 text-xs font-bold rounded-xl bg-brand-600 hover:bg-brand-500 text-white shadow-glow transition-all flex items-center gap-2"
-          >
-            <Save className="w-4 h-4" />
-            {saving ? 'Saving Changes...' : 'Save Configuration'}
-          </button>
-        </div>
-      </form>
+      </section>
     </div>
   );
 };

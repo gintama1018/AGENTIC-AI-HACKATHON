@@ -1,65 +1,65 @@
 import React from 'react';
-import { TrendingUp, TrendingDown, HelpCircle } from 'lucide-react';
+import { TrendingUp, TrendingDown, Minus } from 'lucide-react';
 
+/**
+ * DESIGN.md §4.2 — Numeric Emphasis: 22-28px tabular numerals.
+ * §14 — Cards only for distinct content objects, surface background, stone border.
+ * §2.2 — Decisions before metrics: every stat must have a label + context line.
+ *
+ * props:
+ *   label       — string, what the number represents
+ *   value       — string|number
+ *   unit        — optional prefix/suffix (e.g. '₹', '%')
+ *   unitPos     — 'before' | 'after' (default 'before')
+ *   context     — one-line interpretation of what this number means
+ *   trend       — 'up' | 'down' | 'flat' | null
+ *   trendValue  — string (e.g. '+12% vs last week')
+ *   trendGood   — boolean (is 'up' good or bad for this metric?)
+ */
 export const StatCard = ({
-  title,
+  label,
   value,
-  subtitle,
-  icon: Icon,
+  unit = '',
+  unitPos = 'before',
+  context,
   trend,
-  trendDirection = 'neutral', // 'up' | 'down' | 'neutral'
-  trendLabel = '',
-  gradient = 'from-indigo-500/20 to-purple-500/10',
-  iconColor = 'text-indigo-400',
-  badgeText = ''
+  trendValue,
+  trendGood = false,
 }) => {
+  const TrendIcon = trend === 'up' ? TrendingUp : trend === 'down' ? TrendingDown : Minus;
+
+  const trendColor =
+    trend === 'flat' ? 'text-ash' :
+    (trend === 'up' && trendGood) || (trend === 'down' && !trendGood)
+      ? 'text-success'
+      : 'text-attention';
+
   return (
-    <div className="glass-card rounded-2xl p-5 relative overflow-hidden group">
-      {/* Background Accent Gradient */}
-      <div className={`absolute top-0 right-0 w-32 h-32 bg-gradient-to-br ${gradient} rounded-full blur-2xl -mr-10 -mt-10 pointer-events-none group-hover:scale-125 transition-transform duration-500`} />
+    <div className="rs-card">
+      {/* Label */}
+      <p className="text-meta text-graphite mb-2">{label}</p>
 
-      <div className="flex items-start justify-between relative z-10">
-        <div>
-          <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1 flex items-center gap-1.5">
-            {title}
-            {badgeText && (
-              <span className="px-1.5 py-0.5 text-[10px] bg-slate-800 text-slate-300 rounded border border-slate-700">
-                {badgeText}
-              </span>
-            )}
-          </p>
-          <h3 className="text-2xl sm:text-3xl font-bold text-white tracking-tight mt-1">
-            {value}
-          </h3>
-        </div>
+      {/* Value */}
+      <p className="font-num text-charcoal font-semibold leading-none mb-2" style={{ fontSize: 26 }}>
+        {unitPos === 'before' && unit && <span className="text-[18px] font-normal text-graphite mr-0.5">{unit}</span>}
+        {value}
+        {unitPos === 'after' && unit && <span className="text-[18px] font-normal text-graphite ml-0.5">{unit}</span>}
+      </p>
 
-        {Icon && (
-          <div className={`w-12 h-12 rounded-xl bg-slate-800/80 border border-slate-700/60 flex items-center justify-center ${iconColor} shadow-inner`}>
-            <Icon className="w-6 h-6" />
-          </div>
-        )}
-      </div>
+      {/* Trend */}
+      {trend && trendValue && (
+        <p className={`flex items-center gap-1 text-meta mb-2 ${trendColor}`}>
+          <TrendIcon className="w-3 h-3" />
+          {trendValue}
+        </p>
+      )}
 
-      {/* Footer / Trend Info */}
-      {(trend || subtitle) && (
-        <div className="mt-4 pt-3 border-t border-slate-800/80 flex items-center justify-between text-xs relative z-10">
-          {trend ? (
-            <div className="flex items-center gap-1.5">
-              <span className={`inline-flex items-center gap-0.5 font-semibold ${
-                trendDirection === 'down' ? 'text-emerald-400' :
-                trendDirection === 'up' ? 'text-rose-400' : 'text-slate-400'
-              }`}>
-                {trendDirection === 'up' && <TrendingUp className="w-3.5 h-3.5" />}
-                {trendDirection === 'down' && <TrendingDown className="w-3.5 h-3.5" />}
-                {trend}
-              </span>
-              <span className="text-slate-400">{trendLabel}</span>
-            </div>
-          ) : (
-            <span className="text-slate-400">{subtitle}</span>
-          )}
-        </div>
+      {/* Context interpretation */}
+      {context && (
+        <p className="text-meta text-graphite border-t border-mist pt-2 mt-2">{context}</p>
       )}
     </div>
   );
 };
+
+export default StatCard;

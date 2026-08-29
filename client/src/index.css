@@ -1,86 +1,220 @@
+/* DESIGN.md — ReturnShield AI Design System v1.0 */
+
+/* §04 — Typography: Inter + Source Serif 4 from Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+4:ital,wght@0,400;0,600;1,400&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
+  :root {
+    /* DESIGN.md §03 — Warm-neutral editorial palette */
+    --canvas:    #F5F2EC;   /* Primary application background */
+    --surface:   #FCFAF6;   /* Major surfaces, forms, content areas */
+    --ink:       #1C1B19;   /* Primary navigation, strong controls */
+    --charcoal:  #252421;   /* Headings and high-priority text */
+    --graphite:  #5F5B54;   /* Descriptive copy, metadata */
+    --ash:       #8A847A;   /* Timestamps, low-priority labels */
+    --stone:     #D8D2C8;   /* Structural separators */
+    --mist:      #E8E3DB;   /* Soft visual boundaries */
+
+    /* Semantic — meaning only, never decorative */
+    --attention:      #A45636;
+    --attention-soft: #F0E0D7;
+    --success:        #68705A;
+    --success-soft:   #E4E7DE;
+    --critical:       #7D3F38;
+    --critical-soft:  #EEDDD9;
+  }
+
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
   body {
-    @apply bg-[#0B0F19] text-slate-100 font-sans antialiased min-h-screen;
-    background-image: 
-      radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.08) 0px, transparent 50%),
-      radial-gradient(at 100% 100%, rgba(16, 185, 129, 0.05) 0px, transparent 50%);
-    background-attachment: fixed;
+    background-color: var(--canvas);
+    color: var(--charcoal);
+    font-family: 'Inter', system-ui, sans-serif;
+    font-size: 15px;
+    line-height: 1.55;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    min-height: 100vh;
+  }
+
+  /* §4.3 — Use weight to create hierarchy; no gradient text */
+  h1, h2, h3, h4, h5, h6 {
+    color: var(--charcoal);
+    font-weight: 600;
+    line-height: 1.2;
   }
 }
 
-/* Glassmorphism and Card styles */
-.glass-panel {
-  background: rgba(17, 24, 39, 0.75);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.07);
+@layer components {
+  /* §05 — Primary workstation surface */
+  .rs-surface {
+    background-color: var(--surface);
+    border: 1px solid var(--stone);
+  }
+
+  /* §14 — Cards only for distinct content objects */
+  .rs-card {
+    background-color: var(--surface);
+    border: 1px solid var(--stone);
+    border-radius: 10px;
+    padding: 20px 24px;
+  }
+
+  /* §07 — Separators are a primary grouping tool */
+  .rs-divider {
+    border-color: var(--stone);
+  }
+  .rs-divider-soft {
+    border-color: var(--mist);
+  }
+
+  /* §10.1 — Primary button: Ink background */
+  .rs-btn-primary {
+    background-color: var(--ink);
+    color: var(--surface);
+    height: 40px;
+    padding: 0 16px;
+    border-radius: 7px;
+    font-size: 14px;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    transition: background-color 160ms ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .rs-btn-primary:hover {
+    background-color: #2e2c2a;
+  }
+  .rs-btn-primary:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  /* §10.2 — Secondary button: outlined */
+  .rs-btn-secondary {
+    background-color: transparent;
+    color: var(--charcoal);
+    height: 40px;
+    padding: 0 16px;
+    border-radius: 7px;
+    font-size: 14px;
+    font-weight: 500;
+    border: 1px solid var(--stone);
+    cursor: pointer;
+    transition: border-color 160ms ease, background-color 160ms ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .rs-btn-secondary:hover {
+    border-color: #BDB6AA;
+    background-color: var(--mist);
+  }
+
+  /* §10.3 — Quiet button: no border */
+  .rs-btn-quiet {
+    background-color: transparent;
+    color: var(--graphite);
+    height: 36px;
+    padding: 0 12px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    border: none;
+    cursor: pointer;
+    transition: background-color 160ms ease, color 160ms ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .rs-btn-quiet:hover {
+    background-color: var(--mist);
+    color: var(--charcoal);
+  }
+
+  /* §11 — Form controls */
+  .rs-field {
+    height: 40px;
+    border: 1px solid #CFC8BD;
+    background-color: var(--surface);
+    border-radius: 7px;
+    padding: 0 12px;
+    font-size: 14px;
+    color: var(--charcoal);
+    width: 100%;
+    transition: border-color 160ms ease;
+  }
+  .rs-field::placeholder {
+    color: var(--ash);
+  }
+  .rs-field:focus {
+    outline: none;
+    border-color: var(--graphite);
+  }
+
+  /* §13 — Status indicators: text-first, small semantic marker */
+  .rs-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--graphite);
+  }
+  .rs-status-dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  /* Numeric emphasis — §4.2 */
+  .font-num {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum";
+  }
+
+  /* §04 — Optional editorial serif accent */
+  .font-serif-editorial {
+    font-family: 'Source Serif 4', Georgia, serif;
+  }
 }
 
-.glass-card {
-  background: linear-gradient(135deg, rgba(24, 34, 52, 0.8) 0%, rgba(17, 24, 39, 0.9) 100%);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.glass-card:hover {
-  border-color: rgba(99, 102, 241, 0.35);
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
-}
-
-.glass-card-glow {
-  position: relative;
-}
-.glass-card-glow::before {
-  content: '';
-  position: absolute;
-  inset: -1px;
-  background: linear-gradient(90deg, #6366f1, #10b981, #ec4899);
-  border-radius: inherit;
-  z-index: -1;
-  opacity: 0;
-  transition: opacity 0.3s ease;
-}
-.glass-card-glow:hover::before {
-  opacity: 0.4;
-}
-
-/* Custom Scrollbar */
+/* §09 — Scrollbar: minimal, warm-toned */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 5px;
+  height: 5px;
 }
 ::-webkit-scrollbar-track {
-  background: #0B0F19;
+  background: var(--canvas);
 }
 ::-webkit-scrollbar-thumb {
-  background: #1F293D;
-  border-radius: 4px;
+  background: var(--stone);
+  border-radius: 2px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #374151;
+  background: #BDB6AA;
 }
 
-/* Glow Utilities */
-.text-gradient {
-  background: linear-gradient(135deg, #ffffff 0%, #cbd5e1 50%, #94a3b8 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
-.text-gradient-brand {
-  background: linear-gradient(135deg, #818cf8 0%, #6366f1 50%, #4f46e5 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
-.text-gradient-emerald {
-  background: linear-gradient(135deg, #34d399 0%, #10b981 50%, #059669 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+/* §30 — Print styles */
+@media print {
+  body {
+    background-color: #ffffff !important;
+    color: var(--charcoal) !important;
+  }
+  .no-print {
+    display: none !important;
+  }
+  .rs-card, .rs-surface {
+    background: #ffffff !important;
+    border: 1px solid var(--stone) !important;
+  }
 }

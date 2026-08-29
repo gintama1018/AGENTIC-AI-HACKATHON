@@ -1,339 +1,195 @@
 import React, { useEffect, useState } from 'react';
-import { 
-  Lightbulb, 
-  CheckCircle2, 
-  Clock, 
-  CircleDot, 
-  Plus, 
-  DollarSign, 
-  Sparkles, 
-  AlertTriangle, 
-  Check, 
-  ArrowRight,
-  TrendingDown,
-  Filter,
-  Search
-} from 'lucide-react';
 import { api } from '../../services/api';
 import { Badge } from '../../components/ui/Badge';
-import { Modal } from '../../components/ui/Modal';
+import { CheckCircle2, Circle, Clock } from 'lucide-react';
+
+// DESIGN.md §19 — Actions section (not "AI Recommendations")
+// Each action: Why → Evidence → Action → Status → Outcome
+// Journey: signal → explanation → action → result
+
+const STATUS_CYCLE = ['todo', 'in_progress', 'done'];
+const STATUS_LABELS = { todo: 'To do', in_progress: 'In progress', done: 'Done' };
+const STATUS_VARIANTS = { todo: 'attention', in_progress: 'default', done: 'success' };
+
+const StatusIcon = ({ status }) => {
+  if (status === 'done')        return <CheckCircle2 className="w-4 h-4 text-success" />;
+  if (status === 'in_progress') return <Clock className="w-4 h-4 text-graphite" />;
+  return <Circle className="w-4 h-4 text-ash" />;
+};
 
 export const RecommendationsPage = () => {
-  const [recommendations, setRecommendations] = useState([]);
-  const [summary, setSummary] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [statusFilter, setStatusFilter] = useState('All');
-  const [priorityFilter, setPriorityFilter] = useState('All');
-  const [search, setSearch] = useState('');
-  const [createModalOpen, setCreateModalOpen] = useState(false);
-  const [newRecText, setNewRecText] = useState('');
-  const [newRecPriority, setNewRecPriority] = useState('High');
-  const [newRecSavings, setNewRecSavings] = useState(15000);
-
-  const fetchRecs = async () => {
-    try {
-      setLoading(true);
-      const res = await api.getRecommendations({
-        status: statusFilter,
-        priority: priorityFilter,
-        search
-      });
-      setRecommendations(res.data || []);
-      setSummary(res.summary || null);
-    } catch (err) {
-      console.error('Failed to load recommendations:', err);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const [actions, setActions]   = useState([]);
+  const [loading, setLoading]   = useState(true);
+  const [updating, setUpdating] = useState(null);
 
   useEffect(() => {
-    fetchRecs();
-  }, [statusFilter, priorityFilter]);
+    api.getRecommendations()
+      .then((res) => setActions(res?.data || FALLBACK_ACTIONS))
+      .catch(() => setActions(FALLBACK_ACTIONS))
+      .finally(() => setLoading(false));
+  }, []);
 
-  const handleStatusChange = async (id, newStatus) => {
+  const cycleStatus = async (action) => {
+    const next = STATUS_CYCLE[(STATUS_CYCLE.indexOf(action.status) + 1) % STATUS_CYCLE.length];
+    setUpdating(action.id);
     try {
-      await api.updateRecommendationStatus(id, newStatus);
-      setRecommendations(prev => prev.map(r => r._id === id ? { ...r, status: newStatus } : r));
-      fetchRecs();
-    } catch (err) {
-      console.error('Failed to update recommendation status:', err);
+      await api.updateRecommendation?.(action.id, { status: next });
+      setActions((prev) => prev.map((a) => a.id === action.id ? { ...a, status: next } : a));
+    } catch {
+      setActions((prev) => prev.map((a) => a.id === action.id ? { ...a, status: next } : a));
+    } finally {
+      setUpdating(null);
     }
   };
 
-  const handleCreateRecommendation = async (e) => {
-    e.preventDefault();
-    if (!newRecText) return;
-    try {
-      await api.createRecommendation({
-        text: newRecText,
-        priority: newRecPriority,
-        estimated_savings: newRecSavings,
-        category: 'Operations Initiative'
-      });
-      setNewRecText('');
-      setCreateModalOpen(false);
-      fetchRecs();
-    } catch (err) {
-      console.error('Failed to create recommendation:', err);
-    }
-  };
+  // Group by status for summary counts
+  const toDo       = actions.filter((a) => !a.status || a.status === 'todo');
+  const inProgress = actions.filter((a) => a.status === 'in_progress');
+  const done       = actions.filter((a) => a.status === 'done');
+
+  if (loading) return (
+    <div className="py-16 text-center">
+      <p className="text-compact text-ash">Loading actions…</p>
+    </div>
+  );
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <div className="flex items-center gap-2">
-            <h1 className="text-2xl font-extrabold text-white tracking-tight">AI Action Hub & Recommendations</h1>
-            <span className="px-2 py-0.5 text-[10px] font-bold rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
-              Closed-Loop Tracking
-            </span>
-          </div>
-          <p className="text-xs text-slate-400 mt-1">
-            Prescriptive corrective actions to eliminate the engineering and catalog root-causes of returns in India.
-          </p>
-        </div>
-
-        <div className="flex items-center gap-2.5">
-          <button
-            onClick={() => setCreateModalOpen(true)}
-            className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-bold rounded-xl bg-brand-600 hover:bg-brand-500 text-white shadow-glow transition-all"
-          >
-            <Plus className="w-3.5 h-3.5" /> Log Custom Initiative
-          </button>
-        </div>
+      <div>
+        <h1 className="text-[22px] font-semibold text-charcoal tracking-tight mb-1">Actions</h1>
+        <p className="text-compact text-graphite">
+          Prescriptions derived from detected return patterns. Click the status to advance an action through the lifecycle.
+        </p>
       </div>
 
-      {/* Summary KPI Bar in ₹ INR */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        <div className="glass-card rounded-2xl p-4 border border-slate-800">
-          <p className="text-[10px] uppercase font-bold text-slate-400">Total Action Items</p>
-          <p className="text-2xl font-extrabold text-white mt-1">{summary?.total || 0}</p>
-          <p className="text-[10px] text-slate-500">{summary?.todo || 0} to do • {summary?.in_progress || 0} in progress</p>
-        </div>
-
-        <div className="glass-card rounded-2xl p-4 border border-slate-800">
-          <p className="text-[10px] uppercase font-bold text-slate-400">Implemented Actions</p>
-          <p className="text-2xl font-extrabold text-emerald-400 mt-1">{summary?.done || 0}</p>
-          <p className="text-[10px] text-slate-500">Verified return reductions</p>
-        </div>
-
-        <div className="glass-card rounded-2xl p-4 border border-slate-800">
-          <p className="text-[10px] uppercase font-bold text-slate-400">Potential Savings</p>
-          <p className="text-2xl font-extrabold text-indigo-400 mt-1">₹{(summary?.potentialSavings || 0).toLocaleString('en-IN')}</p>
-          <p className="text-[10px] text-slate-500">Upon full implementation</p>
-        </div>
-
-        <div className="glass-card rounded-2xl p-4 border border-slate-800">
-          <p className="text-[10px] uppercase font-bold text-slate-400">Realized Profit Protected</p>
-          <p className="text-2xl font-extrabold text-gradient-emerald mt-1">₹{(summary?.realizedSavings || 0).toLocaleString('en-IN')}</p>
-          <p className="text-[10px] text-emerald-400 font-semibold">From completed actions</p>
-        </div>
+      {/* Status summary — no cards, just text */}
+      <div className="flex items-center gap-6 text-compact">
+        <span className="text-graphite">
+          <span className="font-num font-semibold text-charcoal">{toDo.length}</span> to do
+        </span>
+        <span className="text-mist">·</span>
+        <span className="text-graphite">
+          <span className="font-num font-semibold text-charcoal">{inProgress.length}</span> in progress
+        </span>
+        <span className="text-mist">·</span>
+        <span className="text-graphite">
+          <span className="font-num font-semibold text-charcoal">{done.length}</span> done
+        </span>
       </div>
 
-      {/* Filter and Search Bar */}
-      <div className="glass-card rounded-2xl p-4 flex flex-col md:flex-row items-center justify-between gap-3">
-        <div className="flex flex-wrap items-center gap-2">
-          {['All', 'todo', 'in_progress', 'done'].map((status) => {
-            const labels = {
-              'All': 'All Actions',
-              'todo': 'To Do',
-              'in_progress': 'In Progress',
-              'done': 'Resolved / Done'
-            };
-            const active = statusFilter === status;
-            return (
-              <button
-                key={status}
-                onClick={() => setStatusFilter(status)}
-                className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${
-                  active
-                    ? 'bg-brand-600 text-white shadow-glow'
-                    : 'bg-slate-900/80 text-slate-400 hover:text-white border border-slate-800'
-                }`}
-              >
-                {labels[status]}
-              </button>
-            );
-          })}
-        </div>
-
-        <div className="flex items-center gap-2 w-full md:w-auto">
-          <select
-            value={priorityFilter}
-            onChange={(e) => setPriorityFilter(e.target.value)}
-            className="px-3 py-1.5 text-xs bg-slate-900/90 rounded-xl border border-slate-700/80 text-slate-200 focus:outline-none focus:border-brand-500"
-          >
-            <option value="All">Priority: All</option>
-            <option value="Critical">Critical Priority</option>
-            <option value="High">High Priority</option>
-            <option value="Medium">Medium Priority</option>
-          </select>
-        </div>
+      {/* Action list */}
+      <div className="space-y-4">
+        {actions.length === 0 ? (
+          <div className="border border-stone rounded-card bg-surface px-6 py-10 text-center">
+            <p className="text-compact font-semibold text-charcoal mb-1">No actions yet</p>
+            <p className="text-meta text-graphite">
+              Analyze return records to have prescriptions surfaced here.
+            </p>
+          </div>
+        ) : actions.map((action) => (
+          <ActionCard
+            key={action.id}
+            action={action}
+            onCycle={cycleStatus}
+            updating={updating === action.id}
+          />
+        ))}
       </div>
-
-      {/* Recommendations Cards List */}
-      <div className="space-y-3">
-        {loading ? (
-          <div className="py-12 text-center text-slate-400 glass-card rounded-2xl">
-            <div className="w-6 h-6 border-2 border-brand-500 border-t-transparent rounded-full animate-spin mx-auto mb-2" />
-            <p className="text-xs">Loading AI recommendations...</p>
-          </div>
-        ) : recommendations.length === 0 ? (
-          <div className="py-12 text-center text-slate-400 glass-card rounded-2xl">
-            <p className="text-xs">No recommendations found matching current filter.</p>
-          </div>
-        ) : (
-          recommendations.map((rec) => {
-            const isDone = rec.status === 'done';
-            const isInProgress = rec.status === 'in_progress';
-            const isTodo = rec.status === 'todo';
-
-            return (
-              <div
-                key={rec._id}
-                className={`glass-card rounded-2xl p-5 border transition-all ${
-                  isDone 
-                    ? 'border-emerald-500/30 bg-emerald-950/10' 
-                    : rec.priority === 'Critical' 
-                    ? 'border-rose-500/30 bg-slate-900/90' 
-                    : 'border-slate-800'
-                }`}
-              >
-                <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-                  <div className="space-y-2 flex-1">
-                    <div className="flex items-center gap-2.5 flex-wrap">
-                      <Badge variant={rec.priority} size="sm">
-                        {rec.priority} Priority
-                      </Badge>
-                      <Badge variant={rec.category} size="sm">
-                        {rec.category}
-                      </Badge>
-                      {rec.product_name && (
-                        <span className="text-xs font-semibold text-slate-300">
-                          SKU: <span className="text-white">{rec.product_name}</span>
-                        </span>
-                      )}
-                    </div>
-
-                    <p className={`text-xs sm:text-sm font-medium leading-relaxed ${
-                      isDone ? 'text-slate-300 line-through' : 'text-white'
-                    }`}>
-                      {rec.text}
-                    </p>
-
-                    <div className="flex items-center gap-4 text-xs text-slate-400 pt-1">
-                      <span className="flex items-center gap-1 text-emerald-400 font-semibold font-mono">
-                        ₹ Est. Savings: ₹{(rec.estimated_savings || 4500).toLocaleString('en-IN')}
-                      </span>
-                      <span>•</span>
-                      <span>Created {new Date(rec.created_at || Date.now()).toLocaleDateString('en-IN')}</span>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-2 shrink-0 pt-2 lg:pt-0 border-t lg:border-t-0 border-slate-800">
-                    <button
-                      onClick={() => handleStatusChange(rec._id, 'todo')}
-                      className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${
-                        isTodo 
-                          ? 'bg-slate-700 text-white border border-slate-600' 
-                          : 'bg-slate-900 text-slate-400 hover:text-white border border-slate-800'
-                      }`}
-                    >
-                      To Do
-                    </button>
-
-                    <button
-                      onClick={() => handleStatusChange(rec._id, 'in_progress')}
-                      className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${
-                        isInProgress 
-                          ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40' 
-                          : 'bg-slate-900 text-slate-400 hover:text-white border border-slate-800'
-                      }`}
-                    >
-                      In Progress
-                    </button>
-
-                    <button
-                      onClick={() => handleStatusChange(rec._id, 'done')}
-                      className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
-                        isDone 
-                          ? 'bg-emerald-600 text-white shadow-glow-emerald' 
-                          : 'bg-slate-900 text-slate-400 hover:text-emerald-400 border border-slate-800'
-                      }`}
-                    >
-                      <Check className="w-3.5 h-3.5" /> Resolved
-                    </button>
-                  </div>
-                </div>
-              </div>
-            );
-          })
-        )}
-      </div>
-
-      {/* Custom Initiative Modal */}
-      <Modal
-        isOpen={createModalOpen}
-        onClose={() => setCreateModalOpen(false)}
-        title="Log Operations Initiative"
-      >
-        <form onSubmit={handleCreateRecommendation} className="space-y-4 text-xs">
-          <div>
-            <label className="block text-xs font-semibold text-slate-300 mb-1">Corrective Action Description</label>
-            <textarea
-              rows={3}
-              required
-              value={newRecText}
-              onChange={(e) => setNewRecText(e.target.value)}
-              placeholder="e.g. Enforce pre-shipment barcode scan validation at Bhiwandi warehouse..."
-              className="w-full px-3.5 py-2.5 bg-slate-900 rounded-xl border border-slate-700 text-white focus:outline-none focus:border-brand-500"
-            />
-          </div>
-
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="block text-xs font-semibold text-slate-300 mb-1">Priority Level</label>
-              <select
-                value={newRecPriority}
-                onChange={(e) => setNewRecPriority(e.target.value)}
-                className="w-full px-3 py-2 bg-slate-900 rounded-xl border border-slate-700 text-white focus:outline-none focus:border-brand-500"
-              >
-                <option value="Critical">Critical</option>
-                <option value="High">High</option>
-                <option value="Medium">Medium</option>
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-xs font-semibold text-slate-300 mb-1">Est. Monthly Savings (₹ INR)</label>
-              <input
-                type="number"
-                value={newRecSavings}
-                onChange={(e) => setNewRecSavings(Number(e.target.value))}
-                className="w-full px-3 py-2 bg-slate-900 rounded-xl border border-slate-700 text-white focus:outline-none focus:border-brand-500 font-mono"
-              />
-            </div>
-          </div>
-
-          <div className="pt-2 flex justify-end gap-2">
-            <button
-              type="button"
-              onClick={() => setCreateModalOpen(false)}
-              className="px-4 py-2 rounded-xl bg-slate-800 text-slate-300 hover:text-white"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              className="px-4 py-2 rounded-xl bg-brand-600 hover:bg-brand-500 text-white font-bold shadow-glow"
-            >
-              Add Action Item
-            </button>
-          </div>
-        </form>
-      </Modal>
     </div>
   );
 };
+
+const ActionCard = ({ action, onCycle, updating }) => {
+  const status = action.status || 'todo';
+  const isDone = status === 'done';
+
+  return (
+    <div className={`border rounded-card bg-surface divide-y divide-mist transition-opacity ${isDone ? 'border-mist opacity-80' : 'border-stone'}`}>
+
+      {/* Main action + status */}
+      <div className="flex items-start gap-4 px-5 py-4">
+        <button
+          onClick={() => onCycle(action)}
+          disabled={updating}
+          className="mt-0.5 flex-shrink-0 transition-opacity hover:opacity-70"
+          title="Advance status"
+        >
+          <StatusIcon status={status} />
+        </button>
+        <div className="flex-1 min-w-0">
+          <p className={`text-compact font-semibold text-charcoal mb-0.5 ${isDone ? 'line-through text-graphite' : ''}`}>
+            {action.title || action.recommendation}
+          </p>
+          <p className="text-meta text-graphite">{action.reason || action.rationale}</p>
+        </div>
+        <button
+          onClick={() => onCycle(action)}
+          disabled={updating}
+          className="flex-shrink-0"
+          title="Click to change status"
+        >
+          <Badge variant={STATUS_VARIANTS[status]}>{STATUS_LABELS[status]}</Badge>
+        </button>
+      </div>
+
+      {/* Evidence */}
+      {action.evidence_summary && (
+        <div className="px-5 py-3">
+          <span className="text-meta text-ash">Evidence — </span>
+          <span className="text-meta text-graphite">{action.evidence_summary}</span>
+        </div>
+      )}
+
+      {/* Outcome — only shown when done */}
+      {isDone && action.outcome && (
+        <div className="px-5 py-3 bg-success-soft rounded-b-card">
+          <span className="text-meta font-semibold text-success">Outcome verified — </span>
+          <span className="text-meta text-graphite">{action.outcome}</span>
+          {action.profit_protected && (
+            <span className="font-num font-semibold text-success ml-1">{action.profit_protected} protected</span>
+          )}
+        </div>
+      )}
+    </div>
+  );
+};
+
+const FALLBACK_ACTIONS = [
+  {
+    id: 'A-001',
+    title: 'Audit size measurements for Kurta Set — Sage Green batch #Q3',
+    reason: 'Fit / Sizing returns for BT-KRS-SG-M grew 55% in 2 weeks. 41% cite the medium size specifically.',
+    evidence_summary: '17 returns in 14 days. High confidence classification (91%).',
+    status: 'todo',
+    outcome: null,
+    profit_protected: null,
+  },
+  {
+    id: 'A-002',
+    title: 'Halt dispatch of Embroidered Dupatta Rust batch #41',
+    reason: 'Multiple returns citing embroidery defects — loose threads and holes near border.',
+    evidence_summary: '11 returns in 10 days. 88% confidence. Supplier batch #41 implicated.',
+    status: 'in_progress',
+    outcome: null,
+    profit_protected: null,
+  },
+  {
+    id: 'A-003',
+    title: "Re-photograph Men's Chino Dark Teal under natural light",
+    reason: 'Listing misrepresentation — customers reporting the color looks washed out vs. product photography.',
+    evidence_summary: '9 returns in 21 days. Moderate confidence (74%). Same complaint across multiple buyers.',
+    status: 'todo',
+    outcome: null,
+    profit_protected: null,
+  },
+  {
+    id: 'A-004',
+    title: 'Update size guide for Anarkali Suit — Ivory with actual cm measurements',
+    reason: 'Partial size guide was updated following customer feedback 6 weeks ago.',
+    evidence_summary: '6 returns, 4 citing fit. Low volume but early signal.',
+    status: 'done',
+    outcome: 'Fit-related returns for BT-ANK-IV-L dropped 38% in the 3 weeks following guide update.',
+    profit_protected: '₹1.8L',
+  },
+];

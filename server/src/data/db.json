@@ -4,7 +4,7 @@
       "_id": "user_demo_001",
       "name": "Sonu Jangir",
       "email": "Sonu.jangir2024@uem.edu.in",
-      "password_hash": "$2b$10$f8z6m0g4IOnq9benEPsCS.EpJmzc3.ryoyTbq3KuhNwuujOx/og3q",
+      "password_hash": "$2b$10$OomdxsD2lpfu6PnLLSZADuy2pYd0IBLgdItDnu.z9LFQZAq2IT8zO",
       "company_name": "BharatThreads Lifestyle Pvt. Ltd.",
       "role": "Head of E-Commerce Operations",
       "location": "Bengaluru, Karnataka, India",
@@ -30,8 +30,8 @@
       "sentiment": "negative",
       "severity": "high",
       "status": "analyzed",
-      "return_date": "2026-08-28T08:46:46.482Z",
-      "created_at": "2026-08-28T08:46:46.482Z"
+      "return_date": "2026-08-28T08:50:09.276Z",
+      "created_at": "2026-08-28T08:50:09.276Z"
     },
     {
       "_id": "ret_ind_1002",
@@ -51,8 +51,8 @@
       "sentiment": "very_negative",
       "severity": "critical",
       "status": "analyzed",
-      "return_date": "2026-08-27T07:46:46.482Z",
-      "created_at": "2026-08-27T07:46:46.482Z"
+      "return_date": "2026-08-27T07:50:09.276Z",
+      "created_at": "2026-08-27T07:50:09.276Z"
     },
     {
       "_id": "ret_ind_1003",
@@ -72,8 +72,8 @@
       "sentiment": "negative",
       "severity": "medium",
       "status": "analyzed",
-      "return_date": "2026-08-25T06:46:46.482Z",
-      "created_at": "2026-08-25T06:46:46.482Z"
+      "return_date": "2026-08-25T06:50:09.276Z",
+      "created_at": "2026-08-25T06:50:09.276Z"
     },
     {
       "_id": "ret_ind_1004",
@@ -93,8 +93,8 @@
       "sentiment": "negative",
       "severity": "high",
       "status": "analyzed",
-      "return_date": "2026-08-27T05:46:46.482Z",
-      "created_at": "2026-08-27T05:46:46.482Z"
+      "return_date": "2026-08-27T05:50:09.276Z",
+      "created_at": "2026-08-27T05:50:09.276Z"
     },
     {
       "_id": "ret_ind_1005",
@@ -114,8 +114,8 @@
       "sentiment": "very_negative",
       "severity": "critical",
       "status": "analyzed",
-      "return_date": "2026-08-24T04:46:46.482Z",
-      "created_at": "2026-08-24T04:46:46.482Z"
+      "return_date": "2026-08-24T04:50:09.276Z",
+      "created_at": "2026-08-24T04:50:09.276Z"
     },
     {
       "_id": "ret_ind_1006",
@@ -135,8 +135,8 @@
       "sentiment": "very_negative",
       "severity": "critical",
       "status": "analyzed",
-      "return_date": "2026-08-28T03:46:46.482Z",
-      "created_at": "2026-08-28T03:46:46.482Z"
+      "return_date": "2026-08-28T03:50:09.276Z",
+      "created_at": "2026-08-28T03:50:09.276Z"
     },
     {
       "_id": "ret_ind_1007",
@@ -156,8 +156,8 @@
       "sentiment": "very_negative",
       "severity": "high",
       "status": "analyzed",
-      "return_date": "2026-08-26T02:46:46.482Z",
-      "created_at": "2026-08-26T02:46:46.482Z"
+      "return_date": "2026-08-26T02:50:09.276Z",
+      "created_at": "2026-08-26T02:50:09.276Z"
     },
     {
       "_id": "ret_ind_1008",
@@ -177,8 +177,8 @@
       "sentiment": "negative",
       "severity": "high",
       "status": "analyzed",
-      "return_date": "2026-08-27T01:46:46.482Z",
-      "created_at": "2026-08-27T01:46:46.482Z"
+      "return_date": "2026-08-27T01:50:09.276Z",
+      "created_at": "2026-08-27T01:50:09.276Z"
     },
     {
       "_id": "ret_ind_1009",
@@ -198,8 +198,8 @@
       "sentiment": "very_negative",
       "severity": "critical",
       "status": "analyzed",
-      "return_date": "2026-08-23T00:46:46.482Z",
-      "created_at": "2026-08-23T00:46:46.482Z"
+      "return_date": "2026-08-23T00:50:09.276Z",
+      "created_at": "2026-08-23T00:50:09.276Z"
     },
     {
       "_id": "ret_ind_1010",
@@ -219,8 +219,8 @@
       "sentiment": "negative",
       "severity": "medium",
       "status": "analyzed",
-      "return_date": "2026-08-25T23:46:46.482Z",
-      "created_at": "2026-08-25T23:46:46.482Z"
+      "return_date": "2026-08-25T23:50:09.276Z",
+      "created_at": "2026-08-25T23:50:09.276Z"
     },
     {
       "_id": "ret_ind_1011",
@@ -240,8 +240,8 @@
       "sentiment": "negative",
       "severity": "high",
       "status": "analyzed",
-      "return_date": "2026-08-27T22:46:46.482Z",
-      "created_at": "2026-08-27T22:46:46.482Z"
+      "return_date": "2026-08-27T22:50:09.276Z",
+      "created_at": "2026-08-27T22:50:09.276Z"
     },
     {
       "_id": "ret_ind_1012",
@@ -261,8 +261,8 @@
       "sentiment": "very_negative",
       "severity": "critical",
       "status": "analyzed",
-      "return_date": "2026-08-24T21:46:46.482Z",
-      "created_at": "2026-08-24T21:46:46.482Z"
+      "return_date": "2026-08-24T21:50:09.276Z",
+      "created_at": "2026-08-24T21:50:09.276Z"
     },
     {
       "_id": "ret_ind_1013",
@@ -282,8 +282,8 @@
       "sentiment": "very_negative",
       "severity": "critical",
       "status": "analyzed",
-      "return_date": "2026-08-25T20:46:46.482Z",
-      "created_at": "2026-08-25T20:46:46.482Z"
+      "return_date": "2026-08-25T20:50:09.276Z",
+      "created_at": "2026-08-25T20:50:09.276Z"
     },
     {
       "_id": "ret_ind_1014",
@@ -303,8 +303,8 @@
       "sentiment": "neutral",
       "severity": "low",
       "status": "analyzed",
-      "return_date": "2026-08-21T19:46:46.482Z",
-      "created_at": "2026-08-21T19:46:46.482Z"
+      "return_date": "2026-08-21T19:50:09.276Z",
+      "created_at": "2026-08-21T19:50:09.276Z"
     },
     {
       "_id": "ret_hist_in_1_0",
@@ -318,14 +318,14 @@
       "customer_comment": "Ordered Size L (40 bust) as per chart, but it's way too tight across the shoulders and chest. Can't even wear it comfortably.",
       "return_reason_raw": "Size too small",
       "ai_reason_category": "Size & Fit Mismatch",
-      "ai_confidence": 0.95,
+      "ai_confidence": 0.96,
       "ai_root_cause": "Kurta bodice chest circumference is 2.5 inches smaller than standard Indian ethnic wear sizing spec (Kurti chest graded 37.5\" instead of 40\").",
       "ai_mitigation_fix": "Update size chart on Myntra/Shopify PDP with bust/shoulder measurements in inches and cm with 'Runs Small' tag.",
       "sentiment": "negative",
       "severity": "high",
       "status": "analyzed",
-      "return_date": "2026-08-29T05:46:46.482Z",
-      "created_at": "2026-08-29T05:46:46.482Z"
+      "return_date": "2026-08-28T08:50:09.276Z",
+      "created_at": "2026-08-28T08:50:09.276Z"
     },
     {
       "_id": "ret_hist_in_1_1",
@@ -339,14 +339,14 @@
       "customer_comment": "Zari embroidery around neck area is coming loose and itching against the collarbone.",
       "return_reason_raw": "Quality defect",
       "ai_reason_category": "Quality / Manufacturing Defect",
-      "ai_confidence": 0.96,
+      "ai_confidence": 0.97,
       "ai_root_cause": "Unbacked metallic zari thread with loose lockstitch prone to unraveling on friction.",
       "ai_mitigation_fix": "Enforce soft cotton lining backing behind embroidered neckline at Surat manufacturing unit.",
       "sentiment": "very_negative",
       "severity": "critical",
       "status": "analyzed",
-      "return_date": "2026-08-23T18:46:46.482Z",
-      "created_at": "2026-08-23T18:46:46.482Z"
+      "return_date": "2026-08-29T04:50:09.276Z",
+      "created_at": "2026-08-29T04:50:09.276Z"
     },
     {
       "_id": "ret_hist_in_1_2",
@@ -360,14 +360,14 @@
       "customer_comment": "Color in picture looks royal emerald green, but received washed-out parrot green. Very disappointing for wedding wear.",
       "return_reason_raw": "Color different from picture",
       "ai_reason_category": "Listing & Color Variance",
-      "ai_confidence": 0.93,
+      "ai_confidence": 0.95,
       "ai_root_cause": "Studio lighting over-saturated RGB highlights creating a 22% delta on green silk fabric under natural daylight.",
       "ai_mitigation_fix": "Re-shoot catalogue photography under standard 5000K daylight and add customer unboxing swatch video.",
       "sentiment": "negative",
       "severity": "medium",
       "status": "analyzed",
-      "return_date": "2026-08-24T06:46:46.482Z",
-      "created_at": "2026-08-24T06:46:46.482Z"
+      "return_date": "2026-08-25T00:50:09.276Z",
+      "created_at": "2026-08-25T00:50:09.276Z"
     },
     {
       "_id": "ret_hist_in_1_3",
@@ -387,8 +387,8 @@
       "sentiment": "negative",
       "severity": "high",
       "status": "analyzed",
-      "return_date": "2026-08-26T21:46:46.482Z",
-      "created_at": "2026-08-26T21:46:46.482Z"
+      "return_date": "2026-08-26T11:50:09.276Z",
+      "created_at": "2026-08-26T11:50:09.276Z"
     },
     {
       "_id": "ret_hist_in_1_4",
@@ -402,14 +402,14 @@
       "customer_comment": "Main front copper button broke off on first trial. Rivet quality is very weak.",
       "return_reason_raw": "Broken button / defect",
       "ai_reason_category": "Quality / Manufacturing Defect",
-      "ai_confidence": 0.94,
+      "ai_confidence": 0.98,
       "ai_root_cause": "Sub-gauge brass shank rivets failing under moderate shearing torque from Batch #IND-BLR-89.",
       "ai_mitigation_fix": "Audit button rivet attachment torque at Tirupur/Bellary vendor facility.",
       "sentiment": "very_negative",
       "severity": "critical",
       "status": "analyzed",
-      "return_date": "2026-08-28T12:46:46.482Z",
-      "created_at": "2026-08-28T12:46:46.482Z"
+      "return_date": "2026-08-27T19:50:09.276Z",
+      "created_at": "2026-08-27T19:50:09.276Z"
     },
     {
       "_id": "ret_hist_in_1_5",
@@ -423,14 +423,14 @@
       "customer_comment": "Right earbud stopped charging after 3 days. Red LED blinks continuously in case. Noise cancellation makes humming noise.",
       "return_reason_raw": "Defective hardware / not charging",
       "ai_reason_category": "Quality / Manufacturing Defect",
-      "ai_confidence": 0.96,
+      "ai_confidence": 0.93,
       "ai_root_cause": "Pogo-pin spring contact misalignment in charging dock causing zero-voltage latch.",
       "ai_mitigation_fix": "Quarantine Batch #TWS-409 and mandate charging cradle voltage verification jig at Noida assembly line.",
       "sentiment": "very_negative",
       "severity": "critical",
       "status": "analyzed",
-      "return_date": "2026-08-28T20:46:46.482Z",
-      "created_at": "2026-08-28T20:46:46.482Z"
+      "return_date": "2026-08-28T14:50:09.276Z",
+      "created_at": "2026-08-28T14:50:09.276Z"
     },
     {
       "_id": "ret_hist_in_1_6",
@@ -450,8 +450,8 @@
       "sentiment": "very_negative",
       "severity": "high",
       "status": "analyzed",
-      "return_date": "2026-08-23T23:46:46.482Z",
-      "created_at": "2026-08-23T23:46:46.482Z"
+      "return_date": "2026-08-29T07:50:09.276Z",
+      "created_at": "2026-08-29T07:50:09.276Z"
     },
     {
       "_id": "ret_hist_in_1_7",
@@ -465,14 +465,14 @@
       "customer_comment": "Ordered Brass Gold finish filter coffee maker, but received Stainless Steel silver. Wrong product dispatched.",
       "return_reason_raw": "Wrong item received",
       "ai_reason_category": "Warehouse Fulfillment Error",
-      "ai_confidence": 0.98,
+      "ai_confidence": 0.96,
       "ai_root_cause": "Barcode SKU sticker mismatch at Bhiwandi warehouse pick & pack station.",
       "ai_mitigation_fix": "Implement optical barcode scan validation before generating Delhivery/BlueDart shipping label.",
       "sentiment": "negative",
       "severity": "high",
       "status": "analyzed",
-      "return_date": "2026-08-24T07:46:46.482Z",
-      "created_at": "2026-08-24T07:46:46.482Z"
+      "return_date": "2026-08-22T23:50:09.276Z",
+      "created_at": "2026-08-22T23:50:09.276Z"
     },
     {
       "_id": "ret_hist_in_1_8",
@@ -486,14 +486,14 @@
       "customer_comment": "Coffee dripper arrived with bent top rim and dent on side. Padded flyer was torn.",
       "return_reason_raw": "Damaged in delivery",
       "ai_reason_category": "Logistics & Transit Damage",
-      "ai_confidence": 0.95,
+      "ai_confidence": 0.92,
       "ai_root_cause": "Shipped in poly courier flyer instead of rigid box packaging for metallic kitchenware.",
       "ai_mitigation_fix": "Enforce rigid Box-in-Box packaging standard across all fragile cookware SKUs.",
       "sentiment": "very_negative",
       "severity": "critical",
       "status": "analyzed",
-      "return_date": "2026-08-27T07:46:46.482Z",
-      "created_at": "2026-08-27T07:46:46.482Z"
+      "return_date": "2026-08-28T12:50:09.276Z",
+      "created_at": "2026-08-28T12:50:09.276Z"
     },
     {
       "_id": "ret_hist_in_2_0",
@@ -507,14 +507,14 @@
       "customer_comment": "Ordered Size L (40 bust) as per chart, but it's way too tight across the shoulders and chest. Can't even wear it comfortably.",
       "return_reason_raw": "Size too small",
       "ai_reason_category": "Size & Fit Mismatch",
-      "ai_confidence": 0.96,
+      "ai_confidence": 0.94,
       "ai_root_cause": "Kurta bodice chest circumference is 2.5 inches smaller than standard Indian ethnic wear sizing spec (Kurti chest graded 37.5\" instead of 40\").",
       "ai_mitigation_fix": "Update size chart on Myntra/Shopify PDP with bust/shoulder measurements in inches and cm with 'Runs Small' tag.",
       "sentiment": "negative",
       "severity": "high",
       "status": "analyzed",
-      "return_date": "2026-08-18T20:46:46.482Z",
-      "created_at": "2026-08-18T20:46:46.482Z"
+      "return_date": "2026-08-15T11:50:09.276Z",
+      "created_at": "2026-08-15T11:50:09.276Z"
     },
     {
       "_id": "ret_hist_in_2_1",
@@ -528,14 +528,14 @@
       "customer_comment": "Zari embroidery around neck area is coming loose and itching against the collarbone.",
       "return_reason_raw": "Quality defect",
       "ai_reason_category": "Quality / Manufacturing Defect",
-      "ai_confidence": 0.94,
+      "ai_confidence": 0.97,
       "ai_root_cause": "Unbacked metallic zari thread with loose lockstitch prone to unraveling on friction.",
       "ai_mitigation_fix": "Enforce soft cotton lining backing behind embroidered neckline at Surat manufacturing unit.",
       "sentiment": "very_negative",
       "severity": "critical",
       "status": "analyzed",
-      "return_date": "2026-08-21T03:46:46.482Z",
-      "created_at": "2026-08-21T03:46:46.482Z"
+      "return_date": "2026-08-21T04:50:09.276Z",
+      "created_at": "2026-08-21T04:50:09.276Z"
     },
     {
       "_id": "ret_hist_in_2_2",
@@ -549,14 +549,14 @@
       "customer_comment": "Color in picture looks royal emerald green, but received washed-out parrot green. Very disappointing for wedding wear.",
       "return_reason_raw": "Color different from picture",
       "ai_reason_category": "Listing & Color Variance",
-      "ai_confidence": 0.94,
+      "ai_confidence": 0.95,
       "ai_root_cause": "Studio lighting over-saturated RGB highlights creating a 22% delta on green silk fabric under natural daylight.",
       "ai_mitigation_fix": "Re-shoot catalogue photography under standard 5000K daylight and add customer unboxing swatch video.",
       "sentiment": "negative",
       "severity": "medium",
       "status": "analyzed",
-      "return_date": "2026-08-18T15:46:46.482Z",
-      "created_at": "2026-08-18T15:46:46.482Z"
+      "return_date": "2026-08-18T21:50:09.276Z",
+      "created_at": "2026-08-18T21:50:09.276Z"
     },
     {
       "_id": "ret_hist_in_2_3",
@@ -576,8 +576,8 @@
       "sentiment": "negative",
       "severity": "high",
       "status": "analyzed",
-      "return_date": "2026-08-19T23:46:46.482Z",
-      "created_at": "2026-08-19T23:46:46.482Z"
+      "return_date": "2026-08-17T04:50:09.276Z",
+      "created_at": "2026-08-17T04:50:09.276Z"
     },
     {
       "_id": "ret_hist_in_2_4",
@@ -597,8 +597,8 @@
       "sentiment": "very_negative",
       "severity": "critical",
       "status": "analyzed",
-      "return_date": "2026-08-22T03:46:46.482Z",
-      "created_at": "2026-08-22T03:46:46.482Z"
+      "return_date": "2026-08-22T03:50:09.276Z",
+      "created_at": "2026-08-22T03:50:09.276Z"
     },
     {
       "_id": "ret_hist_in_2_5",
@@ -612,14 +612,14 @@
       "customer_comment": "Right earbud stopped charging after 3 days. Red LED blinks continuously in case. Noise cancellation makes humming noise.",
       "return_reason_raw": "Defective hardware / not charging",
       "ai_reason_category": "Quality / Manufacturing Defect",
-      "ai_confidence": 0.97,
+      "ai_confidence": 0.95,
       "ai_root_cause": "Pogo-pin spring contact misalignment in charging dock causing zero-voltage latch.",
       "ai_mitigation_fix": "Quarantine Batch #TWS-409 and mandate charging cradle voltage verification jig at Noida assembly line.",
       "sentiment": "very_negative",
       "severity": "critical",
       "status": "analyzed",
-      "return_date": "2026-08-19T01:46:46.482Z",
-      "created_at": "2026-08-19T01:46:46.482Z"
+      "return_date": "2026-08-17T09:50:09.276Z",
+      "created_at": "2026-08-17T09:50:09.276Z"
     },
     {
       "_id": "ret_hist_in_2_6",
@@ -633,14 +633,14 @@
       "customer_comment": "Outer cardboard parcel was completely crushed by courier during transit. Left earbud shell had a hairline crack.",
       "return_reason_raw": "Courier transit damage",
       "ai_reason_category": "Logistics & Transit Damage",
-      "ai_confidence": 0.97,
+      "ai_confidence": 0.96,
       "ai_root_cause": "Single-wall 3-ply corrugated box crushed under hub conveyor sorted loads by courier partner.",
       "ai_mitigation_fix": "Upgrade outer shipping box to 5-ply 150 GSM corrugated carton with internal bubble pouch wrap.",
       "sentiment": "very_negative",
       "severity": "high",
       "status": "analyzed",
-      "return_date": "2026-08-21T19:46:46.482Z",
-      "created_at": "2026-08-21T19:46:46.482Z"
+      "return_date": "2026-08-20T15:50:09.276Z",
+      "created_at": "2026-08-20T15:50:09.276Z"
     },
     {
       "_id": "ret_hist_in_2_7",
@@ -654,14 +654,14 @@
       "customer_comment": "Ordered Brass Gold finish filter coffee maker, but received Stainless Steel silver. Wrong product dispatched.",
       "return_reason_raw": "Wrong item received",
       "ai_reason_category": "Warehouse Fulfillment Error",
-      "ai_confidence": 0.94,
+      "ai_confidence": 0.97,
       "ai_root_cause": "Barcode SKU sticker mismatch at Bhiwandi warehouse pick & pack station.",
       "ai_mitigation_fix": "Implement optical barcode scan validation before generating Delhivery/BlueDart shipping label.",
       "sentiment": "negative",
       "severity": "high",
       "status": "analyzed",
-      "return_date": "2026-08-20T08:46:46.482Z",
-      "created_at": "2026-08-20T08:46:46.482Z"
+      "return_date": "2026-08-19T01:50:09.276Z",
+      "created_at": "2026-08-19T01:50:09.276Z"
     },
     {
       "_id": "ret_hist_in_2_8",
@@ -675,14 +675,14 @@
       "customer_comment": "Coffee dripper arrived with bent top rim and dent on side. Padded flyer was torn.",
       "return_reason_raw": "Damaged in delivery",
       "ai_reason_category": "Logistics & Transit Damage",
-      "ai_confidence": 0.95,
+      "ai_confidence": 0.94,
       "ai_root_cause": "Shipped in poly courier flyer instead of rigid box packaging for metallic kitchenware.",
       "ai_mitigation_fix": "Enforce rigid Box-in-Box packaging standard across all fragile cookware SKUs.",
       "sentiment": "very_negative",
       "severity": "critical",
       "status": "analyzed",
-      "return_date": "2026-08-16T07:46:46.482Z",
-      "created_at": "2026-08-16T07:46:46.482Z"
+      "return_date": "2026-08-21T15:50:09.276Z",
+      "created_at": "2026-08-21T15:50:09.276Z"
     },
     {
       "_id": "ret_hist_in_3_0",
@@ -696,14 +696,14 @@
       "customer_comment": "Ordered Size L (40 bust) as per chart, but it's way too tight across the shoulders and chest. Can't even wear it comfortably.",
       "return_reason_raw": "Size too small",
       "ai_reason_category": "Size & Fit Mismatch",
-      "ai_confidence": 0.92,
+      "ai_confidence": 0.97,
       "ai_root_cause": "Kurta bodice chest circumference is 2.5 inches smaller than standard Indian ethnic wear sizing spec (Kurti chest graded 37.5\" instead of 40\").",
       "ai_mitigation_fix": "Update size chart on Myntra/Shopify PDP with bust/shoulder measurements in inches and cm with 'Runs Small' tag.",
       "sentiment": "negative",
       "severity": "high",
       "status": "analyzed",
-      "return_date": "2026-08-10T20:46:46.482Z",
-      "created_at": "2026-08-10T20:46:46.482Z"
+      "return_date": "2026-08-09T21:50:09.276Z",
+      "created_at": "2026-08-09T21:50:09.276Z"
     },
     {
       "_id": "ret_hist_in_3_1",
@@ -717,14 +717,14 @@
       "customer_comment": "Zari embroidery around neck area is coming loose and itching against the collarbone.",
       "return_reason_raw": "Quality defect",
       "ai_reason_category": "Quality / Manufacturing Defect",
-      "ai_confidence": 0.95,
+      "ai_confidence": 0.97,
       "ai_root_cause": "Unbacked metallic zari thread with loose lockstitch prone to unraveling on friction.",
       "ai_mitigation_fix": "Enforce soft cotton lining backing behind embroidered neckline at Surat manufacturing unit.",
       "sentiment": "very_negative",
       "severity": "critical",
       "status": "analyzed",
-      "return_date": "2026-08-12T19:46:46.482Z",
-      "created_at": "2026-08-12T19:46:46.482Z"
+      "return_date": "2026-08-09T02:50:09.276Z",
+      "created_at": "2026-08-09T02:50:09.276Z"
     },
     {
       "_id": "ret_hist_in_3_2",
@@ -738,14 +738,14 @@
       "customer_comment": "Color in picture looks royal emerald green, but received washed-out parrot green. Very disappointing for wedding wear.",
       "return_reason_raw": "Color different from picture",
       "ai_reason_category": "Listing & Color Variance",
-      "ai_confidence": 0.97,
+      "ai_confidence": 0.98,
       "ai_root_cause": "Studio lighting over-saturated RGB highlights creating a 22% delta on green silk fabric under natural daylight.",
       "ai_mitigation_fix": "Re-shoot catalogue photography under standard 5000K daylight and add customer unboxing swatch video.",
       "sentiment": "negative",
       "severity": "medium",
       "status": "analyzed",
-      "return_date": "2026-08-08T18:46:46.482Z",
-      "created_at": "2026-08-08T18:46:46.482Z"
+      "return_date": "2026-08-14T02:50:09.276Z",
+      "created_at": "2026-08-14T02:50:09.276Z"
     },
     {
       "_id": "ret_hist_in_3_3",
@@ -759,14 +759,14 @@
       "customer_comment": "Waist fits fine, but length is too long. Inseam is 34 inches, drags below heels on Indian height.",
       "return_reason_raw": "Length too long",
       "ai_reason_category": "Size & Fit Mismatch",
-      "ai_confidence": 0.92,
+      "ai_confidence": 0.96,
       "ai_root_cause": "Pattern graded on Western 33.5\" inseam standard without Short (30\") variant for Indian average height.",
       "ai_mitigation_fix": "Introduce 30-inch and 32-inch inseam length options on product page.",
       "sentiment": "negative",
       "severity": "high",
       "status": "analyzed",
-      "return_date": "2026-08-11T10:46:46.482Z",
-      "created_at": "2026-08-11T10:46:46.482Z"
+      "return_date": "2026-08-10T01:50:09.276Z",
+      "created_at": "2026-08-10T01:50:09.276Z"
     },
     {
       "_id": "ret_hist_in_3_4",
@@ -780,14 +780,14 @@
       "customer_comment": "Main front copper button broke off on first trial. Rivet quality is very weak.",
       "return_reason_raw": "Broken button / defect",
       "ai_reason_category": "Quality / Manufacturing Defect",
-      "ai_confidence": 0.92,
+      "ai_confidence": 0.93,
       "ai_root_cause": "Sub-gauge brass shank rivets failing under moderate shearing torque from Batch #IND-BLR-89.",
       "ai_mitigation_fix": "Audit button rivet attachment torque at Tirupur/Bellary vendor facility.",
       "sentiment": "very_negative",
       "severity": "critical",
       "status": "analyzed",
-      "return_date": "2026-08-12T23:46:46.482Z",
-      "created_at": "2026-08-12T23:46:46.482Z"
+      "return_date": "2026-08-09T19:50:09.276Z",
+      "created_at": "2026-08-09T19:50:09.276Z"
     },
     {
       "_id": "ret_hist_in_3_5",
@@ -801,14 +801,14 @@
       "customer_comment": "Right earbud stopped charging after 3 days. Red LED blinks continuously in case. Noise cancellation makes humming noise.",
       "return_reason_raw": "Defective hardware / not charging",
       "ai_reason_category": "Quality / Manufacturing Defect",
-      "ai_confidence": 0.96,
+      "ai_confidence": 0.92,
       "ai_root_cause": "Pogo-pin spring contact misalignment in charging dock causing zero-voltage latch.",
       "ai_mitigation_fix": "Quarantine Batch #TWS-409 and mandate charging cradle voltage verification jig at Noida assembly line.",
       "sentiment": "very_negative",
       "severity": "critical",
       "status": "analyzed",
-      "return_date": "2026-08-15T07:46:46.482Z",
-      "created_at": "2026-08-15T07:46:46.482Z"
+      "return_date": "2026-08-12T07:50:09.276Z",
+      "created_at": "2026-08-12T07:50:09.276Z"
     },
     {
       "_id": "ret_hist_in_3_6",
@@ -822,14 +822,14 @@
       "customer_comment": "Outer cardboard parcel was completely crushed by courier during transit. Left earbud shell had a hairline crack.",
       "return_reason_raw": "Courier transit damage",
       "ai_reason_category": "Logistics & Transit Damage",
-      "ai_confidence": 0.97,
+      "ai_confidence": 0.96,
       "ai_root_cause": "Single-wall 3-ply corrugated box crushed under hub conveyor sorted loads by courier partner.",
       "ai_mitigation_fix": "Upgrade outer shipping box to 5-ply 150 GSM corrugated carton with internal bubble pouch wrap.",
       "sentiment": "very_negative",
       "severity": "high",
       "status": "analyzed",
-      "return_date": "2026-08-11T02:46:46.482Z",
-      "created_at": "2026-08-11T02:46:46.482Z"
+      "return_date": "2026-08-13T13:50:09.276Z",
+      "created_at": "2026-08-13T13:50:09.276Z"
     },
     {
       "_id": "ret_hist_in_3_7",
@@ -843,14 +843,14 @@
       "customer_comment": "Ordered Brass Gold finish filter coffee maker, but received Stainless Steel silver. Wrong product dispatched.",
       "return_reason_raw": "Wrong item received",
       "ai_reason_category": "Warehouse Fulfillment Error",
-      "ai_confidence": 0.95,
+      "ai_confidence": 0.93,
       "ai_root_cause": "Barcode SKU sticker mismatch at Bhiwandi warehouse pick & pack station.",
       "ai_mitigation_fix": "Implement optical barcode scan validation before generating Delhivery/BlueDart shipping label.",
       "sentiment": "negative",
       "severity": "high",
       "status": "analyzed",
-      "return_date": "2026-08-08T13:46:46.482Z",
-      "created_at": "2026-08-08T13:46:46.482Z"
+      "return_date": "2026-08-10T06:50:09.276Z",
+      "created_at": "2026-08-10T06:50:09.276Z"
     },
     {
       "_id": "ret_hist_in_3_8",
@@ -870,8 +870,8 @@
       "sentiment": "very_negative",
       "severity": "critical",
       "status": "analyzed",
-      "return_date": "2026-08-11T14:46:46.482Z",
-      "created_at": "2026-08-11T14:46:46.482Z"
+      "return_date": "2026-08-08T18:50:09.276Z",
+      "created_at": "2026-08-08T18:50:09.276Z"
     },
     {
       "_id": "ret_hist_in_4_0",
@@ -885,14 +885,14 @@
       "customer_comment": "Ordered Size L (40 bust) as per chart, but it's way too tight across the shoulders and chest. Can't even wear it comfortably.",
       "return_reason_raw": "Size too small",
       "ai_reason_category": "Size & Fit Mismatch",
-      "ai_confidence": 0.93,
+      "ai_confidence": 0.95,
       "ai_root_cause": "Kurta bodice chest circumference is 2.5 inches smaller than standard Indian ethnic wear sizing spec (Kurti chest graded 37.5\" instead of 40\").",
       "ai_mitigation_fix": "Update size chart on Myntra/Shopify PDP with bust/shoulder measurements in inches and cm with 'Runs Small' tag.",
       "sentiment": "negative",
       "severity": "high",
       "status": "analyzed",
-      "return_date": "2026-08-05T14:46:46.482Z",
-      "created_at": "2026-08-05T14:46:46.482Z"
+      "return_date": "2026-08-02T02:50:09.276Z",
+      "created_at": "2026-08-02T02:50:09.276Z"
     },
     {
       "_id": "ret_hist_in_4_1",
@@ -906,14 +906,14 @@
       "customer_comment": "Zari embroidery around neck area is coming loose and itching against the collarbone.",
       "return_reason_raw": "Quality defect",
       "ai_reason_category": "Quality / Manufacturing Defect",
-      "ai_confidence": 0.93,
+      "ai_confidence": 0.92,
       "ai_root_cause": "Unbacked metallic zari thread with loose lockstitch prone to unraveling on friction.",
       "ai_mitigation_fix": "Enforce soft cotton lining backing behind embroidered neckline at Surat manufacturing unit.",
       "sentiment": "very_negative",
       "severity": "critical",
       "status": "analyzed",
-      "return_date": "2026-08-07T02:46:46.482Z",
-      "created_at": "2026-08-07T02:46:46.482Z"
+      "return_date": "2026-08-07T03:50:09.276Z",
+      "created_at": "2026-08-07T03:50:09.276Z"
     },
     {
       "_id": "ret_hist_in_4_2",
@@ -927,14 +927,14 @@
       "customer_comment": "Color in picture looks royal emerald green, but received washed-out parrot green. Very disappointing for wedding wear.",
       "return_reason_raw": "Color different from picture",
       "ai_reason_category": "Listing & Color Variance",
-      "ai_confidence": 0.93,
+      "ai_confidence": 0.96,
       "ai_root_cause": "Studio lighting over-saturated RGB highlights creating a 22% delta on green silk fabric under natural daylight.",
       "ai_mitigation_fix": "Re-shoot catalogue photography under standard 5000K daylight and add customer unboxing swatch video.",
       "sentiment": "negative",
       "severity": "medium",
       "status": "analyzed",
-      "return_date": "2026-08-05T11:46:46.482Z",
-      "created_at": "2026-08-05T11:46:46.482Z"
+      "return_date": "2026-08-07T12:50:09.276Z",
+      "created_at": "2026-08-07T12:50:09.276Z"
     },
     {
       "_id": "ret_hist_in_4_3",
@@ -948,14 +948,14 @@
       "customer_comment": "Waist fits fine, but length is too long. Inseam is 34 inches, drags below heels on Indian height.",
       "return_reason_raw": "Length too long",
       "ai_reason_category": "Size & Fit Mismatch",
-      "ai_confidence": 0.95,
+      "ai_confidence": 0.93,
       "ai_root_cause": "Pattern graded on Western 33.5\" inseam standard without Short (30\") variant for Indian average height.",
       "ai_mitigation_fix": "Introduce 30-inch and 32-inch inseam length options on product page.",
       "sentiment": "negative",
       "severity": "high",
       "status": "analyzed",
-      "return_date": "2026-08-04T12:46:46.482Z",
-      "created_at": "2026-08-04T12:46:46.482Z"
+      "return_date": "2026-08-02T12:50:09.276Z",
+      "created_at": "2026-08-02T12:50:09.276Z"
     },
     {
       "_id": "ret_hist_in_4_4",
@@ -969,14 +969,14 @@
       "customer_comment": "Main front copper button broke off on first trial. Rivet quality is very weak.",
       "return_reason_raw": "Broken button / defect",
       "ai_reason_category": "Quality / Manufacturing Defect",
-      "ai_confidence": 0.98,
+      "ai_confidence": 0.94,
       "ai_root_cause": "Sub-gauge brass shank rivets failing under moderate shearing torque from Batch #IND-BLR-89.",
       "ai_mitigation_fix": "Audit button rivet attachment torque at Tirupur/Bellary vendor facility.",
       "sentiment": "very_negative",
       "severity": "critical",
       "status": "analyzed",
-      "return_date": "2026-08-02T13:46:46.482Z",
-      "created_at": "2026-08-02T13:46:46.482Z"
+      "return_date": "2026-08-01T12:50:09.276Z",
+      "created_at": "2026-08-01T12:50:09.276Z"
     },
     {
       "_id": "ret_hist_in_4_5",
@@ -990,14 +990,14 @@
       "customer_comment": "Right earbud stopped charging after 3 days. Red LED blinks continuously in case. Noise cancellation makes humming noise.",
       "return_reason_raw": "Defective hardware / not charging",
       "ai_reason_category": "Quality / Manufacturing Defect",
-      "ai_confidence": 0.93,
+      "ai_confidence": 0.98,
       "ai_root_cause": "Pogo-pin spring contact misalignment in charging dock causing zero-voltage latch.",
       "ai_mitigation_fix": "Quarantine Batch #TWS-409 and mandate charging cradle voltage verification jig at Noida assembly line.",
       "sentiment": "very_negative",
       "severity": "critical",
       "status": "analyzed",
-      "return_date": "2026-08-02T04:46:46.482Z",
-      "created_at": "2026-08-02T04:46:46.482Z"
+      "return_date": "2026-08-02T17:50:09.276Z",
+      "created_at": "2026-08-02T17:50:09.276Z"
     },
     {
       "_id": "ret_hist_in_4_6",
@@ -1011,14 +1011,14 @@
       "customer_comment": "Outer cardboard parcel was completely crushed by courier during transit. Left earbud shell had a hairline crack.",
       "return_reason_raw": "Courier transit damage",
       "ai_reason_category": "Logistics & Transit Damage",
-      "ai_confidence": 0.95,
+      "ai_confidence": 0.96,
       "ai_root_cause": "Single-wall 3-ply corrugated box crushed under hub conveyor sorted loads by courier partner.",
       "ai_mitigation_fix": "Upgrade outer shipping box to 5-ply 150 GSM corrugated carton with internal bubble pouch wrap.",
       "sentiment": "very_negative",
       "severity": "high",
       "status": "analyzed",
-      "return_date": "2026-08-01T08:46:46.482Z",
-      "created_at": "2026-08-01T08:46:46.482Z"
+      "return_date": "2026-08-07T03:50:09.276Z",
+      "created_at": "2026-08-07T03:50:09.276Z"
     },
     {
       "_id": "ret_hist_in_4_7",
@@ -1032,14 +1032,14 @@
       "customer_comment": "Ordered Brass Gold finish filter coffee maker, but received Stainless Steel silver. Wrong product dispatched.",
       "return_reason_raw": "Wrong item received",
       "ai_reason_category": "Warehouse Fulfillment Error",
-      "ai_confidence": 0.92,
+      "ai_confidence": 0.93,
       "ai_root_cause": "Barcode SKU sticker mismatch at Bhiwandi warehouse pick & pack station.",
       "ai_mitigation_fix": "Implement optical barcode scan validation before generating Delhivery/BlueDart shipping label.",
       "sentiment": "negative",
       "severity": "high",
       "status": "analyzed",
-      "return_date": "2026-08-04T13:46:46.482Z",
-      "created_at": "2026-08-04T13:46:46.482Z"
+      "return_date": "2026-08-04T15:50:09.276Z",
+      "created_at": "2026-08-04T15:50:09.276Z"
     },
     {
       "_id": "ret_hist_in_4_8",
@@ -1053,14 +1053,14 @@
       "customer_comment": "Coffee dripper arrived with bent top rim and dent on side. Padded flyer was torn.",
       "return_reason_raw": "Damaged in delivery",
       "ai_reason_category": "Logistics & Transit Damage",
-      "ai_confidence": 0.96,
+      "ai_confidence": 0.94,
       "ai_root_cause": "Shipped in poly courier flyer instead of rigid box packaging for metallic kitchenware.",
       "ai_mitigation_fix": "Enforce rigid Box-in-Box packaging standard across all fragile cookware SKUs.",
       "sentiment": "very_negative",
       "severity": "critical",
       "status": "analyzed",
-      "return_date": "2026-08-03T21:46:46.482Z",
-      "created_at": "2026-08-03T21:46:46.482Z"
+      "return_date": "2026-08-06T13:50:09.276Z",
+      "created_at": "2026-08-06T13:50:09.276Z"
     }
   ],
   "product_stats": [
@@ -1075,7 +1075,7 @@
       "estimated_financial_loss": 12071,
       "top_reason": "Size & Fit Mismatch",
       "unit_price": 2499,
-      "last_updated": "2026-08-29T08:46:46.485Z"
+      "last_updated": "2026-08-29T08:50:09.276Z"
     },
     {
       "_id": "stat_SKU-IND-303",
@@ -1088,7 +1088,7 @@
       "estimated_financial_loss": 9298,
       "top_reason": "Quality / Manufacturing Defect",
       "unit_price": 2999,
-      "last_updated": "2026-08-29T08:46:46.485Z"
+      "last_updated": "2026-08-29T08:50:09.276Z"
     },
     {
       "_id": "stat_SKU-IND-202",
@@ -1101,7 +1101,7 @@
       "estimated_financial_loss": 5798,
       "top_reason": "Size & Fit Mismatch",
       "unit_price": 1599,
-      "last_updated": "2026-08-29T08:46:46.485Z"
+      "last_updated": "2026-08-29T08:50:09.276Z"
     },
     {
       "_id": "stat_SKU-IND-404",
@@ -1114,7 +1114,7 @@
       "estimated_financial_loss": 3923,
       "top_reason": "Warehouse Fulfillment Error",
       "unit_price": 849,
-      "last_updated": "2026-08-29T08:46:46.485Z"
+      "last_updated": "2026-08-29T08:50:09.276Z"
     },
     {
       "_id": "stat_SKU-IND-606",
@@ -1127,7 +1127,7 @@
       "estimated_financial_loss": 1810,
       "top_reason": "Size & Fit Mismatch",
       "unit_price": 2899,
-      "last_updated": "2026-08-29T08:46:46.485Z"
+      "last_updated": "2026-08-29T08:50:09.276Z"
     },
     {
       "_id": "stat_SKU-IND-505",
@@ -1140,7 +1140,7 @@
       "estimated_financial_loss": 655,
       "top_reason": "Listing & Color Variance",
       "unit_price": 1899,
-      "last_updated": "2026-08-29T08:46:46.485Z"
+      "last_updated": "2026-08-29T08:50:09.276Z"
     },
     {
       "_id": "stat_SKU-IND-707",
@@ -1153,7 +1153,7 @@
       "estimated_financial_loss": 430,
       "top_reason": "Quality / Manufacturing Defect",
       "unit_price": 999,
-      "last_updated": "2026-08-29T08:46:46.485Z"
+      "last_updated": "2026-08-29T08:50:09.276Z"
     },
     {
       "_id": "stat_SKU-IND-808",
@@ -1166,10 +1166,22 @@
       "estimated_financial_loss": 505,
       "top_reason": "Buyer Remorse / Intent Shift",
       "unit_price": 1299,
-      "last_updated": "2026-08-29T08:46:46.485Z"
+      "last_updated": "2026-08-29T08:50:09.276Z"
     }
   ],
   "recommendations": [
+    {
+      "_id": "01ec3b82-8f91-4fbd-a8ae-07be595477d0",
+      "rule_key": "custom_1787993481041",
+      "product_id": null,
+      "product_name": "Custom Initiative",
+      "text": "HELLO\n",
+      "category": "Operations Initiative",
+      "priority": "High",
+      "estimated_savings": 15000,
+      "status": "todo",
+      "created_at": "2026-08-29T08:51:21.041Z"
+    },
     {
       "_id": "05e48ea0-6349-4529-ab89-491c00dc2ecd",
       "rule_key": "general_rto_cod_otp_verification",
@@ -1198,7 +1210,7 @@
         "Shadowfax",
         "Xpressbees"
       ],
-      "last_sync": "2026-08-29T08:46:46.485Z",
+      "last_sync": "2026-08-29T08:50:09.276Z",
       "created_at": "2026-07-01T00:00:00.000Z"
     }
   ]

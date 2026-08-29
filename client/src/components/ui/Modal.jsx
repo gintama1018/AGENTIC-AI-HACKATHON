@@ -1,44 +1,51 @@
 import React, { useEffect } from 'react';
 import { X } from 'lucide-react';
 
-export const Modal = ({ isOpen, onClose, title, children, maxWidth = 'max-w-2xl' }) => {
+/**
+ * DESIGN.md §09 — Shadows only for drawers/modals.
+ * Surface: #FCFAF6, border: #D8D2C8, shadow: rgba(28,27,25,0.08)
+ */
+export const Modal = ({ isOpen, onClose, title, children, maxWidth = '560px' }) => {
   useEffect(() => {
-    const handleKeyDown = (e) => {
-      if (e.key === 'Escape') onClose();
-    };
-    if (isOpen) {
-      document.body.style.overflow = 'hidden';
-      window.addEventListener('keydown', handleKeyDown);
-    }
-    return () => {
-      document.body.style.overflow = 'unset';
-      window.removeEventListener('keydown', handleKeyDown);
-    };
+    if (!isOpen) return;
+    const handler = (e) => { if (e.key === 'Escape') onClose(); };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
   }, [isOpen, onClose]);
 
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
-      {/* Backdrop */}
-      <div 
-        className="fixed inset-0 bg-black/75 backdrop-blur-sm transition-opacity"
-        onClick={onClose}
-      />
-
-      {/* Modal Dialog */}
-      <div className={`relative w-full ${maxWidth} glass-card rounded-2xl border border-slate-700/80 shadow-2xl p-6 z-10 max-h-[90vh] overflow-y-auto`}>
-        <div className="flex items-center justify-between pb-4 border-b border-slate-800 mb-5">
-          <h3 className="text-xl font-bold text-white">{title}</h3>
-          <button 
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      style={{ backgroundColor: 'rgba(28, 27, 25, 0.45)' }}
+      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
+    >
+      <div
+        className="rs-surface rounded-card w-full"
+        style={{
+          maxWidth,
+          boxShadow: '0 8px 28px rgba(28, 27, 25, 0.08)',
+        }}
+      >
+        {/* Header */}
+        <div className="flex items-center justify-between px-6 py-4 border-b border-mist">
+          <h2 className="text-subsection text-charcoal">{title}</h2>
+          <button
             onClick={onClose}
-            className="p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 transition-colors"
+            className="p-1 rounded-control text-ash hover:text-charcoal hover:bg-canvas transition-colors"
           >
-            <X className="w-5 h-5" />
+            <X className="w-4 h-4" />
           </button>
         </div>
-        {children}
+
+        {/* Body */}
+        <div className="px-6 py-5">
+          {children}
+        </div>
       </div>
     </div>
   );
 };
+
+export default Modal;

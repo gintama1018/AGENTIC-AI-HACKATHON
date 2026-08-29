@@ -1,409 +1,253 @@
-import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
-import { 
-  UploadCloud, 
-  FileSpreadsheet, 
-  Sparkles, 
-  CheckCircle2, 
-  AlertCircle, 
-  Download, 
-  RefreshCw, 
-  ArrowRight, 
-  Plus, 
-  Layers, 
-  Database,
-  Cpu,
-  FileText
-} from 'lucide-react';
+import React, { useState, useRef } from 'react';
+import { Upload, CheckCircle2, AlertCircle, ArrowRight, FileText } from 'lucide-react';
 import { api } from '../../services/api';
 
+// DESIGN.md §20 — Import should feel like adding evidence to the system
+// Framing: "Bring return data in" not "AI is ingesting"
+// Loading: "Receiving → Validating → Analyzing → Finding patterns → Ready"
+
+const STAGES = ['Receiving', 'Validating', 'Analyzing', 'Finding patterns', 'Ready'];
+
 export const ImportPage = () => {
-  const navigate = useNavigate();
-  const [file, setFile] = useState(null);
-  const [uploading, setUploading] = useState(false);
-  const [uploadStatus, setUploadStatus] = useState(null);
-  const [activeTab, setActiveTab] = useState('csv');
+  const [stage, setStage]         = useState(null);
+  const [counts, setCounts]       = useState(null);
+  const [errorMsg, setErrorMsg]   = useState('');
+  const [warnings, setWarnings]   = useState([]);
+  const [isDragOver, setIsDragOver] = useState(false);
+  const fileInputRef = useRef(null);
 
-  // Manual Form State for Indian returns
-  const [manualForm, setManualForm] = useState({
-    order_id: `ORD-IN-${Math.floor(10000 + Math.random() * 90000)}`,
-    customer_name: 'Priya Patel',
-    product_id: 'SKU-IND-101',
-    product_name: 'Handcrafted Chanderi Silk Anarkali Kurta Set',
-    category: 'Ethnic Wear',
-    product_price: '2499.00',
-    return_reason_raw: 'Size too small',
-    customer_comment: 'Ordered Size L (40 bust) as per chart, but it is way too tight across the shoulders and bust.'
-  });
-  const [manualSubmitting, setManualSubmitting] = useState(false);
-  const [manualResult, setManualResult] = useState(null);
-
-  const handleFileDrop = (e) => {
-    e.preventDefault();
-    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-      setFile(e.dataTransfer.files[0]);
-    }
-  };
-
-  const handleCsvUpload = async (e) => {
-    e.preventDefault();
+  const processFile = async (file) => {
     if (!file) return;
-
-    setUploading(true);
-    setUploadStatus({ type: 'info', message: 'Parsing CSV and dispatching return records to AI classification engine...' });
+    setStage(0);
+    setErrorMsg('');
+    setWarnings([]);
+    setCounts(null);
 
     try {
-      const res = await api.importReturnsCsv(file);
-      setUploadStatus({
-        type: 'success',
-        message: `✅ Success! Analyzed and persisted ${res.processedCount || 'all'} return records to the database.`,
-        sampleResults: res.sampleResults
+      await sleep(600);
+      setStage(1);
+
+      const formData = new FormData();
+      formData.append('file', file);
+
+      await sleep(400);
+      setStage(2);
+
+      const res = await api.importReturns(formData);
+
+      setStage(3);
+      await sleep(700);
+      setStage(4);
+      await sleep(300);
+
+      const d = res?.data || res;
+      setCounts({
+        total:    d?.total_records ?? d?.inserted ?? 0,
+        valid:    d?.valid_records ?? d?.inserted ?? 0,
+        warnings: d?.warnings ?? 0,
       });
-      setTimeout(() => {
-        navigate('/dashboard/returns');
-      }, 2000);
+      setWarnings(d?.warning_details || []);
+      setStage('done');
     } catch (err) {
-      setUploadStatus({
-        type: 'error',
-        message: err.message || 'Failed to import CSV file. Please check format.'
-      });
-    } finally {
-      setUploading(false);
+      setErrorMsg(err.message || 'Import could not be completed.');
+      setStage('error');
     }
   };
 
-  const handleManualSubmit = async (e) => {
+  const handleDrop = (e) => {
     e.preventDefault();
-    setManualSubmitting(true);
-    setManualResult(null);
-
-    try {
-      const res = await api.createSingleReturn(manualForm);
-      setManualResult(res.data);
-      setManualForm(prev => ({
-        ...prev,
-        order_id: `ORD-IN-${Math.floor(10000 + Math.random() * 90000)}`,
-        customer_comment: ''
-      }));
-    } catch (err) {
-      alert('Failed to submit manual return: ' + err.message);
-    } finally {
-      setManualSubmitting(false);
-    }
+    setIsDragOver(false);
+    const file = e.dataTransfer.files?.[0];
+    if (file) processFile(file);
   };
 
-  const handleLoadDemoDataset = async () => {
-    setUploading(true);
-    setUploadStatus({ type: 'info', message: 'Seeding comprehensive 4-week Indian returns dataset...' });
-    try {
-      await api.seedDemoData();
-      setUploadStatus({
-        type: 'success',
-        message: '✅ 50+ realistic Indian e-commerce returns, trend trajectories, and recommendations loaded!'
-      });
-      setTimeout(() => navigate('/dashboard'), 1500);
-    } catch (err) {
-      setUploadStatus({ type: 'error', message: 'Failed to seed demo data' });
-    } finally {
-      setUploading(false);
-    }
+  const handleFileChange = (e) => {
+    const file = e.target.files?.[0];
+    if (file) processFile(file);
   };
 
-  const downloadSampleCsv = () => {
-    const csvContent = `order_id,customer_name,product_id,product_name,category,product_price,return_reason_raw,customer_comment,return_date
-ORD-IN-90121,Rohan Sharma,SKU-IND-101,Handcrafted Chanderi Silk Anarkali Kurta Set,Ethnic Wear,2499.00,Size too small,"Bodice is too tight across chest and shoulders.",2026-08-28
-ORD-IN-90122,Priya Patel,SKU-IND-303,BassPro ANC Wireless Earbuds (TWS),Electronics,2999.00,Defective hardware,"Right earbud stopped charging in case.",2026-08-27
-ORD-IN-90123,Vikram Singh,SKU-IND-404,Traditional Brass South Indian Filter Coffee Maker,Kitchen & Dining,849.00,Damaged in delivery,"Parcel crushed by courier and top rim was bent.",2026-08-26
-ORD-IN-90124,Ananya Iyer,SKU-IND-505,Pure Mulberry Silk Festive Dupatta,Ethnic Wear,1899.00,Color discrepancy,"Color in daylight is pale parrot green instead of dark emerald.",2026-08-25`;
-
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
-    link.download = 'ReturnShield_India_Sample_Template.csv';
-    link.click();
+  const reset = () => {
+    setStage(null);
+    setCounts(null);
+    setErrorMsg('');
+    setWarnings([]);
+    if (fileInputRef.current) fileInputRef.current.value = '';
   };
+
+  const isProcessing = typeof stage === 'number';
+
 
   return (
-    <div className="space-y-6 max-w-4xl mx-auto">
-      <div className="text-center max-w-xl mx-auto space-y-2">
-        <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
-          Data Ingestion Studio
-        </h1>
-        <p className="text-xs text-slate-400">
-          Feed raw returns into the AI pipeline via CSV batch, direct manual entry, or 1-click Indian sample seed.
+    <div className="max-w-xl space-y-8">
+
+      {/* Header */}
+      <div>
+        <h1 className="text-[22px] font-semibold text-charcoal tracking-tight mb-1">Bring return data in</h1>
+        <p className="text-compact text-graphite">
+          Add a CSV or connect an existing source. ReturnShield will validate the records before analysis.
         </p>
       </div>
 
-      <div className="flex items-center justify-center gap-2 p-1.5 glass-card rounded-2xl max-w-md mx-auto">
-        <button
-          onClick={() => setActiveTab('csv')}
-          className={`flex-1 py-2 text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-2 ${
-            activeTab === 'csv' ? 'bg-brand-600 text-white shadow-glow' : 'text-slate-400 hover:text-white'
-          }`}
+      {/* Upload area */}
+      {(stage === null || stage === 'done' || stage === 'error') && (
+        <div
+          onDragOver={(e) => { e.preventDefault(); setIsDragOver(true); }}
+          onDragLeave={() => setIsDragOver(false)}
+          onDrop={handleDrop}
+          onClick={() => fileInputRef.current?.click()}
+          className={[
+            'border-2 border-dashed rounded-card px-6 py-10 text-center cursor-pointer transition-colors',
+            isDragOver
+              ? 'border-charcoal bg-canvas'
+              : 'border-stone bg-surface hover:border-charcoal',
+          ].join(' ')}
         >
-          <UploadCloud className="w-3.5 h-3.5" /> CSV Batch Upload
-        </button>
-
-        <button
-          onClick={() => setActiveTab('manual')}
-          className={`flex-1 py-2 text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-2 ${
-            activeTab === 'manual' ? 'bg-brand-600 text-white shadow-glow' : 'text-slate-400 hover:text-white'
-          }`}
-        >
-          <Plus className="w-3.5 h-3.5" /> Manual Single Entry
-        </button>
-
-        <button
-          onClick={() => setActiveTab('demo')}
-          className={`flex-1 py-2 text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-2 ${
-            activeTab === 'demo' ? 'bg-brand-600 text-white shadow-glow' : 'text-slate-400 hover:text-white'
-          }`}
-        >
-          <Sparkles className="w-3.5 h-3.5" /> Demo Seed
-        </button>
-      </div>
-
-      {uploadStatus && (
-        <div className={`p-4 rounded-xl text-xs flex items-center gap-3 border ${
-          uploadStatus.type === 'success' ? 'bg-emerald-500/15 border-emerald-500/30 text-emerald-300' :
-          uploadStatus.type === 'error' ? 'bg-rose-500/15 border-rose-500/30 text-rose-300' :
-          'bg-indigo-500/15 border-indigo-500/30 text-indigo-300'
-        }`}>
-          <Sparkles className="w-4 h-4 shrink-0 animate-spin" />
-          <span>{uploadStatus.message}</span>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept=".csv,.xlsx,.xls"
+            onChange={handleFileChange}
+            className="hidden"
+          />
+          <Upload className="w-7 h-7 text-ash mx-auto mb-3" />
+          <p className="text-compact font-semibold text-charcoal mb-1">
+            {isDragOver ? 'Drop the file here' : 'Drop a CSV here, or click to browse'}
+          </p>
+          <p className="text-meta text-graphite">
+            Accepted formats: .csv, .xlsx, .xls · Max 5,000 records per import
+          </p>
         </div>
       )}
 
-      {activeTab === 'csv' && (
-        <div className="glass-card rounded-2xl p-6 sm:p-8 space-y-6">
-          <div className="flex items-center justify-between border-b border-slate-800 pb-4">
-            <div>
-              <h3 className="text-sm font-bold text-white">Upload E-Commerce Return Records</h3>
-              <p className="text-xs text-slate-400">Supports Shopify India, Myntra, Flipkart, Amazon, and custom CSV exports</p>
-            </div>
-            <button
-              onClick={downloadSampleCsv}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition-colors"
-            >
-              <Download className="w-3.5 h-3.5" /> Download Sample CSV Template
-            </button>
+      {/* Processing pipeline — DESIGN.md §20 */}
+      {typeof stage === 'number' && (
+        <div className="border border-stone rounded-card bg-surface overflow-hidden">
+          <div className="px-5 py-4 border-b border-mist">
+            <p className="text-compact font-semibold text-charcoal">Processing import</p>
+            <p className="text-meta text-graphite">Your records are being validated and analyzed.</p>
           </div>
+          <div className="divide-y divide-mist">
+            {STAGES.map((label, i) => {
+              const isActive    = stage === i;
+              const isComplete  = typeof stage === 'number' && stage > i;
+              return (
+                <div key={label} className="flex items-center gap-3 px-5 py-3">
+                  <div className={[
+                    'w-5 h-5 rounded-full border flex items-center justify-center flex-shrink-0 transition-colors',
+                    isComplete ? 'bg-charcoal border-charcoal' : isActive ? 'border-charcoal' : 'border-stone',
+                  ].join(' ')}>
+                    {isComplete && <CheckCircle2 className="w-3.5 h-3.5 text-surface" />}
+                    {isActive && <span className="w-1.5 h-1.5 rounded-full bg-charcoal animate-pulse" />}
+                  </div>
+                  <p className={`text-compact ${isActive ? 'text-charcoal font-semibold' : isComplete ? 'text-graphite line-through' : 'text-ash'}`}>
+                    {label}
+                  </p>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
-          <div
-            onDragOver={(e) => e.preventDefault()}
-            onDrop={handleFileDrop}
-            className={`border-2 border-dashed rounded-2xl p-8 text-center transition-all ${
-              file ? 'border-emerald-500/60 bg-emerald-950/10' : 'border-slate-700 hover:border-brand-500/50 bg-slate-900/50'
-            }`}
-          >
-            <div className="w-12 h-12 rounded-2xl bg-slate-800 flex items-center justify-center text-brand-400 mx-auto mb-3 shadow-inner">
-              <FileSpreadsheet className="w-6 h-6" />
+      {/* Success state */}
+      {stage === 'done' && counts && (
+        <div className="space-y-4">
+          <div className="border border-stone rounded-card bg-surface divide-y divide-mist">
+            <div className="px-5 py-4">
+              <div className="flex items-center gap-2 mb-1">
+                <CheckCircle2 className="w-4 h-4 text-success" />
+                <p className="text-compact font-semibold text-charcoal">Import complete</p>
+              </div>
+              <p className="text-meta text-graphite pl-6">{counts.valid} records ready for investigation.</p>
             </div>
 
-            {file ? (
-              <div className="space-y-1">
-                <p className="text-sm font-bold text-white">{file.name}</p>
-                <p className="text-xs text-emerald-400">{(file.size / 1024).toFixed(1)} KB • Ready for AI ingestion</p>
-              </div>
-            ) : (
-              <div className="space-y-1">
-                <p className="text-xs sm:text-sm font-semibold text-slate-200">
-                  Drag and drop your return CSV file here
-                </p>
-                <p className="text-[11px] text-slate-500">or click below to browse from your computer</p>
+            <div className="grid grid-cols-3 divide-x divide-mist">
+              {[
+                { label: 'Received',      value: counts.total },
+                { label: 'Ready',         value: counts.valid },
+                { label: 'Need attention', value: counts.warnings },
+              ].map(({ label, value }) => (
+                <div key={label} className="px-4 py-3 text-center">
+                  <p className="font-num font-semibold text-charcoal" style={{ fontSize: 22 }}>{value}</p>
+                  <p className="text-meta text-graphite">{label}</p>
+                </div>
+              ))}
+            </div>
+
+            {warnings.length > 0 && (
+              <div className="px-5 py-3">
+                <p className="text-meta text-ash mb-2">Records needing attention</p>
+                {warnings.slice(0, 3).map((w, i) => (
+                  <p key={i} className="text-meta text-graphite">{w}</p>
+                ))}
               </div>
             )}
-
-            <label className="mt-4 inline-block">
-              <input
-                type="file"
-                accept=".csv"
-                onChange={(e) => setFile(e.target.files[0])}
-                className="hidden"
-              />
-              <span className="cursor-pointer px-4 py-2 text-xs font-semibold rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition-all">
-                {file ? 'Choose Different File' : 'Browse Files'}
-              </span>
-            </label>
           </div>
 
-          <button
-            onClick={handleCsvUpload}
-            disabled={!file || uploading}
-            className="w-full py-3 text-xs font-bold rounded-xl bg-gradient-to-r from-brand-600 to-indigo-500 hover:from-brand-500 hover:to-indigo-400 text-white shadow-glow transition-all disabled:opacity-40 flex items-center justify-center gap-2"
-          >
-            <Sparkles className={`w-4 h-4 ${uploading ? 'animate-spin' : ''}`} />
-            {uploading ? 'Dispatched to ReturnShield Engine...' : 'Run Autonomous Pipeline & Persist'}
-          </button>
-        </div>
-      )}
-
-      {activeTab === 'manual' && (
-        <div className="glass-card rounded-2xl p-6 sm:p-8 space-y-6">
-          <div className="border-b border-slate-800 pb-4">
-            <h3 className="text-sm font-bold text-white">Manual Return Submission & Instant AI Diagnosis</h3>
-            <p className="text-xs text-slate-400">Test the pipeline on an individual return with real-time classification response.</p>
-          </div>
-
-          <form onSubmit={handleManualSubmit} className="space-y-4 text-xs">
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              <div>
-                <label className="block text-slate-300 font-semibold mb-1">Order ID</label>
-                <input
-                  type="text"
-                  required
-                  value={manualForm.order_id}
-                  onChange={(e) => setManualForm({ ...manualForm, order_id: e.target.value })}
-                  className="w-full px-3 py-2 bg-slate-900 rounded-xl border border-slate-700 text-white font-mono"
-                />
-              </div>
-
-              <div>
-                <label className="block text-slate-300 font-semibold mb-1">Customer Name</label>
-                <input
-                  type="text"
-                  required
-                  value={manualForm.customer_name}
-                  onChange={(e) => setManualForm({ ...manualForm, customer_name: e.target.value })}
-                  className="w-full px-3 py-2 bg-slate-900 rounded-xl border border-slate-700 text-white"
-                />
-              </div>
-
-              <div>
-                <label className="block text-slate-300 font-semibold mb-1">Product Price (₹ INR)</label>
-                <input
-                  type="number"
-                  step="1"
-                  required
-                  value={manualForm.product_price}
-                  onChange={(e) => setManualForm({ ...manualForm, product_price: e.target.value })}
-                  className="w-full px-3 py-2 bg-slate-900 rounded-xl border border-slate-700 text-white font-mono"
-                />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div>
-                <label className="block text-slate-300 font-semibold mb-1">Product SKU / ID</label>
-                <input
-                  type="text"
-                  required
-                  value={manualForm.product_id}
-                  onChange={(e) => setManualForm({ ...manualForm, product_id: e.target.value })}
-                  className="w-full px-3 py-2 bg-slate-900 rounded-xl border border-slate-700 text-white font-mono"
-                />
-              </div>
-
-              <div>
-                <label className="block text-slate-300 font-semibold mb-1">Product Name</label>
-                <input
-                  type="text"
-                  required
-                  value={manualForm.product_name}
-                  onChange={(e) => setManualForm({ ...manualForm, product_name: e.target.value })}
-                  className="w-full px-3 py-2 bg-slate-900 rounded-xl border border-slate-700 text-white"
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-slate-300 font-semibold mb-1">Raw Return Reason Selected by Buyer</label>
-              <input
-                type="text"
-                required
-                value={manualForm.return_reason_raw}
-                onChange={(e) => setManualForm({ ...manualForm, return_reason_raw: e.target.value })}
-                placeholder="e.g. Size too small / Defective button / Color different"
-                className="w-full px-3 py-2 bg-slate-900 rounded-xl border border-slate-700 text-white"
-              />
-            </div>
-
-            <div>
-              <label className="block text-slate-300 font-semibold mb-1">Customer Comment / Voice (Unstructured)</label>
-              <textarea
-                rows={3}
-                required
-                value={manualForm.customer_comment}
-                onChange={(e) => setManualForm({ ...manualForm, customer_comment: e.target.value })}
-                placeholder="Paste customer's verbatim message..."
-                className="w-full px-3.5 py-2.5 bg-slate-900 rounded-xl border border-slate-700 text-white leading-relaxed"
-              />
-            </div>
-
-            <button
-              type="submit"
-              disabled={manualSubmitting}
-              className="w-full py-3 text-xs font-bold rounded-xl bg-brand-600 hover:bg-brand-500 text-white shadow-glow transition-all flex items-center justify-center gap-2"
-            >
-              <Cpu className={`w-4 h-4 ${manualSubmitting ? 'animate-spin' : ''}`} />
-              {manualSubmitting ? 'Running AI Classifier...' : 'Ingest & Trigger AI Classification'}
+          <div className="flex items-center gap-3">
+            <a href="/dashboard/returns" className="rs-btn-primary" style={{ height: 36, padding: '0 14px', fontSize: 13 }}>
+              Review records <ArrowRight className="w-3.5 h-3.5" />
+            </a>
+            <button onClick={reset} className="rs-btn-secondary" style={{ height: 36, padding: '0 14px', fontSize: 13 }}>
+              Import another file
             </button>
-          </form>
+          </div>
+        </div>
+      )}
 
-          {manualResult && (
-            <div className="p-5 rounded-2xl bg-slate-900/90 border border-brand-500/40 space-y-3 mt-4">
-              <div className="flex items-center justify-between border-b border-slate-800 pb-2">
-                <span className="text-xs font-bold text-white flex items-center gap-1.5">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-400" /> Real-Time AI Diagnostic Generated
-                </span>
-                <span className="text-[10px] font-mono text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/30">
-                  Confidence: {Math.round((manualResult.ai_confidence || 0.95) * 100)}%
-                </span>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3 text-xs">
-                <div>
-                  <span className="text-slate-400 text-[10px] uppercase">Classified Category:</span>
-                  <p className="font-bold text-indigo-300">{manualResult.ai_reason_category}</p>
-                </div>
-                <div>
-                  <span className="text-slate-400 text-[10px] uppercase">Assigned Severity:</span>
-                  <p className="font-bold text-rose-400 capitalize">{manualResult.severity} Priority</p>
-                </div>
-              </div>
-
-              <div className="p-3 rounded-xl bg-indigo-950/30 text-xs font-mono text-slate-200">
-                <strong>Root Cause:</strong> {manualResult.ai_root_cause}
-              </div>
-
-              <div className="p-3 rounded-xl bg-emerald-950/30 text-xs text-slate-200">
-                <strong>Action:</strong> {manualResult.ai_mitigation_fix}
-              </div>
-
-              <Link
-                to={`/dashboard/returns/${manualResult._id}`}
-                className="inline-flex items-center gap-1 text-xs text-brand-400 hover:underline font-semibold pt-1"
-              >
-                View Full Diagnostic Page <ArrowRight className="w-3.5 h-3.5" />
-              </Link>
+      {/* Error state — DESIGN.md §26 */}
+      {stage === 'error' && (
+        <div className="border border-stone rounded-card bg-surface divide-y divide-mist">
+          <div className="px-5 py-4">
+            <div className="flex items-center gap-2 mb-1">
+              <AlertCircle className="w-4 h-4 text-attention" />
+              <p className="text-compact font-semibold text-charcoal">Analysis could not be completed</p>
             </div>
-          )}
+            <p className="text-meta text-graphite pl-6">{errorMsg}</p>
+            <p className="text-meta text-graphite pl-6 mt-1">Your file was received, but the analysis service did not respond. Your data was not lost.</p>
+          </div>
+          <div className="px-5 py-3 flex gap-3">
+            <button onClick={reset} className="rs-btn-primary" style={{ height: 36, padding: '0 14px', fontSize: 13 }}>
+              Retry import
+            </button>
+            <a href="/dashboard/returns" className="rs-btn-secondary" style={{ height: 36, padding: '0 14px', fontSize: 13 }}>
+              View saved records
+            </a>
+          </div>
         </div>
       )}
 
-      {activeTab === 'demo' && (
-        <div className="glass-card rounded-2xl p-6 sm:p-8 space-y-6 text-center">
-          <div className="w-14 h-14 rounded-2xl bg-brand-600/20 border border-brand-500/30 flex items-center justify-center text-brand-400 mx-auto">
-            <Sparkles className="w-7 h-7" />
-          </div>
-
-          <div className="max-w-md mx-auto space-y-2">
-            <h3 className="text-base font-bold text-white">Load Full 4-Week Indian E-Commerce Dataset</h3>
-            <p className="text-xs text-slate-400 leading-relaxed">
-              Populates your store with 50+ realistic Indian return records (Ethnic wear, Denim, TWS electronics, Footwear), Delhivery/BlueDart logistics data, and RTO prevention actions.
-            </p>
-          </div>
-
-          <button
-            onClick={handleLoadDemoDataset}
-            disabled={uploading}
-            className="px-6 py-3 text-xs font-bold rounded-xl bg-gradient-to-r from-brand-600 to-indigo-500 hover:from-brand-500 hover:to-indigo-400 text-white shadow-glow transition-all inline-flex items-center gap-2"
-          >
-            <RefreshCw className={`w-4 h-4 ${uploading ? 'animate-spin' : ''}`} />
-            {uploading ? 'Populating Database...' : 'Load Complete Indian D2C Dataset'}
-          </button>
+      {/* Expected CSV format */}
+      <div className="border border-stone rounded-card bg-surface px-5 py-4">
+        <div className="flex items-center gap-2 mb-3">
+          <FileText className="w-4 h-4 text-ash" />
+          <p className="text-compact font-semibold text-charcoal">Expected CSV format</p>
         </div>
-      )}
+        <div className="overflow-x-auto">
+          <table className="w-full text-meta text-graphite">
+            <thead>
+              <tr className="border-b border-mist">
+                {['order_id', 'product_name', 'sku', 'customer_comment', 'return_date', 'order_value', 'city'].map((h) => (
+                  <th key={h} className="pr-4 pb-2 text-left font-semibold text-charcoal">{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td className="pr-4 pt-2 font-num">ORD-91823</td>
+                <td className="pr-4 pt-2">Kurta Set Sage</td>
+                <td className="pr-4 pt-2 font-num">BT-KRS-SG-M</td>
+                <td className="pr-4 pt-2 italic">"Fits too small…"</td>
+                <td className="pr-4 pt-2 font-num">2024-10-12</td>
+                <td className="pr-4 pt-2 font-num">1890</td>
+                <td className="pr-4 pt-2">Jaipur</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
   );
 };
+
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
