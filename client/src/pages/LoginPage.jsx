@@ -4,7 +4,7 @@ import { Shield, Sparkles, Lock, Mail, ArrowRight, CheckCircle2, AlertCircle } f
 import { useAuth } from '../context/AuthContext';
 
 export const LoginPage = () => {
-  const [email, setEmail] = useState('sarah@aurorafashion.com');
+  const [email, setEmail] = useState('Sonu.jangir2024@uem.edu.in');
   const [password, setPassword] = useState('demo1234');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -40,11 +40,9 @@ export const LoginPage = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#0B0F19] px-4 py-12 relative overflow-hidden">
-      {/* Background glow */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[550px] h-[550px] bg-brand-600/15 rounded-full blur-3xl pointer-events-none" />
 
       <div className="max-w-md w-full glass-card rounded-3xl p-8 border border-slate-700/80 shadow-2xl relative z-10 space-y-6">
-        {/* Header */}
         <div className="text-center space-y-2">
           <Link to="/" className="inline-flex items-center gap-2 mb-2">
             <div className="w-10 h-10 rounded-xl bg-brand-600 p-0.5 shadow-glow flex items-center justify-center">
@@ -58,13 +56,13 @@ export const LoginPage = () => {
           <p className="text-xs text-slate-400">Access your store return intelligence and n8n pipeline</p>
         </div>
 
-        {/* 1-Click Fast Demo Login for Evaluators */}
+        {/* 1-Click Fast Demo Login for Indian Evaluators */}
         <div className="p-3.5 rounded-2xl bg-gradient-to-r from-brand-600/20 via-indigo-600/20 to-emerald-600/10 border border-brand-500/40 space-y-2">
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold text-white flex items-center gap-1.5">
               <Sparkles className="w-3.5 h-3.5 text-brand-400" /> Hackathon Quick Access
             </span>
-            <span className="text-[10px] font-mono text-emerald-400">Pre-seeded</span>
+            <span className="text-[10px] font-mono text-emerald-400">Pre-seeded Indian Data</span>
           </div>
           <button
             type="button"
@@ -72,7 +70,7 @@ export const LoginPage = () => {
             disabled={loading}
             className="w-full py-2.5 px-4 text-xs font-bold rounded-xl bg-brand-600 hover:bg-brand-500 text-white shadow-glow transition-all flex items-center justify-center gap-2"
           >
-            1-Click Demo Login (Sarah Jenkins) <ArrowRight className="w-3.5 h-3.5" />
+            1-Click Demo Login (Sonu Jangir - BharatThreads) <ArrowRight className="w-3.5 h-3.5" />
           </button>
         </div>
 
@@ -89,7 +87,6 @@ export const LoginPage = () => {
           </div>
         )}
 
-        {/* Standard Form */}
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-xs font-semibold text-slate-300 mb-1">Work Email</label>
@@ -100,7 +97,7 @@ export const LoginPage = () => {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="name@company.com"
+                placeholder="name@company.in"
                 className="w-full pl-9 pr-3.5 py-2.5 text-xs bg-slate-900/90 rounded-xl border border-slate-700 text-slate-100 placeholder-slate-500 focus:outline-none focus:border-brand-500"
               />
             </div>
@@ -133,7 +130,7 @@ export const LoginPage = () => {
         <div className="text-center text-xs text-slate-400">
           Don't have an account?{' '}
           <Link to="/signup" className="text-brand-400 hover:underline font-semibold">
-            Create tenant profile
+            Create brand profile
           </Link>
         </div>
       </div>

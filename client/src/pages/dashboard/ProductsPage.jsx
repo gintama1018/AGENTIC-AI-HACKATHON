@@ -58,7 +58,7 @@ export const ProductsPage = () => {
             </span>
           </div>
           <p className="text-xs text-slate-400 mt-1">
-            SKUs ranked by dynamic Priority Score = (Return Rate × Return Volume × Net Financial Impact).
+            SKUs ranked by dynamic Priority Score = (Return Rate × Return Volume × Net Financial Loss).
           </p>
         </div>
 
@@ -97,7 +97,7 @@ export const ProductsPage = () => {
                 <th className="px-4 py-3">Category</th>
                 <th className="px-4 py-3">Return Rate %</th>
                 <th className="px-4 py-3">Total Returns</th>
-                <th className="px-4 py-3">Cumulative Loss</th>
+                <th className="px-4 py-3">Cumulative Loss (INR)</th>
                 <th className="px-4 py-3">Top AI Driver</th>
                 <th className="px-4 py-3 text-right">Priority Score</th>
               </tr>
@@ -143,7 +143,7 @@ export const ProductsPage = () => {
 
                     <td className="px-4 py-3">
                       <p className="font-bold text-white group-hover:text-brand-300 transition-colors">{prod.product_name}</p>
-                      <p className="text-[10px] text-slate-500">Unit Price: ${prod.unit_price || '49.99'}</p>
+                      <p className="text-[10px] text-slate-500">MRP: ₹{prod.unit_price?.toLocaleString('en-IN') || '1,499'}</p>
                     </td>
 
                     <td className="px-4 py-3 whitespace-nowrap">
@@ -166,7 +166,7 @@ export const ProductsPage = () => {
                     </td>
 
                     <td className="px-4 py-3 whitespace-nowrap font-mono font-semibold text-rose-300">
-                      ${(prod.estimated_financial_loss || 0).toLocaleString()}
+                      ₹{(prod.estimated_financial_loss || 0).toLocaleString('en-IN')}
                     </td>
 
                     <td className="px-4 py-3 whitespace-nowrap">
@@ -212,7 +212,7 @@ export const ProductsPage = () => {
               </div>
               <div>
                 <p className="text-slate-500 uppercase text-[10px] font-bold">Cumulative Loss</p>
-                <p className="text-xl font-extrabold text-white font-mono mt-0.5">${selectedProduct.estimated_financial_loss}</p>
+                <p className="text-xl font-extrabold text-white font-mono mt-0.5">₹{selectedProduct.estimated_financial_loss?.toLocaleString('en-IN')}</p>
               </div>
             </div>
 
@@ -221,7 +221,7 @@ export const ProductsPage = () => {
                 <Sparkles className="w-4 h-4" /> Primary Failure Mode:
               </p>
               <p className="text-slate-200">
-                Top recurring driver is <strong className="text-white">{selectedProduct.top_reason}</strong>. This SKU contributes significantly to reverse logistics overhead.
+                Top recurring driver is <strong className="text-white">{selectedProduct.top_reason}</strong>. This SKU contributes significantly to reverse courier and RTO loss.
               </p>
             </div>
 
@@ -230,7 +230,7 @@ export const ProductsPage = () => {
                 <CheckCircle2 className="w-4 h-4" /> AI Prescribed Action Plan:
               </p>
               <p className="text-slate-200 leading-relaxed">
-                Update product size guide on PDP, calibrate supplier measurement tolerances, and alert quality assurance team before the next inventory shipment.
+                Update product size chart on catalog, calibrate vendor measurement tolerances, and audit QA inspection before next warehouse lot dispatch.
               </p>
             </div>
 

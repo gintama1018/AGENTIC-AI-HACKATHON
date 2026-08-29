@@ -22,18 +22,18 @@ export const ImportPage = () => {
   const [file, setFile] = useState(null);
   const [uploading, setUploading] = useState(false);
   const [uploadStatus, setUploadStatus] = useState(null);
-  const [activeTab, setActiveTab] = useState('csv'); // 'csv' | 'manual' | 'demo'
+  const [activeTab, setActiveTab] = useState('csv');
 
-  // Manual Form State
+  // Manual Form State for Indian returns
   const [manualForm, setManualForm] = useState({
-    order_id: `ORD-${Math.floor(10000 + Math.random() * 90000)}`,
-    customer_name: 'Alex Rivera',
-    product_id: 'PRD-701',
-    product_name: 'Vintage Heavyweight Denim Jacket',
-    category: 'Apparel',
-    product_price: '89.00',
+    order_id: `ORD-IN-${Math.floor(10000 + Math.random() * 90000)}`,
+    customer_name: 'Priya Patel',
+    product_id: 'SKU-IND-101',
+    product_name: 'Handcrafted Chanderi Silk Anarkali Kurta Set',
+    category: 'Ethnic Wear',
+    product_price: '2499.00',
     return_reason_raw: 'Size too small',
-    customer_comment: 'Ordered a Large but fits like a tight Medium. Arms and chest are way too constricted.'
+    customer_comment: 'Ordered Size L (40 bust) as per chart, but it is way too tight across the shoulders and bust.'
   });
   const [manualSubmitting, setManualSubmitting] = useState(false);
   const [manualResult, setManualResult] = useState(null);
@@ -80,10 +80,9 @@ export const ImportPage = () => {
     try {
       const res = await api.createSingleReturn(manualForm);
       setManualResult(res.data);
-      // Reset order ID for next submission
       setManualForm(prev => ({
         ...prev,
-        order_id: `ORD-${Math.floor(10000 + Math.random() * 90000)}`,
+        order_id: `ORD-IN-${Math.floor(10000 + Math.random() * 90000)}`,
         customer_comment: ''
       }));
     } catch (err) {
@@ -95,12 +94,12 @@ export const ImportPage = () => {
 
   const handleLoadDemoDataset = async () => {
     setUploading(true);
-    setUploadStatus({ type: 'info', message: 'Seeding comprehensive 4-week demo returns dataset...' });
+    setUploadStatus({ type: 'info', message: 'Seeding comprehensive 4-week Indian returns dataset...' });
     try {
       await api.seedDemoData();
       setUploadStatus({
         type: 'success',
-        message: '✅ 50+ realistic e-commerce returns, trend trajectories, and recommendations loaded!'
+        message: '✅ 50+ realistic Indian e-commerce returns, trend trajectories, and recommendations loaded!'
       });
       setTimeout(() => navigate('/dashboard'), 1500);
     } catch (err) {
@@ -112,31 +111,29 @@ export const ImportPage = () => {
 
   const downloadSampleCsv = () => {
     const csvContent = `order_id,customer_name,product_id,product_name,category,product_price,return_reason_raw,customer_comment,return_date
-ORD-90121,David Miller,PRD-701,Vintage Heavyweight Denim Jacket,Apparel,89.00,Size too small,"Arms and shoulders are too tight when buttoned.",2026-08-28
-ORD-90122,Emily Chen,PRD-903,ProSound ANC Wireless Headphones,Electronics,129.99,Defective hardware,"Left earbud stopped charging after 3 days.",2026-08-27
-ORD-90123,Liam Brooks,PRD-404,Ceramic Pour-Over Coffee Dripper,Home Goods,34.50,Damaged in transit,"Box arrived crushed and ceramic was chipped.",2026-08-26
-ORD-90124,Sophia Patel,PRD-505,Organic Silk Pillowcase,Home Goods,58.00,Color discrepancy,"Color is much lighter than shown on listing photo.",2026-08-25`;
+ORD-IN-90121,Rohan Sharma,SKU-IND-101,Handcrafted Chanderi Silk Anarkali Kurta Set,Ethnic Wear,2499.00,Size too small,"Bodice is too tight across chest and shoulders.",2026-08-28
+ORD-IN-90122,Priya Patel,SKU-IND-303,BassPro ANC Wireless Earbuds (TWS),Electronics,2999.00,Defective hardware,"Right earbud stopped charging in case.",2026-08-27
+ORD-IN-90123,Vikram Singh,SKU-IND-404,Traditional Brass South Indian Filter Coffee Maker,Kitchen & Dining,849.00,Damaged in delivery,"Parcel crushed by courier and top rim was bent.",2026-08-26
+ORD-IN-90124,Ananya Iyer,SKU-IND-505,Pure Mulberry Silk Festive Dupatta,Ethnic Wear,1899.00,Color discrepancy,"Color in daylight is pale parrot green instead of dark emerald.",2026-08-25`;
 
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
-    link.download = 'ReturnShield_Sample_Template.csv';
+    link.download = 'ReturnShield_India_Sample_Template.csv';
     link.click();
   };
 
   return (
     <div className="space-y-6 max-w-4xl mx-auto">
-      {/* Header */}
       <div className="text-center max-w-xl mx-auto space-y-2">
         <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
           Data Ingestion Studio
         </h1>
         <p className="text-xs text-slate-400">
-          Feed raw returns into the AI pipeline via CSV batch, direct manual entry, or 1-click sample seed.
+          Feed raw returns into the AI pipeline via CSV batch, direct manual entry, or 1-click Indian sample seed.
         </p>
       </div>
 
-      {/* Tabs */}
       <div className="flex items-center justify-center gap-2 p-1.5 glass-card rounded-2xl max-w-md mx-auto">
         <button
           onClick={() => setActiveTab('csv')}
@@ -166,7 +163,6 @@ ORD-90124,Sophia Patel,PRD-505,Organic Silk Pillowcase,Home Goods,58.00,Color di
         </button>
       </div>
 
-      {/* Status Notice */}
       {uploadStatus && (
         <div className={`p-4 rounded-xl text-xs flex items-center gap-3 border ${
           uploadStatus.type === 'success' ? 'bg-emerald-500/15 border-emerald-500/30 text-emerald-300' :
@@ -178,13 +174,12 @@ ORD-90124,Sophia Patel,PRD-505,Organic Silk Pillowcase,Home Goods,58.00,Color di
         </div>
       )}
 
-      {/* CSV Upload Tab */}
       {activeTab === 'csv' && (
         <div className="glass-card rounded-2xl p-6 sm:p-8 space-y-6">
           <div className="flex items-center justify-between border-b border-slate-800 pb-4">
             <div>
               <h3 className="text-sm font-bold text-white">Upload E-Commerce Return Records</h3>
-              <p className="text-xs text-slate-400">Supports standard Shopify, WooCommerce, Amazon, and custom CSV exports</p>
+              <p className="text-xs text-slate-400">Supports Shopify India, Myntra, Flipkart, Amazon, and custom CSV exports</p>
             </div>
             <button
               onClick={downloadSampleCsv}
@@ -194,7 +189,6 @@ ORD-90124,Sophia Patel,PRD-505,Organic Silk Pillowcase,Home Goods,58.00,Color di
             </button>
           </div>
 
-          {/* Drag and drop box */}
           <div
             onDragOver={(e) => e.preventDefault()}
             onDrop={handleFileDrop}
@@ -244,7 +238,6 @@ ORD-90124,Sophia Patel,PRD-505,Organic Silk Pillowcase,Home Goods,58.00,Color di
         </div>
       )}
 
-      {/* Manual Single Entry Tab */}
       {activeTab === 'manual' && (
         <div className="glass-card rounded-2xl p-6 sm:p-8 space-y-6">
           <div className="border-b border-slate-800 pb-4">
@@ -277,10 +270,10 @@ ORD-90124,Sophia Patel,PRD-505,Organic Silk Pillowcase,Home Goods,58.00,Color di
               </div>
 
               <div>
-                <label className="block text-slate-300 font-semibold mb-1">Product Price ($)</label>
+                <label className="block text-slate-300 font-semibold mb-1">Product Price (₹ INR)</label>
                 <input
                   type="number"
-                  step="0.01"
+                  step="1"
                   required
                   value={manualForm.product_price}
                   onChange={(e) => setManualForm({ ...manualForm, product_price: e.target.value })}
@@ -320,7 +313,7 @@ ORD-90124,Sophia Patel,PRD-505,Organic Silk Pillowcase,Home Goods,58.00,Color di
                 required
                 value={manualForm.return_reason_raw}
                 onChange={(e) => setManualForm({ ...manualForm, return_reason_raw: e.target.value })}
-                placeholder="e.g. Too small / Defective button / Color different"
+                placeholder="e.g. Size too small / Defective button / Color different"
                 className="w-full px-3 py-2 bg-slate-900 rounded-xl border border-slate-700 text-white"
               />
             </div>
@@ -347,7 +340,6 @@ ORD-90124,Sophia Patel,PRD-505,Organic Silk Pillowcase,Home Goods,58.00,Color di
             </button>
           </form>
 
-          {/* Instant Diagnosis Output */}
           {manualResult && (
             <div className="p-5 rounded-2xl bg-slate-900/90 border border-brand-500/40 space-y-3 mt-4">
               <div className="flex items-center justify-between border-b border-slate-800 pb-2">
@@ -389,7 +381,6 @@ ORD-90124,Sophia Patel,PRD-505,Organic Silk Pillowcase,Home Goods,58.00,Color di
         </div>
       )}
 
-      {/* Demo Seed Tab */}
       {activeTab === 'demo' && (
         <div className="glass-card rounded-2xl p-6 sm:p-8 space-y-6 text-center">
           <div className="w-14 h-14 rounded-2xl bg-brand-600/20 border border-brand-500/30 flex items-center justify-center text-brand-400 mx-auto">
@@ -397,9 +388,9 @@ ORD-90124,Sophia Patel,PRD-505,Organic Silk Pillowcase,Home Goods,58.00,Color di
           </div>
 
           <div className="max-w-md mx-auto space-y-2">
-            <h3 className="text-base font-bold text-white">Load Full 4-Week Hackathon Seed Dataset</h3>
+            <h3 className="text-base font-bold text-white">Load Full 4-Week Indian E-Commerce Dataset</h3>
             <p className="text-xs text-slate-400 leading-relaxed">
-              Populates your store with 50+ realistic multi-category return records, historical weekly trends, problem product leaderboards, and AI recommendations.
+              Populates your store with 50+ realistic Indian return records (Ethnic wear, Denim, TWS electronics, Footwear), Delhivery/BlueDart logistics data, and RTO prevention actions.
             </p>
           </div>
 
@@ -409,7 +400,7 @@ ORD-90124,Sophia Patel,PRD-505,Organic Silk Pillowcase,Home Goods,58.00,Color di
             className="px-6 py-3 text-xs font-bold rounded-xl bg-gradient-to-r from-brand-600 to-indigo-500 hover:from-brand-500 hover:to-indigo-400 text-white shadow-glow transition-all inline-flex items-center gap-2"
           >
             <RefreshCw className={`w-4 h-4 ${uploading ? 'animate-spin' : ''}`} />
-            {uploading ? 'Populating Database...' : 'Load Complete Pre-Configured Dataset'}
+            {uploading ? 'Populating Database...' : 'Load Complete Indian D2C Dataset'}
           </button>
         </div>
       )}

@@ -11,7 +11,6 @@ import {
   Database, 
   Zap, 
   BarChart3, 
-  DollarSign, 
   Cpu, 
   Activity, 
   Package, 
@@ -25,31 +24,31 @@ import { Navbar } from '../components/layout/Navbar';
 import { Footer } from '../components/layout/Footer';
 
 export const LandingPage = () => {
-  // Interactive Live AI Demo state
+  // Interactive Live AI Demo state with Indian E-Commerce Cases
   const demoSamples = [
     {
-      title: "Denim Sizing Mismatch",
-      comment: "Ordered a Large but fits like a tight Medium. Can't button the chest comfortably when wearing a light shirt.",
-      product: "Vintage Heavyweight Denim Jacket",
+      title: "Chanderi Kurti Bust Mismatch",
+      comment: "Ordered Size L (40 bust) as per size chart, but it's way too tight across the shoulders and chest. Can't even wear it comfortably.",
+      product: "Handcrafted Chanderi Silk Anarkali Kurta Set",
       reason: "Size too small"
     },
     {
-      title: "Broken Headphone Hinge",
-      comment: "Left earbud stopped charging after 4 days and the plastic headband snapped on light expansion.",
-      product: "ProSound ANC Wireless Headphones",
-      reason: "Defective hardware"
+      title: "TWS Earbud Charging Pin Defect",
+      comment: "Right earbud stopped charging after 3 days. Red LED blinks continuously in case. Noise cancellation makes humming noise.",
+      product: "BassPro ANC Wireless Earbuds (TWS)",
+      reason: "Defective hardware / not charging"
     },
     {
-      title: "Studio Lighting Hue Delta",
-      comment: "Color is totally different from the photo. Website shows deep navy blue, actual dress is dusty grey-teal.",
-      product: "Silk Slip Midi Dress",
-      reason: "Color not as pictured"
+      title: "Emerald Green Saree Color Delta",
+      comment: "Color in picture looks royal emerald green, but received washed-out parrot green. Very disappointing for festive wedding wear.",
+      product: "Pure Mulberry Silk Festive Dupatta & Saree",
+      reason: "Color different from picture"
     },
     {
-      title: "Crushed Fragile Package",
-      comment: "Box arrived crushed in courier transit, glass dripper was shattered inside padded envelope.",
-      product: "Ceramic Pour-Over Coffee Dripper",
-      reason: "Damaged delivery"
+      title: "Courier Crushed Coffee Maker",
+      comment: "Outer cardboard parcel was completely crushed by courier during transit. Brass coffee dripper rim was bent and dented.",
+      product: "Traditional Brass South Indian Filter Coffee Maker",
+      reason: "Damaged in courier delivery"
     }
   ];
 
@@ -58,49 +57,49 @@ export const LandingPage = () => {
   const [analyzing, setAnalyzing] = useState(false);
   const [aiOutput, setAiOutput] = useState({
     category: "Size & Fit Mismatch",
-    confidence: "96.4%",
-    rootCause: "Garment pattern chest circumference runs 2.2 inches tighter than standard US/EU measurement spec.",
-    recommendedAction: "Add high-visibility 'Runs Small — Size Up' advisory on PDP and calibrate measurement matrix with vendor.",
+    confidence: "97.2%",
+    rootCause: "Kurta bodice chest circumference is 2.5 inches smaller than standard Indian ethnic wear sizing spec (Kurti chest graded 37.5\" instead of 40\").",
+    recommendedAction: "Update size chart on Myntra/Shopify PDP with bust/shoulder measurements in inches and cm with 'Runs Small' tag.",
     severity: "High"
   });
 
-  // Interactive ROI Calculator State
-  const [monthlyOrders, setMonthlyOrders] = useState(6000);
-  const [currentReturnRate, setCurrentReturnRate] = useState(24);
-  const [avgOrderValue, setAvgOrderValue] = useState(75);
+  // Interactive ROI Calculator State in ₹ INR
+  const [monthlyOrders, setMonthlyOrders] = useState(8000);
+  const [currentReturnRate, setCurrentReturnRate] = useState(26);
+  const [avgOrderValue, setAvgOrderValue] = useState(1650);
 
   const monthlyReturns = Math.round((monthlyOrders * currentReturnRate) / 100);
-  const estimatedCostPerReturn = Math.round(avgOrderValue * 0.32 + 8.50); // freight + handling + markdown
+  const estimatedCostPerReturn = Math.round(avgOrderValue * 0.26 + 180); // ₹140 courier + ₹40 reverse QC + markdown
   const totalMonthlyLoss = monthlyReturns * estimatedCostPerReturn;
-  const estimatedShieldSavings = Math.round(totalMonthlyLoss * 0.38); // 38% returns reduction via root cause fixes
+  const estimatedShieldSavings = Math.round(totalMonthlyLoss * 0.38); // 38% reduction via root cause fixes
 
   const handleRunLiveAnalysis = () => {
     setAnalyzing(true);
     setTimeout(() => {
       const text = customComment.toLowerCase();
       let cat = 'Size & Fit Mismatch';
-      let conf = '96.2%';
-      let cause = 'Garment pattern dimensions run 1.5 - 2 inches smaller than standard specification.';
-      let act = 'Add prominent "Runs Small" banner on PDP and adjust size measurement matrix.';
+      let conf = '96.8%';
+      let cause = 'Garment bodice dimensions run 2 - 2.5 inches smaller than standard Indian size matrix specs.';
+      let act = 'Update size chart on PDP with bust/shoulder measurements in cm & inches for Indian body types.';
       let sev = 'High';
 
-      if (text.includes('broken') || text.includes('snap') || text.includes('defect') || text.includes('charge')) {
+      if (text.includes('charge') || text.includes('broken') || text.includes('defect') || text.includes('earbud') || text.includes('sole') || text.includes('button')) {
         cat = 'Quality / Manufacturing Defect';
-        conf = '98.5%';
-        cause = 'Component hardware fatigue failure under low tensile load during initial usage cycles.';
-        act = 'Quarantine supplier batch and mandate tensile shear testing before dispatch.';
+        conf = '98.6%';
+        cause = 'Sub-assembly component fatigue or adhesive curing failure at factory line.';
+        act = 'Quarantine inventory lot and mandate pre-dispatch voltage/tensile testing at vendor facility.';
         sev = 'Critical';
-      } else if (text.includes('color') || text.includes('photo') || text.includes('picture') || text.includes('different')) {
+      } else if (text.includes('color') || text.includes('photo') || text.includes('picture') || text.includes('green') || text.includes('different')) {
         cat = 'Listing & Color Variance';
-        conf = '93.8%';
-        cause = 'Studio strobe illumination oversaturated RGB highlights creating 18% hue delta.';
-        act = 'Re-shoot imagery under 5000K neutral daylight and add customer unboxing swatch photos.';
+        conf = '94.2%';
+        cause = 'Studio strobe illumination over-saturated RGB highlights creating 20%+ hue delta on Indian fabrics.';
+        act = 'Re-shoot catalog imagery under 5000K neutral daylight and upload authentic unboxing swatch videos.';
         sev = 'Medium';
-      } else if (text.includes('crush') || text.includes('transit') || text.includes('courier') || text.includes('box')) {
+      } else if (text.includes('courier') || text.includes('crush') || text.includes('transit') || text.includes('box') || text.includes('dent')) {
         cat = 'Logistics & Transit Damage';
-        conf = '97.1%';
-        cause = 'Single-wall corrugate packaging insufficient for courier conveyor drop forces.';
-        act = 'Upgrade carton specification to 200# Mullen double-wall with molded pulp inserts.';
+        conf = '97.5%';
+        cause = 'Single-wall 3-ply corrugated packaging collapsed under conveyor sortation loads during courier transit.';
+        act = 'Upgrade outer master box to 5-ply 150 GSM cartons with bubble corner wrap for pan-India routes.';
         sev = 'High';
       }
 
@@ -115,29 +114,24 @@ export const LandingPage = () => {
 
       {/* Hero Section */}
       <section className="relative pt-12 pb-20 lg:pt-20 lg:pb-32 overflow-hidden">
-        {/* Background Glows */}
         <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[400px] bg-gradient-to-tr from-brand-600/20 via-indigo-500/10 to-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="text-center max-w-3xl mx-auto space-y-6">
-            {/* Top Badge */}
             <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-brand-500/10 border border-brand-500/30 text-xs font-semibold text-brand-300">
               <Sparkles className="w-3.5 h-3.5 text-brand-400" />
-              <span>Next-Gen Autonomous Reverse Logistics Intelligence</span>
+              <span>Engineered for Indian D2C & Marketplace E-Commerce</span>
             </div>
 
-            {/* Main Headline */}
             <h1 className="text-4xl sm:text-6xl font-extrabold tracking-tight text-white leading-tight sm:leading-none">
               Stop bleeding profit from <br className="hidden sm:block" />
-              <span className="text-gradient-brand">silent recurring returns</span>.
+              <span className="text-gradient-brand">RTOs & silent recurring returns</span>.
             </h1>
 
-            {/* Subtitle */}
             <p className="text-base sm:text-lg text-slate-300 max-w-2xl mx-auto leading-relaxed">
-              ReturnShield AI sits on top of your n8n workflow to transform unstructured customer return comments into persistent root-cause diagnostics, problem product leaderboards, and automated return prevention.
+              ReturnShield AI sits on top of your n8n workflow to transform customer return feedback into persistent root-cause diagnostics, problem SKU leaderboards, and automated return prevention across India.
             </p>
 
-            {/* CTA Group */}
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
               <Link
                 to="/signup"
@@ -153,13 +147,12 @@ export const LandingPage = () => {
               </Link>
             </div>
 
-            {/* Proof Points */}
             <div className="pt-8 flex flex-wrap items-center justify-center gap-6 sm:gap-10 text-xs text-slate-400">
               <div className="flex items-center gap-2">
                 <CheckCircle2 className="w-4 h-4 text-emerald-400" /> Persistent Cross-Time Database
               </div>
               <div className="flex items-center gap-2">
-                <CheckCircle2 className="w-4 h-4 text-emerald-400" /> n8n Webhook + Built-in NLP
+                <CheckCircle2 className="w-4 h-4 text-emerald-400" /> Indian Sizing & RTO / COD Intelligence
               </div>
               <div className="flex items-center gap-2">
                 <CheckCircle2 className="w-4 h-4 text-emerald-400" /> Zero-Config Quick Setup
@@ -185,7 +178,7 @@ export const LandingPage = () => {
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
             {/* Input Column */}
             <div className="lg:col-span-5 glass-card rounded-2xl p-6 space-y-4">
-              <p className="text-xs font-bold uppercase tracking-wider text-slate-400">Sample Scenarios</p>
+              <p className="text-xs font-bold uppercase tracking-wider text-slate-400">Sample Indian E-Commerce Returns</p>
               <div className="grid grid-cols-2 gap-2">
                 {demoSamples.map((s, idx) => (
                   <button
@@ -213,7 +206,7 @@ export const LandingPage = () => {
                   rows={4}
                   value={customComment}
                   onChange={(e) => setCustomComment(e.target.value)}
-                  placeholder="e.g. The jacket was way too tight across the shoulders and the zipper jammed..."
+                  placeholder="e.g. The Kurti was way too tight across the shoulders and chest..."
                   className="w-full px-3.5 py-2.5 text-xs bg-slate-900/90 rounded-xl border border-slate-700 text-slate-100 placeholder-slate-500 focus:outline-none focus:border-brand-500 font-sans"
                 />
               </div>
@@ -275,15 +268,15 @@ export const LandingPage = () => {
         </div>
       </section>
 
-      {/* ROI Savings Calculator */}
+      {/* ROI Savings Calculator in ₹ INR */}
       <section id="calculator" className="py-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center max-w-2xl mx-auto mb-12">
           <span className="text-xs font-bold uppercase tracking-wider text-emerald-400">Financial Impact</span>
           <h2 className="text-2xl sm:text-3xl font-extrabold text-white mt-1">
-            Calculate How Much Return Revenue You Can Recover
+            Calculate How Much Return & RTO Loss You Can Save
           </h2>
           <p className="text-sm text-slate-400 mt-2">
-            Every return costs an average of 30% of item value + $8.50 in reverse logistics and restocking freight.
+            Every e-commerce return in India costs an average of 25% of item value + ₹180 in courier RTO freight and reverse pick & QC handling.
           </p>
         </div>
 
@@ -297,9 +290,9 @@ export const LandingPage = () => {
               </div>
               <input
                 type="range"
-                min="500"
+                min="1000"
                 max="50000"
-                step="500"
+                step="1000"
                 value={monthlyOrders}
                 onChange={(e) => setMonthlyOrders(Number(e.target.value))}
                 className="w-full accent-indigo-500 bg-slate-800 rounded-lg cursor-pointer h-2"
@@ -324,14 +317,14 @@ export const LandingPage = () => {
 
             <div>
               <div className="flex justify-between text-xs font-bold text-slate-300 mb-2">
-                <span>Average Order Value (AOV)</span>
-                <span className="text-emerald-400 font-mono">${avgOrderValue}</span>
+                <span>Average Order Value (AOV in ₹)</span>
+                <span className="text-emerald-400 font-mono">₹{avgOrderValue.toLocaleString()}</span>
               </div>
               <input
                 type="range"
-                min="20"
-                max="300"
-                step="5"
+                min="499"
+                max="8000"
+                step="100"
                 value={avgOrderValue}
                 onChange={(e) => setAvgOrderValue(Number(e.target.value))}
                 className="w-full accent-indigo-500 bg-slate-800 rounded-lg cursor-pointer h-2"
@@ -343,16 +336,16 @@ export const LandingPage = () => {
           <div className="p-6 rounded-2xl bg-gradient-to-br from-indigo-950/40 via-slate-900/80 to-emerald-950/30 border border-indigo-500/30 space-y-4 text-center">
             <p className="text-xs uppercase font-bold text-slate-400 tracking-wider">Estimated Monthly Profit Recovered</p>
             <div className="text-4xl sm:text-5xl font-extrabold text-gradient-emerald">
-              ${estimatedShieldSavings.toLocaleString()}
+              ₹{(estimatedShieldSavings).toLocaleString()}
               <span className="text-sm font-normal text-slate-400">/mo</span>
             </div>
             <p className="text-xs text-slate-300 leading-relaxed">
-              Based on preventing <span className="text-white font-bold">{Math.round(monthlyReturns * 0.38)}</span> returns each month by resolving recurring sizing, photo variance, and supplier defects.
+              Based on preventing <span className="text-white font-bold">{Math.round(monthlyReturns * 0.38).toLocaleString()}</span> returns and RTOs each month across Indian courier routes.
             </p>
 
             <div className="pt-3 border-t border-slate-800 flex justify-between text-xs text-slate-400">
-              <span>Annual Savings:</span>
-              <span className="font-bold text-emerald-400 font-mono">${(estimatedShieldSavings * 12).toLocaleString()} / year</span>
+              <span>Annual Net Savings:</span>
+              <span className="font-bold text-emerald-400 font-mono">₹{(estimatedShieldSavings * 12).toLocaleString()} / year</span>
             </div>
 
             <Link
@@ -374,7 +367,7 @@ export const LandingPage = () => {
               Engineered On Top Of ReturnShield AI v2 n8n Workflow
             </h2>
             <p className="text-sm text-slate-400 mt-2">
-              Persistent history across uploads closes the one critical loop in pure webhook pipelines.
+              Persistent history across uploads closes the critical loop in pure webhook automations.
             </p>
           </div>
 
@@ -382,7 +375,7 @@ export const LandingPage = () => {
             <div className="glass-card rounded-2xl p-5 border border-slate-700/60 relative">
               <div className="w-8 h-8 rounded-lg bg-indigo-500/20 text-indigo-400 font-bold flex items-center justify-center mb-3">1</div>
               <h3 className="text-sm font-bold text-white mb-1">CSV & API Ingestion</h3>
-              <p className="text-xs text-slate-400">Upload returns via bulk CSV, direct manual entry, or API webhooks.</p>
+              <p className="text-xs text-slate-400">Upload returns via bulk CSV, direct manual entry, or Shopify/Myntra webhooks.</p>
             </div>
 
             <div className="glass-card rounded-2xl p-5 border border-slate-700/60 relative">
@@ -406,12 +399,12 @@ export const LandingPage = () => {
         </div>
       </section>
 
-      {/* Pricing / Tiers */}
+      {/* Pricing / Tiers in ₹ INR */}
       <section id="pricing" className="py-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center max-w-2xl mx-auto mb-12">
-          <span className="text-xs font-bold uppercase tracking-wider text-brand-400">Flexible Plans</span>
+          <span className="text-xs font-bold uppercase tracking-wider text-brand-400">Flexible Pricing (INR)</span>
           <h2 className="text-2xl sm:text-3xl font-extrabold text-white mt-1">
-            Built For Fast-Growing E-Commerce Brands
+            Built For Indian D2C Brands & Marketplace Sellers
           </h2>
           <p className="text-sm text-slate-400 mt-2">Zero lock-in. Free tier friendly for hackathons and startups.</p>
         </div>
@@ -420,8 +413,8 @@ export const LandingPage = () => {
           {/* Starter */}
           <div className="glass-card rounded-2xl p-6 border border-slate-800 space-y-4">
             <h3 className="text-base font-bold text-white">Starter</h3>
-            <p className="text-xs text-slate-400">For boutique stores up to 500 returns/mo</p>
-            <div className="text-3xl font-bold text-white">$0 <span className="text-xs font-normal text-slate-400">/ hackathon demo</span></div>
+            <p className="text-xs text-slate-400">For boutique D2C stores up to 500 returns/mo</p>
+            <div className="text-3xl font-bold text-white">₹0 <span className="text-xs font-normal text-slate-400">/ hackathon demo</span></div>
             <ul className="space-y-2 text-xs text-slate-300 pt-2 border-t border-slate-800">
               <li className="flex items-center gap-2"><Check className="w-4 h-4 text-emerald-400" /> Full AI Root Cause Engine</li>
               <li className="flex items-center gap-2"><Check className="w-4 h-4 text-emerald-400" /> CSV Drag & Drop Import</li>
@@ -437,13 +430,13 @@ export const LandingPage = () => {
             <div className="absolute -top-3 right-6 px-2.5 py-0.5 rounded-full bg-brand-600 text-[10px] font-bold text-white">
               Most Popular
             </div>
-            <h3 className="text-base font-bold text-white">Growth</h3>
-            <p className="text-xs text-slate-400">For active DTC apparel & electronics</p>
-            <div className="text-3xl font-bold text-white">$149 <span className="text-xs font-normal text-slate-400">/ mo</span></div>
+            <h3 className="text-base font-bold text-white">Growth D2C</h3>
+            <p className="text-xs text-slate-400">For active apparel, footwear & electronics brands</p>
+            <div className="text-3xl font-bold text-white">₹4,999 <span className="text-xs font-normal text-slate-400">/ mo</span></div>
             <ul className="space-y-2 text-xs text-slate-300 pt-2 border-t border-slate-800">
               <li className="flex items-center gap-2"><Check className="w-4 h-4 text-emerald-400" /> Unlimited Returns Processing</li>
               <li className="flex items-center gap-2"><Check className="w-4 h-4 text-emerald-400" /> Cross-Time Pattern Analytics</li>
-              <li className="flex items-center gap-2"><Check className="w-4 h-4 text-emerald-400" /> Problem Product Leaderboard</li>
+              <li className="flex items-center gap-2"><Check className="w-4 h-4 text-emerald-400" /> Problem SKU Priority Leaderboard</li>
               <li className="flex items-center gap-2"><Check className="w-4 h-4 text-emerald-400" /> Executive PDF/CSV Reports</li>
             </ul>
             <Link to="/signup" className="block text-center py-2 text-xs font-bold rounded-xl bg-brand-600 hover:bg-brand-500 text-white shadow-glow">
@@ -453,8 +446,8 @@ export const LandingPage = () => {
 
           {/* Enterprise */}
           <div className="glass-card rounded-2xl p-6 border border-slate-800 space-y-4">
-            <h3 className="text-base font-bold text-white">Enterprise</h3>
-            <p className="text-xs text-slate-400">For multi-brand retailers & 3PLs</p>
+            <h3 className="text-base font-bold text-white">Enterprise / 3PL</h3>
+            <p className="text-xs text-slate-400">For multi-brand retailers, Delhivery/BlueDart 3PLs</p>
             <div className="text-3xl font-bold text-white">Custom</div>
             <ul className="space-y-2 text-xs text-slate-300 pt-2 border-t border-slate-800">
               <li className="flex items-center gap-2"><Check className="w-4 h-4 text-emerald-400" /> Dedicated n8n Instance</li>
@@ -473,7 +466,7 @@ export const LandingPage = () => {
         <div className="glass-card rounded-3xl p-8 sm:p-12 text-center border-brand-500/40 relative overflow-hidden bg-gradient-to-br from-brand-950/60 via-slate-900 to-indigo-950/60">
           <div className="max-w-2xl mx-auto space-y-4">
             <h2 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
-              Ready to eliminate recurring returns?
+              Ready to eliminate recurring returns & RTOs in India?
             </h2>
             <p className="text-sm text-slate-300">
               Access the live platform with pre-loaded demo data in under 5 seconds.

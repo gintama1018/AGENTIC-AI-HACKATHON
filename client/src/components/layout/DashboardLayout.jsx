@@ -36,9 +36,9 @@ export const DashboardLayout = () => {
     { name: 'Overview', path: '/dashboard', icon: LayoutDashboard },
     { name: 'Returns Explorer', path: '/dashboard/returns', icon: RotateCcw },
     { name: 'Trend Patterns', path: '/dashboard/patterns', icon: TrendingUp },
-    { name: 'Problem Products', path: '/dashboard/products', icon: PackageX },
-    { name: 'AI Recommendations', path: '/dashboard/recommendations', icon: Lightbulb },
-    { name: 'Data Import & Ingestion', path: '/dashboard/import', icon: UploadCloud },
+    { name: 'Problem SKUs', path: '/dashboard/products', icon: PackageX },
+    { name: 'AI Action Hub', path: '/dashboard/recommendations', icon: Lightbulb },
+    { name: 'Data Ingestion & CSV', path: '/dashboard/import', icon: UploadCloud },
     { name: 'Executive Reports', path: '/dashboard/reports', icon: FileSpreadsheet },
     { name: 'Settings & n8n', path: '/dashboard/settings', icon: Settings }
   ];
@@ -46,9 +46,9 @@ export const DashboardLayout = () => {
   const handleSeedDemoData = async () => {
     try {
       setSeeding(true);
-      setSeedNotice('Seeding realistic returns...');
+      setSeedNotice('Seeding Indian returns data...');
       const res = await api.seedDemoData();
-      setSeedNotice('✅ Demo dataset refreshed!');
+      setSeedNotice('✅ Indian demo dataset refreshed!');
       setTimeout(() => setSeedNotice(''), 3500);
       window.location.reload();
     } catch (err) {
@@ -86,10 +86,10 @@ export const DashboardLayout = () => {
         <div className="px-4 py-3 mx-3 mt-3 rounded-xl bg-slate-850/80 border border-slate-800/80">
           <div className="flex items-center justify-between">
             <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Tenant Profile</p>
-            <span className="text-[10px] text-brand-400 font-mono">Multi-Tenant</span>
+            <span className="text-[10px] text-brand-400 font-mono">India D2C</span>
           </div>
-          <p className="text-sm font-bold text-white truncate mt-0.5">{user?.company_name || 'Aurora Apparel'}</p>
-          <p className="text-xs text-slate-400 truncate">{user?.email || 'sarah@aurorafashion.com'}</p>
+          <p className="text-sm font-bold text-white truncate mt-0.5">{user?.company_name || 'BharatThreads Lifestyle Pvt. Ltd.'}</p>
+          <p className="text-xs text-slate-400 truncate">{user?.email || 'Sonu.jangir2024@uem.edu.in'}</p>
         </div>
 
         {/* Navigation Items */}
@@ -142,7 +142,7 @@ export const DashboardLayout = () => {
             className="w-full flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-medium rounded-xl bg-slate-800/90 hover:bg-slate-700/90 text-slate-200 border border-slate-700/70 transition-all disabled:opacity-50"
           >
             <RefreshCw className={`w-3.5 h-3.5 ${seeding ? 'animate-spin text-brand-400' : 'text-slate-400'}`} />
-            {seeding ? 'Refreshing Seed...' : 'Re-seed Demo Data'}
+            {seeding ? 'Refreshing Indian Seed...' : 'Re-seed Indian Demo Data'}
           </button>
 
           {seedNotice && (
@@ -164,7 +164,6 @@ export const DashboardLayout = () => {
       <div className="flex-1 lg:pl-64 flex flex-col min-h-screen">
         {/* Top Navigation Header */}
         <header className="h-16 glass-panel border-b border-slate-800/80 sticky top-0 z-20 px-4 sm:px-6 lg:px-8 flex items-center justify-between">
-          {/* Mobile hamburger */}
           <div className="flex items-center gap-3 lg:hidden">
             <button
               onClick={() => setMobileSidebarOpen(!mobileSidebarOpen)}
@@ -178,7 +177,6 @@ export const DashboardLayout = () => {
             </Link>
           </div>
 
-          {/* Quick Breadcrumb / Context */}
           <div className="hidden sm:flex items-center gap-2 text-xs text-slate-400">
             <Link to="/" className="hover:text-white transition-colors">Platform</Link>
             <span>/</span>
@@ -187,7 +185,6 @@ export const DashboardLayout = () => {
             </span>
           </div>
 
-          {/* Right Action Icons & User Badge */}
           <div className="flex items-center gap-3">
             <Link
               to="/dashboard/import"
@@ -203,8 +200,8 @@ export const DashboardLayout = () => {
                 {user?.name ? user.name.slice(0, 2).toUpperCase() : 'SJ'}
               </div>
               <div className="hidden md:block text-left">
-                <p className="text-xs font-semibold text-white leading-tight">{user?.name || 'Sarah Jenkins'}</p>
-                <p className="text-[10px] text-slate-400">{user?.role || 'Operations Director'}</p>
+                <p className="text-xs font-semibold text-white leading-tight">{user?.name || 'Sonu Jangir'}</p>
+                <p className="text-[10px] text-slate-400">{user?.role || 'Head of Operations'}</p>
               </div>
             </div>
           </div>
@@ -253,7 +250,7 @@ export const DashboardLayout = () => {
                   }}
                   className="w-full py-2 text-xs bg-slate-800 text-slate-200 rounded-lg text-center font-medium"
                 >
-                  Re-seed Demo Data
+                  Re-seed Indian Demo Data
                 </button>
                 <button
                   onClick={() => {

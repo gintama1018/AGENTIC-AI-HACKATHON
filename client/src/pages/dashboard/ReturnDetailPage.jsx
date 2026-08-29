@@ -87,7 +87,7 @@ export const ReturnDetailPage = () => {
               </span>
             </div>
             <p className="text-xs text-slate-400 mt-0.5">
-              Logged on {new Date(item.return_date || item.created_at).toLocaleString()}
+              Logged on {new Date(item.return_date || item.created_at).toLocaleString('en-IN')}
             </p>
           </div>
         </div>
@@ -106,7 +106,6 @@ export const ReturnDetailPage = () => {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Left Column: Customer Voice & AI Classification */}
         <div className="lg:col-span-7 space-y-6">
-          {/* Customer Voice Verbatim Card */}
           <div className="glass-card rounded-2xl p-6 space-y-4">
             <div className="flex items-center justify-between border-b border-slate-800 pb-3">
               <div className="flex items-center gap-2">
@@ -139,7 +138,7 @@ export const ReturnDetailPage = () => {
               <div className="p-3 rounded-xl bg-slate-900/60 border border-slate-800">
                 <p className="text-[10px] font-semibold text-slate-400 uppercase">AI Confidence</p>
                 <p className="text-sm font-bold font-mono text-emerald-400 mt-1">
-                  {Math.round((item.ai_confidence || 0.94) * 100)}%
+                  {Math.round((item.ai_confidence || 0.95) * 100)}%
                 </p>
               </div>
 
@@ -152,7 +151,6 @@ export const ReturnDetailPage = () => {
             </div>
           </div>
 
-          {/* Deep Root-Cause Diagnostic Card */}
           <div className="glass-card rounded-2xl p-6 border-brand-500/30 space-y-4">
             <div className="flex items-center justify-between border-b border-slate-800 pb-3">
               <h3 className="text-sm font-bold text-white flex items-center gap-2">
@@ -182,7 +180,6 @@ export const ReturnDetailPage = () => {
 
         {/* Right Column: Product Context & Related Recurring Returns */}
         <div className="lg:col-span-5 space-y-6">
-          {/* Product Profile Card */}
           <div className="glass-card rounded-2xl p-6 space-y-4">
             <h3 className="text-sm font-bold text-white flex items-center gap-2 border-b border-slate-800 pb-3">
               <Package className="w-4 h-4 text-indigo-400" /> Affected Product Details
@@ -190,7 +187,7 @@ export const ReturnDetailPage = () => {
 
             <div>
               <p className="text-base font-extrabold text-white">{item.product_name}</p>
-              <p className="text-xs font-mono text-slate-400 mt-0.5">SKU: {item.product_id} • Category: {item.category || 'Apparel'}</p>
+              <p className="text-xs font-mono text-slate-400 mt-0.5">SKU: {item.product_id} • Category: {item.category || 'Ethnic Wear'}</p>
             </div>
 
             {productStats ? (
@@ -198,7 +195,7 @@ export const ReturnDetailPage = () => {
                 <div className="p-3 rounded-xl bg-slate-900/80 border border-slate-800">
                   <p className="text-[10px] text-slate-400 uppercase font-semibold">SKU Return Rate</p>
                   <p className="text-lg font-bold font-mono text-rose-400 mt-0.5">{productStats.return_rate}%</p>
-                  <p className="text-[10px] text-slate-500">Benchmark ~15%</p>
+                  <p className="text-[10px] text-slate-500">Benchmark ~14%</p>
                 </div>
 
                 <div className="p-3 rounded-xl bg-slate-900/80 border border-slate-800">
@@ -210,19 +207,18 @@ export const ReturnDetailPage = () => {
                 <div className="p-3 rounded-xl bg-slate-900/80 border border-slate-800 col-span-2">
                   <p className="text-[10px] text-slate-400 uppercase font-semibold">Estimated Cumulative Loss</p>
                   <p className="text-xl font-bold font-mono text-white mt-0.5">
-                    ${(productStats.estimated_financial_loss || 0).toLocaleString()}
+                    ₹{(productStats.estimated_financial_loss || 0).toLocaleString('en-IN')}
                   </p>
                   <p className="text-[10px] text-slate-400 mt-0.5">Across {productStats.total_returns} recorded returns</p>
                 </div>
               </div>
             ) : (
               <div className="p-3 rounded-xl bg-slate-900/80 text-xs text-slate-400">
-                Price: ${item.product_price}
+                Price: ₹{item.product_price?.toLocaleString('en-IN')}
               </div>
             )}
           </div>
 
-          {/* Related Returns for this SKU (Persistent Pattern Proof!) */}
           <div className="glass-card rounded-2xl p-6 space-y-4">
             <div className="border-b border-slate-800 pb-3">
               <h3 className="text-sm font-bold text-white flex items-center gap-2">

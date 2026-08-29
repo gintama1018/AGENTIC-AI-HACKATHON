@@ -7,15 +7,15 @@ export const getOverview = async (req, res) => {
     const productStats = db.product_stats || [];
 
     const totalReturns = returns.length;
-    const estimatedTotalOrders = Math.max(totalReturns * 5.2, 450);
+    const estimatedTotalOrders = Math.max(totalReturns * 5.4, 480);
     const rtoRate = totalReturns > 0 ? parseFloat(((totalReturns / estimatedTotalOrders) * 100).toFixed(1)) : 0;
 
-    // Financial loss
+    // Financial loss in ₹ INR
     const totalFinancialLoss = productStats.reduce((sum, p) => sum + (p.estimated_financial_loss || 0), 0);
 
     // AI Confidence Avg
-    const totalConf = returns.reduce((sum, r) => sum + (r.ai_confidence || 0.9), 0);
-    const avgConfidence = totalReturns > 0 ? Math.round((totalConf / totalReturns) * 100) : 94;
+    const totalConf = returns.reduce((sum, r) => sum + (r.ai_confidence || 0.92), 0);
+    const avgConfidence = totalReturns > 0 ? Math.round((totalConf / totalReturns) * 100) : 95;
 
     // Reason category distribution
     const reasonCounts = {};
@@ -39,7 +39,7 @@ export const getOverview = async (req, res) => {
     const now = new Date();
     for (let i = 13; i >= 0; i--) {
       const d = new Date(now.getTime() - (i * 24 * 60 * 60 * 1000));
-      const key = d.toISOString().slice(5, 10); // MM-DD
+      const key = d.toISOString().slice(5, 10);
       dailyMap[key] = { date: key, returns: 0, fitIssues: 0, defects: 0 };
     }
 
@@ -65,10 +65,10 @@ export const getOverview = async (req, res) => {
     });
 
     // Active alert banner logic
-    const urgentAlert = reasonDistribution.find(r => r.percentage >= 30) ? {
+    const urgentAlert = reasonDistribution.find(r => r.percentage >= 28) ? {
       type: 'warning',
       title: `Surge in "${topReason}" Returns`,
-      message: `${topReason} accounts for ${reasonDistribution[0].percentage}% of all recent return volume. Sizing calibration is recommended.`,
+      message: `${topReason} accounts for ${reasonDistribution[0].percentage}% of all recent return volume across Indian shipments. Sizing matrix calibration is recommended.`,
       severity: 'high'
     } : null;
 
@@ -99,7 +99,6 @@ export const getPatterns = async (req, res) => {
     const db = getDb();
     const returns = db.returns || [];
 
-    // Group returns into past 4 weeks (Week 1 = oldest, Week 4 = most recent)
     const now = new Date();
     const weekBuckets = [
       { week: 'W-3 (4 wks ago)', returns: [] },
@@ -140,7 +139,6 @@ export const getPatterns = async (req, res) => {
       return row;
     });
 
-    // Calculate trajectory (Rising vs Falling)
     const currentWeekCatCounts = {};
     const priorWeekCatCounts = {};
 
@@ -231,10 +229,10 @@ export const getFinancialImpact = async (req, res) => {
       potentialSavings: Math.round(potentialSavings),
       realizedSavings: Math.round(realizedSavings),
       costDrivers: [
-        { name: 'Return Freight & Courier Shipping', percentage: 42, avgPerReturn: '$6.80' },
-        { name: 'Reverse Logistics & Restocking Labor', percentage: 24, avgPerReturn: '$3.90' },
-        { name: 'Damaged / Open-Box Liquidation Markdown', percentage: 26, avgPerReturn: '$14.20' },
-        { name: 'Customer Support / Reprocessing Overhead', percentage: 8, avgPerReturn: '$1.40' }
+        { name: 'Reverse Logistics & Delhivery/BlueDart RTO Courier Freight', percentage: 44, avgPerReturn: '₹140' },
+        { name: 'Warehouse Reverse QC Inspection & Re-packing', percentage: 22, avgPerReturn: '₹65' },
+        { name: 'Damaged / Open-Box Liquidation Markdown Discount', percentage: 26, avgPerReturn: '₹380' },
+        { name: 'Customer Support & NDR Calling Overhead', percentage: 8, avgPerReturn: '₹35' }
       ]
     });
   } catch (err) {

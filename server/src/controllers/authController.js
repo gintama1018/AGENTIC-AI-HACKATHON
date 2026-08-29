@@ -25,7 +25,7 @@ export const signup = async (req, res) => {
       name: name || 'Operations Lead',
       email: email.toLowerCase(),
       password_hash,
-      company_name: company_name || 'E-Commerce Store',
+      company_name: company_name || 'Bharat Direct Commerce',
       role: 'Operations Lead',
       created_at: new Date().toISOString()
     };
@@ -59,10 +59,10 @@ export const login = async (req, res) => {
     if (!email && !password) {
       const demoUser = db.users[0] || {
         _id: 'user_demo_001',
-        name: 'Sarah Jenkins',
-        email: 'sarah@aurorafashion.com',
-        company_name: 'Aurora Apparel & Goods',
-        role: 'Operations Director'
+        name: 'Sonu Jangir',
+        email: 'Sonu.jangir2024@uem.edu.in',
+        company_name: 'BharatThreads Lifestyle Pvt. Ltd.',
+        role: 'Head of E-Commerce Operations'
       };
       const token = jwt.sign({ userId: demoUser._id, email: demoUser.email }, JWT_SECRET, { expiresIn: '7d' });
       return res.json({

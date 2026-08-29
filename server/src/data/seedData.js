@@ -6,269 +6,204 @@ export const getInitialSeedData = () => {
 
   const defaultUser = {
     _id: 'user_demo_001',
-    name: 'Sarah Jenkins',
-    email: 'sarah@aurorafashion.com',
+    name: 'Sonu Jangir',
+    email: 'Sonu.jangir2024@uem.edu.in',
     password_hash: hashedPassword,
-    company_name: 'Aurora Apparel & Goods',
-    role: 'Operations Director',
+    company_name: 'BharatThreads Lifestyle Pvt. Ltd.',
+    role: 'Head of E-Commerce Operations',
+    location: 'Bengaluru, Karnataka, India',
     created_at: '2026-07-01T00:00:00.000Z'
   };
 
   const sampleProducts = [
-    { id: 'PRD-701', name: 'Vintage Heavyweight Denim Jacket', category: 'Apparel', price: 89.00 },
-    { id: 'PRD-802', name: 'Ultra-Comfort Knit Joggers', category: 'Apparel', price: 45.00 },
-    { id: 'PRD-903', name: 'ProSound ANC Wireless Headphones', category: 'Electronics', price: 129.99 },
-    { id: 'PRD-404', name: 'Ceramic Pour-Over Coffee Dripper', category: 'Home & Kitchen', price: 34.50 },
-    { id: 'PRD-505', name: 'Organic Silk Pillowcase (2-Pack)', category: 'Home Goods', price: 58.00 },
-    { id: 'PRD-606', name: 'Waterproof All-Terrain Trail Shoes', category: 'Footwear', price: 110.00 },
-    { id: 'PRD-307', name: 'GlowBoost Vitamin C Face Serum', category: 'Cosmetics', price: 38.00 },
-    { id: 'PRD-208', name: 'Ergonomic Memory Foam Lumbar Cushion', category: 'Accessories', price: 42.00 }
+    { id: 'SKU-IND-101', name: 'Handcrafted Chanderi Silk Anarkali Kurta Set', category: 'Ethnic Wear', price: 2499.00 },
+    { id: 'SKU-IND-202', name: 'Slim Fit Stretch Denim Jeans (Dark Indigo)', category: 'Men Apparel', price: 1599.00 },
+    { id: 'SKU-IND-303', name: 'BassPro ANC Wireless Earbuds (TWS)', category: 'Electronics', price: 2999.00 },
+    { id: 'SKU-IND-404', name: 'Traditional Brass South Indian Filter Coffee Maker', category: 'Kitchen & Dining', price: 849.00 },
+    { id: 'SKU-IND-505', name: 'Pure Mulberry Silk Festive Dupatta (2-Piece)', category: 'Ethnic Wear', price: 1899.00 },
+    { id: 'SKU-IND-606', name: 'All-Terrain Cushioned Running Shoes', category: 'Footwear', price: 2899.00 },
+    { id: 'SKU-IND-707', name: 'Kumkumadi Ayurvedic Radiance Face Oil (30ml)', category: 'Beauty & Skincare', price: 999.00 },
+    { id: 'SKU-IND-808', name: 'Ergonomic Memory Foam Orthopedic Backrest Cushion', category: 'Home & Office', price: 1299.00 }
   ];
 
   const rawReturnTemplates = [
     {
       prodIdx: 0,
-      comment: "Ordered a Large but fits like a Medium. Can't even button the chest comfortably when wearing a light tee.",
-      rawReason: "Too small",
+      comment: "Ordered Size L (40 bust) as per chart, but it's way too tight across the shoulders and chest. Can't even wear it comfortably.",
+      rawReason: "Size too small",
       aiCat: "Size & Fit Mismatch",
-      conf: 0.96,
-      rootCause: "Sizing chest circumference runs 2.2 inches tighter than standard US/EU measurement spec.",
-      mitigation: "Update size guide on PDP with high-visibility 'Runs Small' banner.",
+      conf: 0.97,
+      rootCause: "Kurta bodice chest circumference is 2.5 inches smaller than standard Indian ethnic wear sizing spec (Kurti chest graded 37.5\" instead of 40\").",
+      mitigation: "Update size chart on Myntra/Shopify PDP with bust/shoulder measurements in inches and cm with 'Runs Small' tag.",
       severity: "high",
       sentiment: "negative",
       daysAgo: 1
     },
     {
       prodIdx: 0,
-      comment: "Arms are way too tight around the bicep area. Length is fine though.",
-      rawReason: "Size mismatch",
-      aiCat: "Size & Fit Mismatch",
-      conf: 0.94,
-      rootCause: "Sleeve pitch and armhole opening taper too aggressively for jacket weight class.",
-      mitigation: "Instruct garment supplier to relax upper-sleeve pattern radius by 1.2 inches.",
-      severity: "high",
-      sentiment: "negative",
+      comment: "Zari embroidery around neck area is coming loose and itching against the collarbone.",
+      rawReason: "Quality defect",
+      aiCat: "Quality / Manufacturing Defect",
+      conf: 0.96,
+      rootCause: "Unbacked metallic zari thread with loose lockstitch prone to unraveling on friction.",
+      mitigation: "Enforce soft cotton lining backing behind embroidered neckline at Surat manufacturing unit.",
+      severity: "critical",
+      sentiment: "very_negative",
       daysAgo: 2
     },
     {
       prodIdx: 0,
-      comment: "Third time wearing it and the left copper button popped right off when unbuttoning.",
-      rawReason: "Defective item",
-      aiCat: "Quality / Manufacturing Defect",
-      conf: 0.98,
-      rootCause: "Sub-gauge shank rivets failing under moderate shearing torque.",
-      mitigation: "Quarantine Batch #D409 button hardware and switch to reinforced steel studs.",
-      severity: "critical",
-      sentiment: "very_negative",
+      comment: "Color in picture looks royal emerald green, but received washed-out parrot green. Very disappointing for wedding wear.",
+      rawReason: "Color different from picture",
+      aiCat: "Listing & Color Variance",
+      conf: 0.94,
+      rootCause: "Studio lighting over-saturated RGB highlights creating a 22% delta on green silk fabric under natural daylight.",
+      mitigation: "Re-shoot catalogue photography under standard 5000K daylight and add customer unboxing swatch video.",
+      severity: "medium",
+      sentiment: "negative",
       daysAgo: 4
     },
     {
-      prodIdx: 0,
-      comment: "Color is much lighter than shown. The site picture is deep indigo, this is faded sky blue.",
-      rawReason: "Color discrepancy",
-      aiCat: "Listing & Color Variance",
-      conf: 0.92,
-      rootCause: "PDP studio wash imagery was shot under 6500K strobe lighting without gamma compensation.",
-      mitigation: "Re-photograph denim wash under standard daylight Kelvin ratings.",
-      severity: "medium",
-      sentiment: "negative",
-      daysAgo: 5
-    },
-    {
-      prodIdx: 0,
-      comment: "Fit around torso is really boxy and stiff. Just didn't like how it looked on me.",
-      rawReason: "Buyer changed mind",
-      aiCat: "Buyer Remorse / Intent Shift",
-      conf: 0.89,
-      rootCause: "14oz rigid unwashed denim requires break-in period not clarified on product page.",
-      mitigation: "Add customer onboarding video on how to soften and break in raw denim.",
-      severity: "low",
-      sentiment: "neutral",
-      daysAgo: 7
-    },
-    {
       prodIdx: 1,
-      comment: "Waistband elastic snapped inside the casing after first 30° cold wash cycle.",
-      rawReason: "Defective quality",
-      aiCat: "Quality / Manufacturing Defect",
-      conf: 0.97,
-      rootCause: "Poly-elastane blend degraded due to low melting point internal bonding thread.",
-      mitigation: "Issue non-conformance ticket to factory and replace waistband cord supplier.",
-      severity: "critical",
-      sentiment: "very_negative",
+      comment: "Waist fits fine, but length is too long. Inseam is 34 inches, drags below heels on Indian height.",
+      rawReason: "Length too long",
+      aiCat: "Size & Fit Mismatch",
+      conf: 0.95,
+      rootCause: "Pattern graded on Western 33.5\" inseam standard without Short (30\") variant for Indian average height.",
+      mitigation: "Introduce 30-inch and 32-inch inseam length options on product page.",
+      severity: "high",
+      sentiment: "negative",
       daysAgo: 2
     },
     {
       prodIdx: 1,
-      comment: "Way too long! I am 5'10 and the cuffs bunch up around my shoes by 3 inches.",
-      rawReason: "Too long",
-      aiCat: "Size & Fit Mismatch",
-      conf: 0.93,
-      rootCause: "Inseam graded at 32.5 inches without short/tall sizing variants available.",
-      mitigation: "Introduce Short (30\") and Regular (32\") inseam options on listing.",
-      severity: "high",
-      sentiment: "negative",
-      daysAgo: 6
-    },
-    {
-      prodIdx: 1,
-      comment: "Material is thinner than expected, almost see-through under bright light.",
-      rawReason: "Misleading material",
-      aiCat: "Listing & Color Variance",
-      conf: 0.91,
-      rootCause: "Listing copy describes 'heavyweight fleece' while 220 GSM single jersey was used.",
-      mitigation: "Correct listing fabric specification from heavyweight fleece to lightweight French terry.",
-      severity: "medium",
-      sentiment: "negative",
-      daysAgo: 9
+      comment: "Main front copper button broke off on first trial. Rivet quality is very weak.",
+      rawReason: "Broken button / defect",
+      aiCat: "Quality / Manufacturing Defect",
+      conf: 0.98,
+      rootCause: "Sub-gauge brass shank rivets failing under moderate shearing torque from Batch #IND-BLR-89.",
+      mitigation: "Audit button rivet attachment torque at Tirupur/Bellary vendor facility.",
+      severity: "critical",
+      sentiment: "very_negative",
+      daysAgo: 5
     },
     {
       prodIdx: 2,
-      comment: "Left earbud stopped charging after 4 days. Red LED flashes constantly in the case.",
-      rawReason: "Broken hardware",
+      comment: "Right earbud stopped charging after 3 days. Red LED blinks continuously in case. Noise cancellation makes humming noise.",
+      rawReason: "Defective hardware / not charging",
       aiCat: "Quality / Manufacturing Defect",
       conf: 0.99,
-      rootCause: "Pogo pin spring contact corrosion/misalignment in charging cradle.",
-      mitigation: "Recalibrate contact pin alignment jig at factory assembly line.",
+      rootCause: "Pogo-pin spring contact misalignment in charging dock causing zero-voltage latch.",
+      mitigation: "Quarantine Batch #TWS-409 and mandate charging cradle voltage verification jig at Noida assembly line.",
       severity: "critical",
       sentiment: "very_negative",
       daysAgo: 1
     },
     {
       prodIdx: 2,
-      comment: "ANC has a faint high-pitch buzzing noise when connected to MacBook over Bluetooth.",
-      rawReason: "Audio defect",
-      aiCat: "Quality / Manufacturing Defect",
-      conf: 0.95,
-      rootCause: "Firmware DAC sampling clock jitter on AAC codec stream.",
-      mitigation: "Push OTA firmware update v1.4.2 addressing Bluetooth sampling filter.",
-      severity: "critical",
-      sentiment: "negative",
+      comment: "Outer cardboard parcel was completely crushed by courier during transit. Left earbud shell had a hairline crack.",
+      rawReason: "Courier transit damage",
+      aiCat: "Logistics & Transit Damage",
+      conf: 0.97,
+      rootCause: "Single-wall 3-ply corrugated box crushed under hub conveyor sorted loads by courier partner.",
+      mitigation: "Upgrade outer shipping box to 5-ply 150 GSM corrugated carton with internal bubble pouch wrap.",
+      severity: "high",
+      sentiment: "very_negative",
       daysAgo: 3
     },
     {
-      prodIdx: 2,
-      comment: "Earcups are too small for large ears. Causes intense pain after 45 minutes of use.",
-      rawReason: "Uncomfortable fit",
-      aiCat: "Size & Fit Mismatch",
-      conf: 0.92,
-      rootCause: "Inner cup depth is only 18mm with firm foam density causing cartilage pressure.",
-      mitigation: "Release velour plush deep-cushion accessory kit with 24mm depth.",
-      severity: "medium",
-      sentiment: "negative",
-      daysAgo: 8
-    },
-    {
-      prodIdx: 2,
-      comment: "Delivery box looked like it was stepped on by the courier, headphones had a cracked headband.",
-      rawReason: "Shipping transit damage",
-      aiCat: "Logistics & Transit Damage",
-      conf: 0.97,
-      rootCause: "Retail packaging lacks internal crush-resistant cardboard structural bridge.",
-      mitigation: "Add rigid inner sleeve and mandate bubble-wrap outer envelopes for parcel dispatch.",
-      severity: "high",
-      sentiment: "very_negative",
-      daysAgo: 10
-    },
-    {
       prodIdx: 3,
-      comment: "Dripper arrived cracked down the middle. Ceramic pieces were loose in the bubble envelope.",
-      rawReason: "Broken on arrival",
-      aiCat: "Logistics & Transit Damage",
-      conf: 0.98,
-      rootCause: "Shipped in padded mailer rather than rigid corrugated box with molded pulp insert.",
-      mitigation: "Mandate Box-in-Box packaging standard for all fragile kitchenware SKUs.",
-      severity: "critical",
-      sentiment: "very_negative",
-      daysAgo: 1
-    },
-    {
-      prodIdx: 3,
-      comment: "Ordered matte black, received glossy turquoise blue. Incorrect item in box.",
+      comment: "Ordered Brass Gold finish filter coffee maker, but received Stainless Steel silver. Wrong product dispatched.",
       rawReason: "Wrong item received",
       aiCat: "Warehouse Fulfillment Error",
       conf: 0.99,
-      rootCause: "Supplier barcode label on box exterior mapped to turquoise SKU instead of matte black.",
-      mitigation: "Audit inventory barcodes at receiving dock and re-label affected warehouse batch.",
+      rootCause: "Barcode SKU sticker mismatch at Bhiwandi warehouse pick & pack station.",
+      mitigation: "Implement optical barcode scan validation before generating Delhivery/BlueDart shipping label.",
       severity: "high",
       sentiment: "negative",
-      daysAgo: 4
+      daysAgo: 2
+    },
+    {
+      prodIdx: 3,
+      comment: "Coffee dripper arrived with bent top rim and dent on side. Padded flyer was torn.",
+      rawReason: "Damaged in delivery",
+      aiCat: "Logistics & Transit Damage",
+      conf: 0.98,
+      rootCause: "Shipped in poly courier flyer instead of rigid box packaging for metallic kitchenware.",
+      mitigation: "Enforce rigid Box-in-Box packaging standard across all fragile cookware SKUs.",
+      severity: "critical",
+      sentiment: "very_negative",
+      daysAgo: 6
     },
     {
       prodIdx: 4,
-      comment: "Doesn't feel like 100% Mulberry silk. Feels more like synthetic satin polyester.",
+      comment: "Fabric does not feel like pure silk. Feels more like synthetic poly-georgette. Border zari is stiff.",
       rawReason: "Material not as described",
       aiCat: "Listing & Color Variance",
       conf: 0.93,
-      rootCause: "Listing omitted 19-Momme rating specification and OEKO-TEX certification details.",
-      mitigation: "Upload certified laboratory silk momme test report badge to PDP image carousel.",
+      rootCause: "Product title states '100% Mulberry Silk' while blend is 40% Art-Silk Viscose.",
+      mitigation: "Correct PDP specification to 'Art-Silk Festive Blend' and upload certified Silk Mark laboratory test badge.",
       severity: "medium",
       sentiment: "negative",
       daysAgo: 3
     },
     {
-      prodIdx: 4,
-      comment: "Zipper on pillowcase pulled right off the track on day two.",
-      rawReason: "Broken zipper",
-      aiCat: "Quality / Manufacturing Defect",
+      prodIdx: 5,
+      comment: "Toe box is extremely narrow for Indian feet. Caused blisters during first 20 min morning walk.",
+      rawReason: "Uncomfortable / Narrow fit",
+      aiCat: "Size & Fit Mismatch",
       conf: 0.96,
-      rootCause: "Missing zipper end-stop metal crimp during blind seam finishing.",
-      mitigation: "Enforce automated ultrasonic end-stop crimping with textile subcontractor.",
+      rootCause: "Last shape constructed on narrow European D-width standard rather than wide Indian EE-width last.",
+      mitigation: "Add Wide (EE) width variant and add sizing advisory recommending sizing up for broad feet.",
       severity: "high",
       sentiment: "negative",
-      daysAgo: 11
+      daysAgo: 1
     },
     {
       prodIdx: 5,
-      comment: "Stepped in shallow puddle and my socks were soaked in seconds. Definitely not waterproof.",
-      rawReason: "Defective waterproofing",
+      comment: "Sole separated completely from upper near the toe after 1 week of walking.",
+      rawReason: "Sole peeling defect",
       aiCat: "Quality / Manufacturing Defect",
-      conf: 0.97,
-      rootCause: "Hydrophobic membrane seam-tape failure along lower tongue gusset.",
-      mitigation: "Audit supplier vulcanized seam taping machines and test batch hydro-pressure.",
+      conf: 0.98,
+      rootCause: "Inadequate polyurethane adhesive curing time at Agra footwear contract manufacturer.",
+      mitigation: "Issue non-conformance warning to factory and increase adhesive hot-press bonding dwell time.",
       severity: "critical",
       sentiment: "very_negative",
-      daysAgo: 2
-    },
-    {
-      prodIdx: 5,
-      comment: "Toe box is extremely narrow. My toes were completely squished.",
-      rawReason: "Too narrow",
-      aiCat: "Size & Fit Mismatch",
-      conf: 0.95,
-      rootCause: "Last shape constructed on European narrow D-width standard rather than wide trail last.",
-      mitigation: "Add Wide (EE) width option and add sizing advisory for trail running socks.",
-      severity: "high",
-      sentiment: "negative",
-      daysAgo: 5
+      daysAgo: 4
     },
     {
       prodIdx: 6,
-      comment: "Serum turned dark orange/brown within 1 week of delivery, oxidized and smells acidic.",
-      rawReason: "Spoiled product",
+      comment: "Oil turned dark brown and had a strong rancid smell on delivery. Seal was slightly leaking.",
+      rawReason: "Leaked / Spoiled product",
       aiCat: "Quality / Manufacturing Defect",
-      conf: 0.96,
-      rootCause: "Dropper bottle cap does not have airtight nitrogen seal, degrading L-ascorbic acid.",
-      mitigation: "Switch to amber airless pump bottle packaging to prevent air oxidation.",
+      conf: 0.95,
+      rootCause: "Dropper cap rubber teat degradation caused oxidation during high-temp transit.",
+      mitigation: "Switch to airtight nitrogen-purged amber glass pump bottle with heat-induction foil seal.",
       severity: "critical",
       sentiment: "very_negative",
       daysAgo: 3
     },
     {
       prodIdx: 7,
-      comment: "Way too hard, like sitting against a brick. Doesn't mold to back at all.",
-      rawReason: "Too firm",
+      comment: "Way too hard, feels like a wooden plank against my car seat. Did not like the firmness.",
+      rawReason: "Buyer changed mind / Too hard",
       aiCat: "Buyer Remorse / Intent Shift",
       conf: 0.88,
-      rootCause: "Memory foam density rating is 60D (extra firm orthotic grade) which feels hard in cold ambient temp.",
-      mitigation: "Include product temperature-responsive acclimation card inside box.",
+      rootCause: "High-density 60D orthopedic foam feels rigid in air-conditioned environments during initial usage.",
+      mitigation: "Include product acclimation insert card explaining 5-day body posture adaptation curve.",
       severity: "low",
       sentiment: "neutral",
-      daysAgo: 8
+      daysAgo: 7
     }
   ];
 
-  // Generate 55+ realistic return records distributed across the last 30 days
+  const indianNames = [
+    'Rohan Sharma', 'Priya Patel', 'Vikram Singh', 'Ananya Iyer', 
+    'Sneha Roy', 'Arjun Nair', 'Pooja Gupta', 'Amit Verma', 
+    'Rahul Deshmukh', 'Kavita Reddy', 'Deepak Joshi', 'Neha Choudhary',
+    'Aditya Banerjee', 'Ritu Aggarwal', 'Manish Kulkarni', 'Swati Mishra'
+  ];
+
   const returns = [];
   const now = new Date();
 
@@ -278,10 +213,10 @@ export const getInitialSeedData = () => {
     const returnDate = new Date(now.getTime() - (tpl.daysAgo * 24 * 60 * 60 * 1000) - (idx * 3600000)).toISOString();
     
     returns.push({
-      _id: `ret_${idx + 1001}`,
+      _id: `ret_ind_${idx + 1001}`,
       user_id: defaultUser._id,
-      order_id: `ORD-${92000 + idx}`,
-      customer_name: ['Alex Rivera', 'Emily Chen', 'Marcus Vance', 'David Miller', 'Sophia Patel', 'Liam Brooks', 'Chloe Bennett', 'Noah Sullivan'][idx % 8],
+      order_id: `ORD-IN-${92000 + idx}`,
+      customer_name: indianNames[idx % indianNames.length],
       product_id: prod.id,
       product_name: prod.name,
       category: prod.category,
@@ -300,20 +235,20 @@ export const getInitialSeedData = () => {
     });
   });
 
-  // Generate additional historical return points across past 4 weeks to create stunning trend lines
+  // Generate additional historical return points across past 4 weeks
   for (let w = 1; w <= 4; w++) {
-    for (let i = 0; i < 8; i++) {
+    for (let i = 0; i < 9; i++) {
       const template = rawReturnTemplates[i % rawReturnTemplates.length];
       const prod = sampleProducts[template.prodIdx];
-      const randomHours = Math.floor(Math.random() * 168); // within week
+      const randomHours = Math.floor(Math.random() * 168);
       const returnDate = new Date(now.getTime() - (w * 7 * 24 * 60 * 60 * 1000) + (randomHours * 3600000)).toISOString();
-      const returnId = `ret_hist_${w}_${i}`;
+      const returnId = `ret_hist_in_${w}_${i}`;
 
       returns.push({
         _id: returnId,
         user_id: defaultUser._id,
-        order_id: `ORD-${85000 + (w * 100) + i}`,
-        customer_name: ['Olivia Martin', 'James Wilson', 'Emma Watson', 'Lucas Garcia', 'Ava Taylor', 'Ethan Anderson', 'Mia Thomas', 'William Jackson'][i % 8],
+        order_id: `ORD-IN-${85000 + (w * 100) + i}`,
+        customer_name: indianNames[(i + w * 2) % indianNames.length],
         product_id: prod.id,
         product_name: prod.name,
         category: prod.category,
@@ -321,7 +256,7 @@ export const getInitialSeedData = () => {
         customer_comment: template.comment,
         return_reason_raw: template.rawReason,
         ai_reason_category: template.aiCat,
-        ai_confidence: parseFloat((0.91 + (Math.random() * 0.07)).toFixed(2)),
+        ai_confidence: parseFloat((0.92 + (Math.random() * 0.06)).toFixed(2)),
         ai_root_cause: template.rootCause,
         ai_mitigation_fix: template.mitigation,
         sentiment: template.sentiment,
@@ -340,9 +275,10 @@ export const getInitialSeedData = () => {
       user_id: defaultUser._id,
       n8n_webhook_url: 'https://primary-production-n8n.cloud/webhook/returnshield-ai-v2',
       google_sheet_id: '1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms',
-      api_key: 'rsh_live_9948fa812bc802f6ae4e',
+      api_key: 'rsh_live_india_9948fa812bc802f6ae4e',
       sync_interval: 'hourly',
       auto_analyze: true,
+      courier_partners: ['Delhivery', 'BlueDart', 'Shadowfax', 'Xpressbees'],
       last_sync: new Date().toISOString(),
       created_at: '2026-07-01T00:00:00.000Z'
     }

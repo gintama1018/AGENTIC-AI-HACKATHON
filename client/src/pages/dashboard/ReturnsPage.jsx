@@ -79,7 +79,7 @@ export const ReturnsPage = () => {
 
   const exportCsv = () => {
     if (returns.length === 0) return;
-    const headers = ['Order ID', 'Customer', 'Product ID', 'Product Name', 'Price', 'AI Category', 'Confidence', 'Root Cause', 'Customer Comment', 'Date'];
+    const headers = ['Order ID', 'Customer', 'Product ID', 'Product Name', 'Price (INR)', 'AI Category', 'Confidence', 'Root Cause', 'Customer Comment', 'Date'];
     const rows = returns.map(r => [
       r.order_id,
       `"${r.customer_name || 'Customer'}"`,
@@ -97,7 +97,7 @@ export const ReturnsPage = () => {
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement('a');
     link.setAttribute('href', encodedUri);
-    link.setAttribute('download', `ReturnShield_Returns_${new Date().toISOString().slice(0,10)}.csv`);
+    link.setAttribute('download', `ReturnShield_India_Returns_${new Date().toISOString().slice(0,10)}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -110,7 +110,7 @@ export const ReturnsPage = () => {
         <div>
           <h1 className="text-2xl font-extrabold text-white tracking-tight">Returns Diagnostic Explorer</h1>
           <p className="text-xs text-slate-400 mt-1">
-            Search, filter, and inspect AI-classified returns with persistent root-cause tracing.
+            Search, filter, and inspect AI-classified returns with persistent root-cause tracing across Indian deliveries.
           </p>
         </div>
 
@@ -233,12 +233,12 @@ export const ReturnsPage = () => {
                   <tr key={item._id} className="hover:bg-slate-800/40 transition-colors group">
                     <td className="px-4 py-3 whitespace-nowrap">
                       <span className="font-mono font-bold text-brand-400">{item.order_id}</span>
-                      <p className="text-[10px] text-slate-500">{new Date(item.return_date || item.created_at).toLocaleDateString()}</p>
+                      <p className="text-[10px] text-slate-500">{new Date(item.return_date || item.created_at).toLocaleDateString('en-IN')}</p>
                     </td>
 
                     <td className="px-4 py-3">
                       <p className="font-semibold text-white truncate max-w-[170px]">{item.product_name}</p>
-                      <p className="text-[10px] text-slate-400 font-mono">{item.product_id} • ${item.product_price || '49.99'}</p>
+                      <p className="text-[10px] text-slate-400 font-mono">{item.product_id} • ₹{item.product_price?.toLocaleString('en-IN') || '1,499'}</p>
                     </td>
 
                     <td className="px-4 py-3 max-w-[220px]">
@@ -261,7 +261,7 @@ export const ReturnsPage = () => {
 
                     <td className="px-4 py-3 whitespace-nowrap">
                       <span className="px-2 py-0.5 rounded-full text-[11px] font-mono font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
-                        {Math.round((item.ai_confidence || 0.94) * 100)}%
+                        {Math.round((item.ai_confidence || 0.95) * 100)}%
                       </span>
                     </td>
 
@@ -328,7 +328,7 @@ export const ReturnsPage = () => {
               <div>
                 <p className="text-slate-500 uppercase text-[10px] font-bold">Product</p>
                 <p className="font-bold text-white text-sm">{selectedReturn.product_name}</p>
-                <p className="font-mono text-slate-400 text-[11px]">{selectedReturn.product_id} • ${selectedReturn.product_price}</p>
+                <p className="font-mono text-slate-400 text-[11px]">{selectedReturn.product_id} • ₹{selectedReturn.product_price?.toLocaleString('en-IN')}</p>
               </div>
               <div>
                 <p className="text-slate-500 uppercase text-[10px] font-bold">AI Category & Severity</p>

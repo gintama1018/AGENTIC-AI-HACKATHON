@@ -75,20 +75,19 @@ export const OverviewPage = () => {
 
   return (
     <div className="space-y-6">
-      {/* Top Banner Alert if high return spike */}
       {urgentAlert && <AlertBanner alert={urgentAlert} />}
 
-      {/* Page Header with Action Buttons */}
+      {/* Page Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <div className="flex items-center gap-2">
-            <h1 className="text-2xl font-extrabold text-white tracking-tight">Returns Intelligence Overview</h1>
+            <h1 className="text-2xl font-extrabold text-white tracking-tight">Returns & RTO Intelligence Overview</h1>
             <span className="px-2 py-0.5 text-[10px] font-bold rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
-              Live Sync
+              Pan-India Live Sync
             </span>
           </div>
           <p className="text-xs text-slate-400 mt-1">
-            Autonomous multi-week return diagnostics, priority scores, and financial impact.
+            Autonomous multi-week return diagnostics, priority scores, and financial impact for Indian D2C.
           </p>
         </div>
 
@@ -109,13 +108,13 @@ export const OverviewPage = () => {
         </div>
       </div>
 
-      {/* KPI Stats Grid */}
+      {/* KPI Stats Grid in ₹ INR */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard
           title="Total Returns Tracked"
           value={metrics?.totalReturns || 0}
           icon={RotateCcw}
-          trend="+12%"
+          trend="+14%"
           trendDirection="up"
           trendLabel="vs last month"
           iconColor="text-indigo-400"
@@ -126,25 +125,25 @@ export const OverviewPage = () => {
           title="Estimated RTO Rate"
           value={`${metrics?.rtoRate || 0}%`}
           icon={Percent}
-          trend="-2.4%"
+          trend="-3.1%"
           trendDirection="down"
-          trendLabel="target <18%"
+          trendLabel="target <15%"
           iconColor="text-emerald-400"
           gradient="from-emerald-500/20 to-teal-500/10"
         />
 
         <StatCard
           title="Financial Loss / At Risk"
-          value={`$${(metrics?.totalFinancialLoss || 0).toLocaleString()}`}
+          value={`₹${(metrics?.totalFinancialLoss || 0).toLocaleString('en-IN')}`}
           icon={DollarSign}
-          subtitle="Shipping + handling + markdown"
+          subtitle="RTO courier freight + reverse QC + markdown"
           iconColor="text-rose-400"
           gradient="from-rose-500/20 to-pink-500/10"
         />
 
         <StatCard
           title="AI Diagnostic Confidence"
-          value={`${metrics?.avgConfidence || 94}%`}
+          value={`${metrics?.avgConfidence || 95}%`}
           icon={Sparkles}
           badgeText="n8n NLP"
           subtitle="Autonomous root-cause accuracy"
@@ -169,10 +168,10 @@ export const OverviewPage = () => {
                 <span className="w-2.5 h-2.5 rounded-full bg-indigo-500" /> Total Returns
               </span>
               <span className="flex items-center gap-1 text-amber-400">
-                <span className="w-2.5 h-2.5 rounded-full bg-amber-500" /> Sizing Mismatch
+                <span className="w-2.5 h-2.5 rounded-full bg-amber-500" /> Size & Fit
               </span>
               <span className="flex items-center gap-1 text-rose-400">
-                <span className="w-2.5 h-2.5 rounded-full bg-rose-500" /> Hardware Defects
+                <span className="w-2.5 h-2.5 rounded-full bg-rose-500" /> Defects
               </span>
             </div>
           </div>
@@ -242,7 +241,6 @@ export const OverviewPage = () => {
             </div>
           </div>
 
-          {/* Legend Items */}
           <div className="space-y-1.5 pt-2 border-t border-slate-800/80 max-h-40 overflow-y-auto">
             {(reasonDistribution || []).slice(0, 4).map((item, idx) => (
               <div key={idx} className="flex items-center justify-between text-xs">
@@ -257,14 +255,13 @@ export const OverviewPage = () => {
         </div>
       </div>
 
-      {/* Lower Section: Problem Products Leaderboard + Recent Analyzed Returns */}
+      {/* Lower Section: Problem SKUs Leaderboard + Recent Analyzed Returns */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        {/* Top Problem Products */}
         <div className="lg:col-span-5 glass-card rounded-2xl p-5 space-y-4">
           <div className="flex items-center justify-between border-b border-slate-800/80 pb-3">
             <div>
               <h3 className="text-sm font-bold text-white flex items-center gap-2">
-                <PackageX className="w-4 h-4 text-rose-400" /> Problem Products Priority
+                <PackageX className="w-4 h-4 text-rose-400" /> Problem SKUs Priority
               </h3>
               <p className="text-xs text-slate-400">Ranked by Priority Score (Volume × Return Rate × Loss)</p>
             </div>
@@ -284,9 +281,9 @@ export const OverviewPage = () => {
                   <div className="flex items-center gap-2 text-[11px] text-slate-400">
                     <span>{prod.total_returns} returns</span>
                     <span>•</span>
-                    <span className="text-rose-400 font-semibold">{prod.return_rate}% return rate</span>
+                    <span className="text-rose-400 font-semibold">{prod.return_rate}% rate</span>
                     <span>•</span>
-                    <span className="text-slate-300 font-mono">${prod.estimated_financial_loss}</span>
+                    <span className="text-slate-300 font-mono">₹{prod.estimated_financial_loss?.toLocaleString('en-IN')}</span>
                   </div>
                 </div>
 
@@ -335,7 +332,7 @@ export const OverviewPage = () => {
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
                     <span className="text-[10px] font-mono text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/30">
-                      {Math.round((ret.ai_confidence || 0.94) * 100)}% conf
+                      {Math.round((ret.ai_confidence || 0.95) * 100)}% conf
                     </span>
                     <ChevronRight className="w-3.5 h-3.5 text-slate-500 group-hover:text-white group-hover:translate-x-0.5 transition-all" />
                   </div>

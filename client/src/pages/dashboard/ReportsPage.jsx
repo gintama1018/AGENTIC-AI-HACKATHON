@@ -57,12 +57,12 @@ export const ReportsPage = () => {
 
   return (
     <div className="space-y-6 max-w-4xl mx-auto">
-      {/* Action Header (hidden when printing) */}
+      {/* Action Header */}
       <div className="flex items-center justify-between no-print">
         <div>
           <h1 className="text-2xl font-extrabold text-white tracking-tight">Executive Intelligence Report</h1>
           <p className="text-xs text-slate-400 mt-0.5">
-            C-level summary of reverse-logistics loss, root causes, and return reduction initiatives.
+            C-level summary of reverse-logistics loss, RTO rates, root causes, and return reduction initiatives in India.
           </p>
         </div>
 
@@ -89,13 +89,13 @@ export const ReportsPage = () => {
           </div>
 
           <div className="text-right text-xs text-slate-400 space-y-0.5">
-            <p className="font-bold text-white">{user?.company_name || 'Aurora Apparel & Goods'}</p>
-            <p>Generated: {new Date().toLocaleDateString()}</p>
-            <p className="font-mono text-[10px] text-brand-400">Report ID: RPT-2026-{Math.floor(1000 + Math.random() * 9000)}</p>
+            <p className="font-bold text-white">{user?.company_name || 'BharatThreads Lifestyle Pvt. Ltd.'}</p>
+            <p>Generated: {new Date().toLocaleDateString('en-IN')}</p>
+            <p className="font-mono text-[10px] text-brand-400">Report ID: RPT-IND-2026-{Math.floor(1000 + Math.random() * 9000)}</p>
           </div>
         </div>
 
-        {/* Executive Summary Metrics */}
+        {/* Executive Summary Metrics in ₹ INR */}
         <div className="grid grid-cols-3 gap-4 text-center">
           <div className="p-4 rounded-2xl bg-slate-900/80 border border-slate-800">
             <p className="text-[10px] uppercase font-bold text-slate-400">Total Returns Analyzed</p>
@@ -104,26 +104,26 @@ export const ReportsPage = () => {
           </div>
 
           <div className="p-4 rounded-2xl bg-slate-900/80 border border-slate-800">
-            <p className="text-[10px] uppercase font-bold text-slate-400">Total Return Loss</p>
+            <p className="text-[10px] uppercase font-bold text-slate-400">Total Return & RTO Loss</p>
             <p className="text-2xl font-extrabold text-rose-400 font-mono mt-1">
-              ${(overview?.metrics?.totalFinancialLoss || 0).toLocaleString()}
+              ₹{(overview?.metrics?.totalFinancialLoss || 0).toLocaleString('en-IN')}
             </p>
-            <p className="text-[10px] text-slate-500">Reverse logistics & markdowns</p>
+            <p className="text-[10px] text-slate-500">Courier freight, handling & markdowns</p>
           </div>
 
           <div className="p-4 rounded-2xl bg-slate-900/80 border border-slate-800">
             <p className="text-[10px] uppercase font-bold text-slate-400">Projected Recoverable Profit</p>
             <p className="text-2xl font-extrabold text-emerald-400 font-mono mt-1">
-              ${(financial?.potentialSavings || 0).toLocaleString()}
+              ₹{(financial?.potentialSavings || 0).toLocaleString('en-IN')}
             </p>
             <p className="text-[10px] text-emerald-400/80 font-semibold">With AI mitigation steps</p>
           </div>
         </div>
 
-        {/* Financial Cost Drivers */}
+        {/* Financial Cost Drivers in ₹ INR */}
         <div className="space-y-3">
           <h3 className="text-xs font-bold uppercase tracking-wider text-slate-300">
-            Reverse Logistics Cost Drivers Breakdown
+            Indian Reverse Logistics Cost Drivers Breakdown
           </h3>
           <div className="grid grid-cols-2 gap-3 text-xs">
             {(financial?.costDrivers || []).map((driver, idx) => (
@@ -156,7 +156,7 @@ export const ReportsPage = () => {
                   </p>
                 </div>
                 <div className="text-right">
-                  <span className="text-xs font-mono font-bold text-rose-300">${p.estimated_financial_loss} Loss</span>
+                  <span className="text-xs font-mono font-bold text-rose-300">₹{p.estimated_financial_loss?.toLocaleString('en-IN')} Loss</span>
                   <p className="text-[10px] text-slate-500">Priority Score: {p.priority_score}</p>
                 </div>
               </div>
@@ -167,7 +167,7 @@ export const ReportsPage = () => {
         {/* Sign-off footer */}
         <div className="pt-6 border-t border-slate-800 text-[11px] text-slate-400 flex items-center justify-between">
           <span>Prepared by ReturnShield AI Engine v2</span>
-          <span>Confidential — Internal Operations Use</span>
+          <span>Confidential — Internal Operations Use (India)</span>
         </div>
       </div>
     </div>

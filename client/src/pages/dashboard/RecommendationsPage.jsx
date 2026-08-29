@@ -28,7 +28,7 @@ export const RecommendationsPage = () => {
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [newRecText, setNewRecText] = useState('');
   const [newRecPriority, setNewRecPriority] = useState('High');
-  const [newRecSavings, setNewRecSavings] = useState(1200);
+  const [newRecSavings, setNewRecSavings] = useState(15000);
 
   const fetchRecs = async () => {
     try {
@@ -54,7 +54,6 @@ export const RecommendationsPage = () => {
   const handleStatusChange = async (id, newStatus) => {
     try {
       await api.updateRecommendationStatus(id, newStatus);
-      // Optimistic update
       setRecommendations(prev => prev.map(r => r._id === id ? { ...r, status: newStatus } : r));
       fetchRecs();
     } catch (err) {
@@ -92,7 +91,7 @@ export const RecommendationsPage = () => {
             </span>
           </div>
           <p className="text-xs text-slate-400 mt-1">
-            Prescriptive corrective actions to eliminate the engineering and catalog root-causes of returns.
+            Prescriptive corrective actions to eliminate the engineering and catalog root-causes of returns in India.
           </p>
         </div>
 
@@ -106,7 +105,7 @@ export const RecommendationsPage = () => {
         </div>
       </div>
 
-      {/* Summary KPI Bar */}
+      {/* Summary KPI Bar in ₹ INR */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         <div className="glass-card rounded-2xl p-4 border border-slate-800">
           <p className="text-[10px] uppercase font-bold text-slate-400">Total Action Items</p>
@@ -122,20 +121,19 @@ export const RecommendationsPage = () => {
 
         <div className="glass-card rounded-2xl p-4 border border-slate-800">
           <p className="text-[10px] uppercase font-bold text-slate-400">Potential Savings</p>
-          <p className="text-2xl font-extrabold text-indigo-400 mt-1">${(summary?.potentialSavings || 0).toLocaleString()}</p>
+          <p className="text-2xl font-extrabold text-indigo-400 mt-1">₹{(summary?.potentialSavings || 0).toLocaleString('en-IN')}</p>
           <p className="text-[10px] text-slate-500">Upon full implementation</p>
         </div>
 
         <div className="glass-card rounded-2xl p-4 border border-slate-800">
           <p className="text-[10px] uppercase font-bold text-slate-400">Realized Profit Protected</p>
-          <p className="text-2xl font-extrabold text-gradient-emerald mt-1">${(summary?.realizedSavings || 0).toLocaleString()}</p>
+          <p className="text-2xl font-extrabold text-gradient-emerald mt-1">₹{(summary?.realizedSavings || 0).toLocaleString('en-IN')}</p>
           <p className="text-[10px] text-emerald-400 font-semibold">From completed actions</p>
         </div>
       </div>
 
       {/* Filter and Search Bar */}
       <div className="glass-card rounded-2xl p-4 flex flex-col md:flex-row items-center justify-between gap-3">
-        {/* Status Pills */}
         <div className="flex flex-wrap items-center gap-2">
           {['All', 'todo', 'in_progress', 'done'].map((status) => {
             const labels = {
@@ -161,7 +159,6 @@ export const RecommendationsPage = () => {
           })}
         </div>
 
-        {/* Priority Filter */}
         <div className="flex items-center gap-2 w-full md:w-auto">
           <select
             value={priorityFilter}
@@ -228,14 +225,13 @@ export const RecommendationsPage = () => {
 
                     <div className="flex items-center gap-4 text-xs text-slate-400 pt-1">
                       <span className="flex items-center gap-1 text-emerald-400 font-semibold font-mono">
-                        <DollarSign className="w-3.5 h-3.5" /> Est. Savings: ${(rec.estimated_savings || 450).toLocaleString()}
+                        ₹ Est. Savings: ₹{(rec.estimated_savings || 4500).toLocaleString('en-IN')}
                       </span>
                       <span>•</span>
-                      <span>Created {new Date(rec.created_at || Date.now()).toLocaleDateString()}</span>
+                      <span>Created {new Date(rec.created_at || Date.now()).toLocaleDateString('en-IN')}</span>
                     </div>
                   </div>
 
-                  {/* Status Toggle Buttons */}
                   <div className="flex items-center gap-2 shrink-0 pt-2 lg:pt-0 border-t lg:border-t-0 border-slate-800">
                     <button
                       onClick={() => handleStatusChange(rec._id, 'todo')}
@@ -291,7 +287,7 @@ export const RecommendationsPage = () => {
               required
               value={newRecText}
               onChange={(e) => setNewRecText(e.target.value)}
-              placeholder="e.g. Audit supplier zipper hardware for Denim Jacket Batch #409..."
+              placeholder="e.g. Enforce pre-shipment barcode scan validation at Bhiwandi warehouse..."
               className="w-full px-3.5 py-2.5 bg-slate-900 rounded-xl border border-slate-700 text-white focus:outline-none focus:border-brand-500"
             />
           </div>
@@ -311,7 +307,7 @@ export const RecommendationsPage = () => {
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-300 mb-1">Est. Monthly Savings ($)</label>
+              <label className="block text-xs font-semibold text-slate-300 mb-1">Est. Monthly Savings (₹ INR)</label>
               <input
                 type="number"
                 value={newRecSavings}
