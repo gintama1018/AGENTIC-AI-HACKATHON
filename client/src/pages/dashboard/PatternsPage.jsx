@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { TrendingUp, TrendingDown, ArrowRight } from 'lucide-react';
+import { TrendingUp, TrendingDown, ArrowRight, Activity } from 'lucide-react';
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip,
   ResponsiveContainer, BarChart, Bar
@@ -7,19 +7,15 @@ import {
 import { api } from '../../services/api';
 import { Link } from 'react-router-dom';
 
-// DESIGN.md §17 — Charts earn their place. Each chart answers ONE question.
-// Every chart must have: Title + one-sentence interpretation above it.
-// Neutral palette. Thin lines. No gradients. No rainbow series.
-
-// Recharts custom tooltip matching the warm palette
-const WarmTooltip = ({ active, payload, label }) => {
+const DarkTooltip = ({ active, payload, label }) => {
   if (!active || !payload?.length) return null;
   return (
-    <div className="bg-surface border border-stone rounded-surface px-3 py-2 shadow-float text-meta">
-      <p className="text-ash mb-1">{label}</p>
+    <div className="bg-[#0B0F17] border border-slate-700 rounded-lg p-3 shadow-xl text-xs space-y-1">
+      <p className="text-slate-400 font-semibold">{label}</p>
       {payload.map((p) => (
-        <p key={p.name} className="text-charcoal font-num">
-          {p.name}: <strong>{p.value}</strong>
+        <p key={p.name} className="text-white font-num flex items-center justify-between gap-4">
+          <span style={{ color: p.color }}>{p.name}:</span>
+          <strong>{p.value} returns</strong>
         </p>
       ))}
     </div>
@@ -54,187 +50,177 @@ export const PatternsPage = () => {
       .finally(() => setLoading(false));
   }, []);
 
-  const weeklyData = data?.weekly_trends || FALLBACK_WEEKLY;
+  const weeklyData = data?.weekly_trends?.length ? data.weekly_trends : FALLBACK_WEEKLY;
 
   if (loading) return (
-    <div className="py-16 text-center">
-      <p className="text-compact text-ash">Comparing previous history…</p>
+    <div className="flex items-center justify-center h-56 text-slate-400 gap-2">
+      <Activity className="w-5 h-5 animate-spin text-indigo-400" />
+      <span className="text-sm font-medium">Analyzing return trajectory patterns…</span>
     </div>
   );
 
   return (
-    <div className="space-y-12">
-      <div>
-        <h1 className="text-[22px] font-semibold text-charcoal tracking-tight mb-1">Longitudinal Patterns</h1>
-        <p className="text-compact text-graphite">
-          How return reasons are changing over time. Each chart answers one specific question.
+    <div className="space-y-10">
+      <div className="border-b border-slate-800 pb-4">
+        <h1 className="text-xl sm:text-2xl font-extrabold text-white tracking-tight">Longitudinal Return Patterns</h1>
+        <p className="text-xs text-slate-400 mt-1">
+          Historical trajectories and week-over-week root-cause shifts across Indian operations.
         </p>
       </div>
 
-      {/* ── Chart 1: What changed week over week? ─────────────── */}
-      <section>
-        {/* DESIGN.md §17 — Chart header: title + one-sentence interpretation */}
-        <div className="mb-5">
-          <h2 className="text-subsection text-charcoal mb-1">Fit-related returns are accelerating</h2>
-          <p className="text-compact text-graphite">
-            Return volume for size and fit complaints has grown steadily over 6 weeks, while other categories remain roughly stable.
+      {/* ── Chart 1: Trajectory Trend ─────────────── */}
+      <section className="space-y-3">
+        <div className="space-y-1">
+          <h2 className="text-base font-bold text-white">1. Longitudinal Category Trajectory (Last 6 Weeks)</h2>
+          <p className="text-xs text-slate-400">
+            <strong className="text-amber-400">Size & Fit Mismatch</strong> accelerated from 4 to 17 returns per week, representing the steepest upward slope.
           </p>
         </div>
 
-        <div className="border border-stone rounded-card bg-surface px-5 py-5">
-          <ResponsiveContainer width="100%" height={240}>
-            <LineChart data={weeklyData} margin={{ top: 4, right: 16, left: -16, bottom: 0 }}>
-              <CartesianGrid stroke="#E8E3DB" strokeDasharray="3 3" vertical={false} />
+        <div className="bg-[#111827] border border-slate-800 rounded-xl p-5 shadow-sm">
+          <ResponsiveContainer width="100%" height={260}>
+            <LineChart data={weeklyData} margin={{ top: 10, right: 20, left: -20, bottom: 0 }}>
+              <CartesianGrid stroke="#1E293B" strokeDasharray="3 3" vertical={false} />
               <XAxis
                 dataKey="week"
-                tick={{ fill: '#8A847A', fontSize: 12 }}
-                axisLine={{ stroke: '#D8D2C8' }}
+                tick={{ fill: '#94A3B8', fontSize: 12 }}
+                axisLine={{ stroke: '#334155' }}
                 tickLine={false}
               />
               <YAxis
-                tick={{ fill: '#8A847A', fontSize: 12 }}
+                tick={{ fill: '#94A3B8', fontSize: 12 }}
                 axisLine={false}
                 tickLine={false}
               />
-              <Tooltip content={<WarmTooltip />} />
-              {/* Single dominant line; others are muted */}
+              <Tooltip content={<DarkTooltip />} />
               <Line
                 dataKey="fit"
-                name="Fit / Sizing"
-                stroke="#252421"
-                strokeWidth={2}
-                dot={false}
-                activeDot={{ r: 3, fill: '#252421' }}
+                name="Size & Fit"
+                stroke="#F59E0B"
+                strokeWidth={3}
+                dot={{ fill: '#F59E0B', r: 4 }}
+                activeDot={{ r: 6 }}
               />
               <Line
                 dataKey="quality"
                 name="Quality Defect"
-                stroke="#8A847A"
-                strokeWidth={1}
-                dot={false}
+                stroke="#F43F5E"
+                strokeWidth={2}
+                dot={{ fill: '#F43F5E', r: 3 }}
               />
               <Line
                 dataKey="listing"
                 name="Listing Mismatch"
-                stroke="#BDB6AA"
-                strokeWidth={1}
-                dot={false}
+                stroke="#818CF8"
+                strokeWidth={2}
+                dot={{ fill: '#818CF8', r: 3 }}
               />
               <Line
                 dataKey="logistics"
-                name="Logistics"
-                stroke="#D8D2C8"
-                strokeWidth={1}
-                dot={false}
+                name="Logistics Damage"
+                stroke="#34D399"
+                strokeWidth={2}
+                dot={{ fill: '#34D399', r: 3 }}
               />
             </LineChart>
           </ResponsiveContainer>
 
-          {/* Minimal legend — text only */}
-          <div className="flex items-center gap-5 mt-3 pt-3 border-t border-mist flex-wrap">
-            {[
-              { color: '#252421', label: 'Fit / Sizing (dominant)' },
-              { color: '#8A847A', label: 'Quality Defect' },
-              { color: '#BDB6AA', label: 'Listing Mismatch' },
-              { color: '#D8D2C8', label: 'Logistics' },
-            ].map(({ color, label }) => (
-              <span key={label} className="flex items-center gap-1.5 text-meta text-graphite">
-                <span className="inline-block w-3 h-0.5 flex-shrink-0" style={{ backgroundColor: color }} />
-                {label}
-              </span>
-            ))}
+          <div className="flex items-center gap-6 mt-4 pt-3 border-t border-slate-800/80 flex-wrap text-xs">
+            <span className="flex items-center gap-2 text-slate-300 font-semibold">
+              <span className="w-3 h-3 rounded-full bg-amber-500" /> Size & Fit (Dominant Surge)
+            </span>
+            <span className="flex items-center gap-2 text-slate-400">
+              <span className="w-3 h-3 rounded-full bg-rose-500" /> Quality Defect
+            </span>
+            <span className="flex items-center gap-2 text-slate-400">
+              <span className="w-3 h-3 rounded-full bg-indigo-400" /> Listing Variance
+            </span>
+            <span className="flex items-center gap-2 text-slate-400">
+              <span className="w-3 h-3 rounded-full bg-emerald-400" /> Logistics Damage
+            </span>
           </div>
         </div>
       </section>
 
-      {/* ── Chart 2: What shifted this week vs last? ─────────── */}
-      <section>
-        <div className="mb-5">
-          <h2 className="text-subsection text-charcoal mb-1">Week-over-week shift by reason</h2>
-          <p className="text-compact text-graphite">
-            Every category increased this week. The largest absolute jump is in Fit / Sizing (+6 returns). Buyer Remorse is the only category that declined.
+      {/* ── Chart 2: Shift by reason ─────────── */}
+      <section className="space-y-3">
+        <div className="space-y-1">
+          <h2 className="text-base font-bold text-white">2. Week-over-Week Return Shift Analysis</h2>
+          <p className="text-xs text-slate-400">
+            Comparison between previous week (slate) and current week (indigo).
           </p>
         </div>
 
-        <div className="border border-stone rounded-card bg-surface px-5 py-5">
-          <ResponsiveContainer width="100%" height={200}>
-            <BarChart data={SHIFT_DATA} layout="vertical" margin={{ top: 0, right: 24, left: 0, bottom: 0 }}>
-              <CartesianGrid stroke="#E8E3DB" strokeDasharray="3 3" horizontal={false} />
-              <XAxis type="number" tick={{ fill: '#8A847A', fontSize: 12 }} axisLine={false} tickLine={false} />
+        <div className="bg-[#111827] border border-slate-800 rounded-xl p-5 shadow-sm">
+          <ResponsiveContainer width="100%" height={220}>
+            <BarChart data={SHIFT_DATA} layout="vertical" margin={{ top: 0, right: 30, left: 10, bottom: 0 }}>
+              <CartesianGrid stroke="#1E293B" strokeDasharray="3 3" horizontal={false} />
+              <XAxis type="number" tick={{ fill: '#94A3B8', fontSize: 12 }} axisLine={false} tickLine={false} />
               <YAxis
                 type="category"
                 dataKey="reason"
-                width={130}
-                tick={{ fill: '#5F5B54', fontSize: 12 }}
+                width={140}
+                tick={{ fill: '#E2E8F0', fontSize: 12, fontWeight: 500 }}
                 axisLine={false}
                 tickLine={false}
               />
-              <Tooltip content={<WarmTooltip />} />
-              <Bar dataKey="prev" name="Last week" fill="#E8E3DB" radius={[0, 2, 2, 0]} barSize={8} />
-              <Bar dataKey="curr" name="This week" fill="#252421" radius={[0, 2, 2, 0]} barSize={8} />
+              <Tooltip content={<DarkTooltip />} />
+              <Bar dataKey="prev" name="Last week" fill="#334155" radius={[0, 4, 4, 0]} barSize={10} />
+              <Bar dataKey="curr" name="This week" fill="#6366F1" radius={[0, 4, 4, 0]} barSize={10} />
             </BarChart>
           </ResponsiveContainer>
 
-          <div className="flex items-center gap-5 mt-3 pt-3 border-t border-mist">
-            <span className="flex items-center gap-1.5 text-meta text-graphite">
-              <span className="inline-block w-3 h-2 rounded-sm flex-shrink-0" style={{ backgroundColor: '#E8E3DB' }} /> Last week
+          <div className="flex items-center gap-6 mt-4 pt-3 border-t border-slate-800/80 text-xs">
+            <span className="flex items-center gap-2 text-slate-400">
+              <span className="w-3 h-2 rounded bg-slate-700" /> Previous Week Baseline
             </span>
-            <span className="flex items-center gap-1.5 text-meta text-graphite">
-              <span className="inline-block w-3 h-2 rounded-sm flex-shrink-0" style={{ backgroundColor: '#252421' }} /> This week
+            <span className="flex items-center gap-2 text-indigo-300 font-semibold">
+              <span className="w-3 h-2 rounded bg-indigo-500" /> Current Week Surge
             </span>
           </div>
         </div>
       </section>
 
       {/* ── Editorial conclusions ──────────────────────────────── */}
-      <section>
-        <p className="text-meta text-ash uppercase tracking-widest mb-4">One-line conclusions</p>
-        <div className="border border-stone rounded-card bg-surface divide-y divide-mist">
+      <section className="space-y-3">
+        <h2 className="text-base font-bold text-white">3. Operational Diagnoses & Root-Cause Summaries</h2>
+        <div className="bg-[#111827] border border-slate-800 rounded-xl divide-y divide-slate-800/80">
           {[
             {
-              signal: 'Fit / Sizing',
+              signal: 'Size & Fit Mismatch',
               trend: 'up',
-              conclusion: 'Persistent week-over-week growth. Likely linked to a specific batch. Investigate BT-KRS-SG-M.',
+              conclusion: 'Continuous week-over-week acceleration. Strong correlation with Kurta Set batch #2024-Q3.',
               action: '/dashboard/products',
-              actionLabel: 'See problem SKUs',
+              actionLabel: 'Inspect Problem SKUs',
             },
             {
               signal: 'Quality / Defect',
               trend: 'up',
-              conclusion: 'Slow but steady increase since Week 3. Embroidered Dupatta Rust is the top contributor.',
+              conclusion: 'Concentrated in Embroidered Dupatta Rust SKU. Embroidery finishing flaws identified.',
               action: '/dashboard/returns?category=Quality',
-              actionLabel: 'Filter returns',
+              actionLabel: 'Filter Records',
             },
             {
-              signal: 'Listing Mismatch',
+              signal: 'Listing Variance',
               trend: 'up',
-              conclusion: 'Photography discrepancy for Men\'s Chino Dark Teal is driving most of these returns.',
+              conclusion: 'Studio lighting over-saturation on Men’s Chinos driving buyer disappointment.',
               action: '/dashboard/recommendations',
-              actionLabel: 'See prescribed action',
-            },
-            {
-              signal: 'Buyer Remorse',
-              trend: 'down',
-              conclusion: 'Slight decline this week — positive signal, but the sample is small.',
-              action: null,
-              actionLabel: null,
+              actionLabel: 'View Action',
             },
           ].map(({ signal, trend, conclusion, action, actionLabel }) => (
-            <div key={signal} className="flex items-start gap-4 px-5 py-4">
-              <div className="mt-0.5 flex-shrink-0">
-                {trend === 'up'
-                  ? <TrendingUp className="w-4 h-4 text-attention" />
-                  : <TrendingDown className="w-4 h-4 text-success" />}
+            <div key={signal} className="flex items-start justify-between gap-4 p-5 hover:bg-slate-800/30 transition-colors">
+              <div className="flex items-start gap-3">
+                <div className="mt-0.5 p-1 rounded bg-amber-950/60 border border-amber-800/60 text-amber-400">
+                  <TrendingUp className="w-4 h-4" />
+                </div>
+                <div className="space-y-1">
+                  <p className="text-sm font-bold text-white">{signal}</p>
+                  <p className="text-xs text-slate-300 leading-relaxed">{conclusion}</p>
+                </div>
               </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-compact font-semibold text-charcoal mb-0.5">{signal}</p>
-                <p className="text-compact text-graphite">{conclusion}</p>
-              </div>
-              {action && (
-                <Link to={action} className="rs-btn-quiet text-[13px] flex-shrink-0">
-                  {actionLabel} <ArrowRight className="w-3 h-3" />
-                </Link>
-              )}
+              <Link to={action} className="rs-btn-secondary text-xs flex-shrink-0" style={{ height: 32, padding: '0 12px' }}>
+                {actionLabel} <ArrowRight className="w-3.5 h-3.5" />
+              </Link>
             </div>
           ))}
         </div>

@@ -27,99 +27,101 @@ export const SignupPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-canvas flex items-center justify-center px-4 py-16">
-      <div className="w-full max-w-sm">
+    <div className="min-h-screen bg-[#080C14] text-slate-100 flex items-center justify-center px-4 py-16">
+      <div className="w-full max-w-sm space-y-6">
 
         {/* Logo */}
-        <Link to="/" className="flex items-center gap-2 mb-8">
-          <div className="w-7 h-7 rounded-control bg-ink flex items-center justify-center">
-            <Shield className="w-4 h-4 text-surface" />
+        <Link to="/" className="inline-flex items-center gap-2.5">
+          <div className="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center text-white shadow-sm">
+            <Shield className="w-4 h-4" />
           </div>
-          <span className="font-semibold text-[15px] text-charcoal tracking-tight">ReturnShield</span>
+          <span className="font-extrabold text-base text-white tracking-tight">ReturnShield</span>
         </Link>
 
-        {/* Heading */}
-        <h1 className="text-[22px] font-semibold text-charcoal tracking-tight mb-1">
-          Register brand workspace
-        </h1>
-        <p className="text-compact text-graphite mb-6">
-          Set up an isolated investigation environment for your brand.
-        </p>
-
-        {/* Error */}
-        {error && (
-          <div className="flex items-center gap-2 p-3 rounded-surface mb-4 border"
-            style={{ background: '#EEDDD9', borderColor: '#C49088', color: '#7D3F38' }}>
-            <AlertCircle className="w-4 h-4 flex-shrink-0" />
-            <span className="text-compact">{error}</span>
-          </div>
-        )}
-
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-meta font-semibold text-charcoal mb-1">Your name</label>
-            <input
-              type="text"
-              required
-              name="name"
-              value={formData.name}
-              onChange={handleChange}
-              placeholder="e.g. Sonu Jangir"
-              className="rs-field"
-            />
+        {/* Card */}
+        <div className="bg-[#111827] border border-slate-800 rounded-2xl p-6 sm:p-8 space-y-6 shadow-xl">
+          <div className="space-y-1">
+            <h1 className="text-xl font-extrabold text-white tracking-tight">
+              Register Brand Workspace
+            </h1>
+            <p className="text-xs text-slate-400">
+              Set up dedicated return intelligence for your Indian store.
+            </p>
           </div>
 
-          <div>
-            <label className="block text-meta font-semibold text-charcoal mb-1">Company / brand name</label>
-            <input
-              type="text"
-              required
-              name="company_name"
-              value={formData.company_name}
-              onChange={handleChange}
-              placeholder="e.g. BharatThreads Lifestyle Pvt. Ltd."
-              className="rs-field"
-            />
-          </div>
+          {/* Error */}
+          {error && (
+            <div className="flex items-center gap-2 p-3 rounded-lg bg-rose-950/50 border border-rose-800/60 text-rose-300 text-xs">
+              <AlertCircle className="w-4 h-4 flex-shrink-0" />
+              <span>{error}</span>
+            </div>
+          )}
 
-          <div>
-            <label className="block text-meta font-semibold text-charcoal mb-1">Work email</label>
-            <input
-              type="email"
-              required
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              placeholder="name@company.in"
-              className="rs-field"
-            />
-          </div>
+          <form onSubmit={handleSubmit} className="space-y-4 text-xs">
+            <div>
+              <label className="block font-semibold text-slate-300 mb-1">Your Full Name</label>
+              <input
+                type="text"
+                required
+                name="name"
+                value={formData.name}
+                onChange={handleChange}
+                placeholder="e.g. Sonu Jangir"
+                className="rs-field"
+              />
+            </div>
 
-          <div>
-            <label className="block text-meta font-semibold text-charcoal mb-1">Password</label>
-            <input
-              type="password"
-              required
-              name="password"
-              value={formData.password}
-              onChange={handleChange}
-              placeholder="Minimum 6 characters"
-              className="rs-field"
-            />
-          </div>
+            <div>
+              <label className="block font-semibold text-slate-300 mb-1">Brand / Company Name</label>
+              <input
+                type="text"
+                required
+                name="company_name"
+                value={formData.company_name}
+                onChange={handleChange}
+                placeholder="e.g. BharatThreads Lifestyle Pvt. Ltd."
+                className="rs-field"
+              />
+            </div>
 
-          <button type="submit" disabled={loading} className="rs-btn-primary w-full justify-center mt-2">
-            {loading ? 'Creating workspace…' : 'Create workspace'}
-            <ArrowRight className="w-4 h-4" />
-          </button>
-        </form>
+            <div>
+              <label className="block font-semibold text-slate-300 mb-1">Work Email</label>
+              <input
+                type="email"
+                required
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
+                placeholder="name@company.in"
+                className="rs-field"
+              />
+            </div>
 
-        <p className="text-meta text-ash text-center mt-6">
-          Already registered?{' '}
-          <Link to="/login" className="text-charcoal font-medium hover:underline underline-offset-2">
-            Sign in
-          </Link>
-        </p>
+            <div>
+              <label className="block font-semibold text-slate-300 mb-1">Password</label>
+              <input
+                type="password"
+                required
+                name="password"
+                value={formData.password}
+                onChange={handleChange}
+                placeholder="Minimum 6 characters"
+                className="rs-field"
+              />
+            </div>
+
+            <button type="submit" disabled={loading} className="w-full rs-btn-primary justify-center text-xs font-bold mt-2" style={{ height: 40 }}>
+              {loading ? 'Creating...' : 'Create Workspace & Launch'} <ArrowRight className="w-4 h-4" />
+            </button>
+          </form>
+
+          <p className="text-xs text-slate-400 text-center pt-2">
+            Already registered?{' '}
+            <Link to="/login" className="text-indigo-400 font-semibold hover:underline">
+              Sign in
+            </Link>
+          </p>
+        </div>
       </div>
     </div>
   );

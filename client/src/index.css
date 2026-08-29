@@ -1,7 +1,4 @@
-/* DESIGN.md — ReturnShield AI Design System v1.0 */
-
-/* §04 — Typography: Inter + Source Serif 4 from Google Fonts */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+4:ital,wght@0,400;0,600;1,400&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -9,212 +6,185 @@
 
 @layer base {
   :root {
-    /* DESIGN.md §03 — Warm-neutral editorial palette */
-    --canvas:    #F5F2EC;   /* Primary application background */
-    --surface:   #FCFAF6;   /* Major surfaces, forms, content areas */
-    --ink:       #1C1B19;   /* Primary navigation, strong controls */
-    --charcoal:  #252421;   /* Headings and high-priority text */
-    --graphite:  #5F5B54;   /* Descriptive copy, metadata */
-    --ash:       #8A847A;   /* Timestamps, low-priority labels */
-    --stone:     #D8D2C8;   /* Structural separators */
-    --mist:      #E8E3DB;   /* Soft visual boundaries */
-
-    /* Semantic — meaning only, never decorative */
-    --attention:      #A45636;
-    --attention-soft: #F0E0D7;
-    --success:        #68705A;
-    --success-soft:   #E4E7DE;
-    --critical:       #7D3F38;
-    --critical-soft:  #EEDDD9;
+    --bg-main:       #080C14;
+    --bg-sidebar:    #0D121F;
+    --bg-surface:    #111827;
+    --bg-card:       #151E32;
+    --bg-card-hover: #1A253D;
+    --border-subtle: #1E293B;
+    --border-card:   #25334D;
+    --border-strong: #334566;
+    
+    --text-pure:     #FFFFFF;
+    --text-primary:  #F1F5F9;
+    --text-secondary:#94A3B8;
+    --text-muted:    #64748B;
+    
+    --accent-indigo: #6366F1;
+    --accent-emerald:#10B981;
+    --accent-amber:  #F59E0B;
+    --accent-rose:   #F43F5E;
+    --accent-sky:    #38BDF8;
   }
 
-  html {
+  html, body {
+    background-color: #080C14 !important;
+    color: #F1F5F9 !important;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-  }
-
-  body {
-    background-color: var(--canvas);
-    color: var(--charcoal);
-    font-family: 'Inter', system-ui, sans-serif;
-    font-size: 15px;
-    line-height: 1.55;
-    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
     min-height: 100vh;
   }
 
-  /* §4.3 — Use weight to create hierarchy; no gradient text */
   h1, h2, h3, h4, h5, h6 {
-    color: var(--charcoal);
-    font-weight: 600;
-    line-height: 1.2;
+    color: #FFFFFF !important;
+    font-weight: 700;
   }
 }
 
 @layer components {
-  /* §05 — Primary workstation surface */
-  .rs-surface {
-    background-color: var(--surface);
-    border: 1px solid var(--stone);
-  }
-
-  /* §14 — Cards only for distinct content objects */
+  /* High-Contrast Card Primitive */
   .rs-card {
-    background-color: var(--surface);
-    border: 1px solid var(--stone);
-    border-radius: 10px;
+    background-color: #111827 !important;
+    border: 1px solid #1E293B !important;
+    border-radius: 12px;
     padding: 20px 24px;
+    color: #F1F5F9 !important;
+    transition: border-color 0.2s ease, transform 0.2s ease;
+  }
+  .rs-card:hover {
+    border-color: #334566 !important;
   }
 
-  /* §07 — Separators are a primary grouping tool */
-  .rs-divider {
-    border-color: var(--stone);
-  }
-  .rs-divider-soft {
-    border-color: var(--mist);
+  /* High-Contrast Surface Primitive */
+  .rs-surface {
+    background-color: #0F1626 !important;
+    border: 1px solid #1E293B !important;
+    color: #F1F5F9 !important;
   }
 
-  /* §10.1 — Primary button: Ink background */
+  /* Primary Button */
   .rs-btn-primary {
-    background-color: var(--ink);
-    color: var(--surface);
-    height: 40px;
+    background: linear-gradient(135deg, #4F46E5 0%, #4338CA 100%) !important;
+    color: #FFFFFF !important;
+    height: 38px;
     padding: 0 16px;
-    border-radius: 7px;
-    font-size: 14px;
+    border-radius: 8px;
+    font-size: 13px;
     font-weight: 600;
-    border: none;
+    border: 1px solid #6366F1 !important;
     cursor: pointer;
-    transition: background-color 160ms ease;
+    transition: all 0.2s ease;
     display: inline-flex;
     align-items: center;
     gap: 6px;
   }
   .rs-btn-primary:hover {
-    background-color: #2e2c2a;
-  }
-  .rs-btn-primary:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
+    background: linear-gradient(135deg, #6366F1 0%, #4F46E5 100%) !important;
+    box-shadow: 0 0 16px rgba(99, 102, 241, 0.4);
   }
 
-  /* §10.2 — Secondary button: outlined */
+  /* Secondary Button */
   .rs-btn-secondary {
-    background-color: transparent;
-    color: var(--charcoal);
-    height: 40px;
+    background-color: #131B2E !important;
+    color: #F1F5F9 !important;
+    height: 38px;
     padding: 0 16px;
-    border-radius: 7px;
-    font-size: 14px;
+    border-radius: 8px;
+    font-size: 13px;
     font-weight: 500;
-    border: 1px solid var(--stone);
+    border: 1px solid #25334D !important;
     cursor: pointer;
-    transition: border-color 160ms ease, background-color 160ms ease;
+    transition: all 0.2s ease;
     display: inline-flex;
     align-items: center;
     gap: 6px;
   }
   .rs-btn-secondary:hover {
-    border-color: #BDB6AA;
-    background-color: var(--mist);
+    background-color: #1A253D !important;
+    border-color: #475B82 !important;
+    color: #FFFFFF !important;
   }
 
-  /* §10.3 — Quiet button: no border */
+  /* Quiet Button */
   .rs-btn-quiet {
-    background-color: transparent;
-    color: var(--graphite);
-    height: 36px;
-    padding: 0 12px;
+    background-color: transparent !important;
+    color: #94A3B8 !important;
+    height: 34px;
+    padding: 0 10px;
     border-radius: 6px;
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 500;
-    border: none;
+    border: 1px solid transparent !important;
     cursor: pointer;
-    transition: background-color 160ms ease, color 160ms ease;
+    transition: all 0.15s ease;
     display: inline-flex;
     align-items: center;
     gap: 6px;
   }
   .rs-btn-quiet:hover {
-    background-color: var(--mist);
-    color: var(--charcoal);
+    background-color: #182238 !important;
+    border-color: #25334D !important;
+    color: #FFFFFF !important;
   }
 
-  /* §11 — Form controls */
+  /* Form Fields */
   .rs-field {
     height: 40px;
-    border: 1px solid #CFC8BD;
-    background-color: var(--surface);
-    border-radius: 7px;
+    border: 1px solid #25334D !important;
+    background-color: #0B0F17 !important;
+    border-radius: 8px;
     padding: 0 12px;
-    font-size: 14px;
-    color: var(--charcoal);
+    font-size: 13px;
+    color: #FFFFFF !important;
     width: 100%;
-    transition: border-color 160ms ease;
+    transition: border-color 0.2s ease;
   }
   .rs-field::placeholder {
-    color: var(--ash);
+    color: #64748B !important;
   }
   .rs-field:focus {
     outline: none;
-    border-color: var(--graphite);
+    border-color: #6366F1 !important;
+    box-shadow: 0 0 0 1px #6366F1;
   }
 
-  /* §13 — Status indicators: text-first, small semantic marker */
-  .rs-status {
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-    font-size: 13px;
-    font-weight: 500;
-    color: var(--graphite);
-  }
-  .rs-status-dot {
-    width: 5px;
-    height: 5px;
-    border-radius: 50%;
-    flex-shrink: 0;
-  }
-
-  /* Numeric emphasis — §4.2 */
+  /* Numeric formatting */
   .font-num {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
     font-variant-numeric: tabular-nums;
-    font-feature-settings: "tnum";
-  }
-
-  /* §04 — Optional editorial serif accent */
-  .font-serif-editorial {
-    font-family: 'Source Serif 4', Georgia, serif;
   }
 }
 
-/* §09 — Scrollbar: minimal, warm-toned */
+/* Scrollbar */
 ::-webkit-scrollbar {
-  width: 5px;
-  height: 5px;
+  width: 6px;
+  height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: var(--canvas);
+  background: #080C14;
 }
 ::-webkit-scrollbar-thumb {
-  background: var(--stone);
-  border-radius: 2px;
+  background: #1F293D;
+  border-radius: 3px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #BDB6AA;
+  background: #334566;
 }
 
-/* §30 — Print styles */
+/* Print Styles */
 @media print {
   body {
     background-color: #ffffff !important;
-    color: var(--charcoal) !important;
+    color: #0f172a !important;
   }
   .no-print {
     display: none !important;
   }
   .rs-card, .rs-surface {
     background: #ffffff !important;
-    border: 1px solid var(--stone) !important;
+    border: 1px solid #cbd5e1 !important;
+    color: #0f172a !important;
   }
 }

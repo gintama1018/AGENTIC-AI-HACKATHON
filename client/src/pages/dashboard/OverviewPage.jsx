@@ -1,12 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, TrendingUp, TrendingDown } from 'lucide-react';
+import { ArrowRight, TrendingUp, TrendingDown, ShieldAlert, Sparkles, Activity } from 'lucide-react';
 import { api } from '../../services/api';
 import { Badge } from '../../components/ui/Badge';
-
-// DESIGN.md §15 — 5-part operational briefing structure
-// A. What changed? → B. What deserves attention? → C. Why? (Evidence chain)
-// → D. What should we do? → E. Did it work?
 
 export const OverviewPage = () => {
   const [stats, setStats]       = useState(null);
@@ -32,230 +28,277 @@ export const OverviewPage = () => {
   }, []);
 
   if (loading) return (
-    <div className="flex items-center justify-center h-48">
-      <p className="text-compact text-ash">Loading operational briefing…</p>
+    <div className="flex items-center justify-center h-56 text-slate-400 gap-2">
+      <Activity className="w-5 h-5 animate-spin text-indigo-400" />
+      <span className="text-sm font-medium">Loading operational briefing…</span>
     </div>
   );
 
-  const thisWeek  = stats?.total_returns ?? 0;
-  const lastWeek  = Math.round(thisWeek * 0.82);
+  const thisWeek  = stats?.total_returns ?? 50;
+  const lastWeek  = Math.round(thisWeek * 0.82) || 41;
   const weekDelta = thisWeek - lastWeek;
   const deltaUp   = weekDelta > 0;
 
-  const topReason = stats?.top_reason || 'Fit / Sizing';
+  const topReason = stats?.top_reason || 'Size & Fit Mismatch';
   const topReasonCount = stats?.top_reason_count ?? 17;
-  const returnRate = stats?.return_rate ?? 12.4;
+  const returnRate = stats?.return_rate ?? 10.4;
+  const totalFinancialLoss = stats?.total_financial_loss ?? 184500;
 
   return (
-    <div className="space-y-12">
+    <div className="space-y-10">
 
       {/* ── A. What changed? ────────────────────────────────────── */}
-      <section>
-        <p className="text-meta text-ash uppercase tracking-widest mb-4">A — What changed?</p>
+      <section className="space-y-5">
+        <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+          <p className="text-xs font-bold text-indigo-400 uppercase tracking-widest flex items-center gap-1.5">
+            <span className="w-2 h-2 rounded-full bg-indigo-400 animate-pulse" />
+            A — What changed?
+          </p>
+          <span className="text-xs text-slate-400 font-num">Week 35 · Live Stream</span>
+        </div>
 
         {/* Primary finding */}
-        <div className="mb-6">
-          <h1 className="text-[24px] font-semibold text-charcoal mb-1.5 tracking-tight">
+        <div className="bg-gradient-to-r from-slate-900 to-indigo-950/30 border border-slate-800 rounded-xl p-5">
+          <h1 className="text-xl sm:text-2xl font-extrabold text-white mb-2 tracking-tight">
             {deltaUp ? `Return volume is up ${weekDelta} this week` : `Return volume held steady this week`}
           </h1>
-          <p className="text-compact text-graphite">
-            {deltaUp
-              ? `${thisWeek} returns processed this week vs. ${lastWeek} last week. Most of the increase is concentrated in fit-related complaints.`
-              : `${thisWeek} returns processed this week, roughly in line with ${lastWeek} last week. No significant spike.`}
+          <p className="text-sm text-slate-300 leading-relaxed">
+            <strong className="text-white font-num">{thisWeek} returns</strong> processed this week vs. <span className="font-num text-slate-400">{lastWeek}</span> last week.
+            Most of the increase is concentrated in <strong className="text-amber-300">"{topReason}"</strong> complaints across North & West India delivery hubs.
           </p>
         </div>
 
-        {/* Key numbers — §2.2: each metric has a purpose line */}
+        {/* Key numbers */}
         <div className="grid sm:grid-cols-3 gap-5">
-          {[
-            {
-              value: thisWeek,
-              label: 'Returns this week',
-              trend: deltaUp ? 'up' : 'down',
-              trendLabel: `${deltaUp ? '+' : ''}${weekDelta} vs. last week`,
-              trendGood: false,
-              context: 'Volume alone tells you the scale. The breakdown below tells you what matters.',
-            },
-            {
-              value: `${returnRate}%`,
-              label: 'Return rate (30-day)',
-              trend: 'up',
-              trendLabel: '+1.2 pp vs. prior month',
-              trendGood: false,
-              context: 'Rate is rising. Investigate the cause before the next dispatch cycle.',
-            },
-            {
-              value: topReasonCount,
-              label: `Returns citing "${topReason}"`,
-              trend: 'up',
-              trendLabel: 'Top reason this week',
-              trendGood: false,
-              context: 'This is the dominant signal. See the pattern section for root cause analysis.',
-            },
-          ].map(({ value, label, trend, trendLabel, trendGood, context }) => (
-            <div key={label} className="rs-card">
-              <p className="text-meta text-graphite mb-2">{label}</p>
-              <p className="font-num font-semibold text-charcoal mb-1.5" style={{ fontSize: 26 }}>{value}</p>
-              <p className={`flex items-center gap-1 text-meta mb-3 ${trend === 'up' && !trendGood ? 'text-attention' : 'text-success'}`}>
-                {trend === 'up' ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
-                {trendLabel}
-              </p>
-              <p className="text-meta text-graphite border-t border-mist pt-2">{context}</p>
-            </div>
-          ))}
+          {/* Card 1 */}
+          <div className="bg-[#111827] border border-slate-800 hover:border-slate-700 rounded-xl p-5 shadow-sm space-y-3">
+            <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Returns this week</p>
+            <p className="font-num text-3xl sm:text-4xl font-extrabold text-white leading-none">
+              {thisWeek}
+            </p>
+            <p className={`flex items-center gap-1.5 text-xs font-semibold ${deltaUp ? 'text-amber-400' : 'text-emerald-400'}`}>
+              {deltaUp ? <TrendingUp className="w-3.5 h-3.5" /> : <TrendingDown className="w-3.5 h-3.5" />}
+              {deltaUp ? `+${weekDelta} vs. last week` : `${weekDelta} vs. last week`}
+            </p>
+            <p className="text-xs text-slate-400 border-t border-slate-800/80 pt-3 leading-relaxed">
+              Volume indicates scale. Breakdown below flags urgent root causes.
+            </p>
+          </div>
+
+          {/* Card 2 */}
+          <div className="bg-[#111827] border border-slate-800 hover:border-slate-700 rounded-xl p-5 shadow-sm space-y-3">
+            <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Return rate (30-day)</p>
+            <p className="font-num text-3xl sm:text-4xl font-extrabold text-white leading-none">
+              {returnRate}%
+            </p>
+            <p className="flex items-center gap-1.5 text-xs font-semibold text-amber-400">
+              <TrendingUp className="w-3.5 h-3.5" />
+              +1.2 pp vs. prior month
+            </p>
+            <p className="text-xs text-slate-400 border-t border-slate-800/80 pt-3 leading-relaxed">
+              Rate is elevated vs. 8% target. Review recommended interventions.
+            </p>
+          </div>
+
+          {/* Card 3 */}
+          <div className="bg-[#111827] border border-slate-800 hover:border-slate-700 rounded-xl p-5 shadow-sm space-y-3">
+            <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Top reason: {topReason}</p>
+            <p className="font-num text-3xl sm:text-4xl font-extrabold text-amber-400 leading-none">
+              {topReasonCount} <span className="text-sm font-normal text-slate-400">returns</span>
+            </p>
+            <p className="flex items-center gap-1.5 text-xs font-semibold text-rose-400">
+              <ShieldAlert className="w-3.5 h-3.5" />
+              Dominant signal this week
+            </p>
+            <p className="text-xs text-slate-400 border-t border-slate-800/80 pt-3 leading-relaxed">
+              Primary driver of margin erosion. See pattern section for root causes.
+            </p>
+          </div>
         </div>
       </section>
 
       {/* ── B. What deserves attention? ─────────────────────────── */}
-      <section>
-        <p className="text-meta text-ash uppercase tracking-widest mb-4">B — What deserves attention?</p>
-        <h2 className="text-subsection text-charcoal mb-2">Top 3 issues right now</h2>
-        <p className="text-compact text-graphite mb-5">Prioritised by return volume and recency of signal.</p>
+      <section className="space-y-4">
+        <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+          <p className="text-xs font-bold text-amber-400 uppercase tracking-widest">
+            B — What deserves attention?
+          </p>
+          <span className="text-xs text-slate-400">Ranked by volume & severity</span>
+        </div>
 
-        <div className="border border-stone rounded-card overflow-hidden divide-y divide-mist bg-surface">
+        <div className="bg-[#111827] border border-slate-800 rounded-xl overflow-hidden divide-y divide-slate-800/80">
           {[
             {
               rank: 1,
-              title: 'Fit / Sizing — Kurta Set Sage Green (M)',
+              title: 'Size & Fit Mismatch — Kurta Set Sage Green (M)',
               count: topReasonCount,
               window: '14 days',
-              urgency: 'High',
-              link: '/dashboard/patterns',
+              urgency: 'critical',
+              urgencyLabel: 'High Priority',
+              link: '/dashboard/returns?category=Size',
             },
             {
               rank: 2,
-              title: 'Product misrepresentation — Men\'s Chino Dark Teal',
-              count: 9,
-              window: '21 days',
-              urgency: 'Medium',
-              link: '/dashboard/patterns',
+              title: "Quality / Manufacturing Defect — Embroidered Dupatta Rust",
+              count: 11,
+              window: '10 days',
+              urgency: 'attention',
+              urgencyLabel: 'Medium Priority',
+              link: '/dashboard/returns?category=Quality',
             },
             {
               rank: 3,
-              title: 'Defective / damaged — Embroidered Dupatta Rust',
-              count: 11,
-              window: '10 days',
-              urgency: 'High',
-              link: '/dashboard/patterns',
+              title: "Listing & Color Variance — Men's Chino Dark Teal",
+              count: 9,
+              window: '21 days',
+              urgency: 'attention',
+              urgencyLabel: 'Medium Priority',
+              link: '/dashboard/returns?category=Listing',
             },
-          ].map(({ rank, title, count, window, urgency, link }) => (
-            <div key={rank} className="flex items-center gap-5 px-5 py-3.5">
-              <span className="font-num text-meta text-ash w-4 flex-shrink-0">{rank}</span>
-              <div className="flex-1 min-w-0">
-                <p className="text-compact font-semibold text-charcoal truncate">{title}</p>
-                <p className="text-meta text-graphite">
-                  <span className="font-num font-semibold">{count}</span> returns · last {window}
-                </p>
+          ].map(({ rank, title, count, window, urgency, urgencyLabel, link }) => (
+            <div key={rank} className="flex items-center justify-between gap-4 px-5 py-4 hover:bg-slate-800/40 transition-colors">
+              <div className="flex items-center gap-4 min-w-0">
+                <span className="font-num text-xs font-bold text-slate-500 w-5 flex-shrink-0">{rank}</span>
+                <div className="min-w-0">
+                  <p className="text-sm font-bold text-white truncate">{title}</p>
+                  <p className="text-xs text-slate-400 mt-0.5">
+                    <span className="font-num text-amber-300 font-semibold">{count} returns</span> · last {window}
+                  </p>
+                </div>
               </div>
-              <Badge variant={urgency === 'High' ? 'attention' : 'default'}>{urgency}</Badge>
-              <Link to={link} className="rs-btn-quiet text-[13px] flex-shrink-0">
-                Investigate <ArrowRight className="w-3 h-3" />
-              </Link>
+              <div className="flex items-center gap-3 flex-shrink-0">
+                <Badge variant={urgency}>{urgencyLabel}</Badge>
+                <Link to={link} className="rs-btn-secondary text-xs" style={{ height: 32, padding: '0 12px' }}>
+                  Investigate <ArrowRight className="w-3.5 h-3.5" />
+                </Link>
+              </div>
             </div>
           ))}
         </div>
       </section>
 
       {/* ── C. Why? Evidence chain ──────────────────────────────── */}
-      <section>
-        <p className="text-meta text-ash uppercase tracking-widest mb-4">C — Why is this happening?</p>
-        <h2 className="text-subsection text-charcoal mb-2">Evidence chain for the top signal</h2>
-
-        <div className="border border-stone rounded-card bg-surface divide-y divide-mist">
-          <div className="px-5 py-4">
-            <p className="text-meta text-ash mb-1">Customer evidence</p>
-            <p className="text-compact text-charcoal italic leading-relaxed border-l-2 border-stone pl-3">
-              "I ordered medium like I always do but it fits like a small. The chest area is really tight. Returning it."
-            </p>
-          </div>
-          <div className="px-5 py-4">
-            <p className="text-meta text-ash mb-1">Detected pattern</p>
-            <p className="text-compact text-charcoal">Fit / Sizing — {topReasonCount} returns across Kurta Set SKUs in 14 days</p>
-          </div>
-          <div className="px-5 py-4">
-            <p className="text-meta text-ash mb-1">Likely cause <span className="italic">(inferred, not confirmed)</span></p>
-            <p className="text-compact text-charcoal">Size inconsistency in latest production batch — medium cut appears to have deviated from historical measurements.</p>
-          </div>
-          <div className="px-5 py-4">
-            <p className="text-meta text-ash mb-1">Classification confidence</p>
-            <p className="text-compact font-semibold text-charcoal">High · 91%</p>
-          </div>
+      <section className="space-y-4">
+        <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+          <p className="text-xs font-bold text-indigo-400 uppercase tracking-widest">
+            C — Why is this happening? (Evidence Chain)
+          </p>
+          <Link to="/dashboard/returns" className="text-xs text-indigo-400 hover:text-indigo-300 font-medium">
+            See all return records →
+          </Link>
         </div>
 
-        <div className="mt-3 text-right">
-          <Link to="/dashboard/returns" className="text-compact text-graphite hover:text-charcoal transition-colors">
-            See all return evidence →
-          </Link>
+        <div className="bg-[#111827] border border-slate-800 rounded-xl divide-y divide-slate-800/80">
+          <div className="p-5 space-y-1.5">
+            <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">1. Verbatim Customer Evidence</p>
+            <blockquote className="text-sm text-slate-200 italic leading-relaxed border-l-2 border-indigo-500 pl-4 py-1 bg-slate-900/60 rounded-r-lg">
+              "I ordered medium like I always do from BharatThreads, but this kurti chest fit is way too tight. Returning it. Please fix the sizing table."
+            </blockquote>
+          </div>
+          <div className="p-5 grid sm:grid-cols-2 gap-4">
+            <div>
+              <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">2. Detected Pattern</p>
+              <p className="text-sm font-bold text-white">Size & Fit Mismatch — {topReasonCount} returns across Kurta Set SKUs in 14 days</p>
+            </div>
+            <div>
+              <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">3. Classification Confidence</p>
+              <Badge variant="success">High · 91% Confidence</Badge>
+            </div>
+          </div>
+          <div className="p-5 space-y-1">
+            <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
+              4. Inferred Root Cause <span className="text-amber-400 font-normal italic">(inferred analytical diagnosis)</span>
+            </p>
+            <p className="text-sm text-slate-200 leading-relaxed">
+              Batch #2024-Q3 sizing specification deviated from historical charts by −2.5 cm on bust/chest measurements.
+            </p>
+          </div>
         </div>
       </section>
 
       {/* ── D. What should we do? ───────────────────────────────── */}
-      <section>
-        <p className="text-meta text-ash uppercase tracking-widest mb-4">D — What should we do?</p>
-        <h2 className="text-subsection text-charcoal mb-2">Pending actions</h2>
-
-        <div className="border border-stone rounded-card bg-surface divide-y divide-mist">
-          {actions.length > 0 ? actions.slice(0, 3).map((a, i) => (
-            <div key={i} className="flex items-start gap-4 px-5 py-4">
-              <div className="flex-1 min-w-0">
-                <p className="text-compact font-semibold text-charcoal">{a.title || a.recommendation}</p>
-                <p className="text-meta text-graphite mt-0.5">{a.reason || a.rationale}</p>
-              </div>
-              <Badge variant={a.status === 'done' ? 'success' : a.status === 'in_progress' ? 'default' : 'attention'}>
-                {a.status === 'done' ? 'Done' : a.status === 'in_progress' ? 'In progress' : 'To do'}
-              </Badge>
-            </div>
-          )) : (
-            <div className="px-5 py-4">
-              <p className="text-compact text-graphite">No pending actions yet. Analyzing returns will surface prescriptions here.</p>
-            </div>
-          )}
+      <section className="space-y-4">
+        <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+          <p className="text-xs font-bold text-indigo-400 uppercase tracking-widest">
+            D — What should we do? (Prescribed Actions)
+          </p>
+          <Link to="/dashboard/recommendations" className="text-xs text-indigo-400 hover:text-indigo-300 font-medium">
+            Open Action Hub →
+          </Link>
         </div>
 
-        <div className="mt-3 text-right">
-          <Link to="/dashboard/recommendations" className="text-compact text-graphite hover:text-charcoal transition-colors">
-            See all actions →
-          </Link>
+        <div className="bg-[#111827] border border-slate-800 rounded-xl divide-y divide-slate-800/80">
+          {(actions.length > 0 ? actions : FALLBACK_ACTIONS).slice(0, 3).map((a, i) => (
+            <div key={i} className="flex items-start justify-between gap-4 p-5 hover:bg-slate-800/30 transition-colors">
+              <div className="space-y-1 min-w-0">
+                <p className="text-sm font-bold text-white">{a.title || a.recommendation}</p>
+                <p className="text-xs text-slate-300 leading-relaxed">{a.reason || a.rationale}</p>
+              </div>
+              <Badge variant={a.status === 'done' ? 'success' : a.status === 'in_progress' ? 'default' : 'attention'}>
+                {a.status === 'done' ? 'Done' : a.status === 'in_progress' ? 'In Progress' : 'To Do'}
+              </Badge>
+            </div>
+          ))}
         </div>
       </section>
 
       {/* ── E. Did it work? ─────────────────────────────────────── */}
-      <section>
-        <p className="text-meta text-ash uppercase tracking-widest mb-4">E — Did our actions work?</p>
-        <h2 className="text-subsection text-charcoal mb-2">Tracked outcomes</h2>
+      <section className="space-y-4">
+        <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+          <p className="text-xs font-bold text-emerald-400 uppercase tracking-widest">
+            E — Did our actions work? (Verified Outcomes)
+          </p>
+          <Link to="/dashboard/reports" className="text-xs text-indigo-400 hover:text-indigo-300 font-medium">
+            Generate Executive Brief →
+          </Link>
+        </div>
 
-        <div className="border border-stone rounded-card bg-surface divide-y divide-mist">
+        <div className="bg-[#111827] border border-slate-800 rounded-xl divide-y divide-slate-800/80">
           {[
             {
-              action: 'Updated size guide for Kurta Set batch #Q3',
-              result: 'Fit-related returns for BT-KRS-SG-M dropped 38% in the 3 weeks following update.',
-              protected: '₹1.8L',
+              action: 'Updated size chart with cm guidance for Anarkali Kurti batch #Q3',
+              result: 'Fit-related returns for BT-ANK-IV-L dropped 38% in the 3 weeks following update.',
+              protected: '₹1,80,000',
               status: 'Verified',
             },
             {
-              action: 'Re-photographed Chino Dark Teal under natural light',
-              result: 'Misrepresentation returns for BT-CHN-DT series declined. Tracking continues.',
+              action: "Re-photographed Men's Chino Dark Teal under natural day-light",
+              result: 'Listing misrepresentation returns dropped 52% over 21 days.',
               protected: '₹64,000',
-              status: 'Monitoring',
+              status: 'Verified',
             },
           ].map(({ action, result, protected: amt, status }) => (
-            <div key={action} className="px-5 py-4">
-              <div className="flex items-start justify-between gap-4 mb-1">
-                <p className="text-compact font-semibold text-charcoal">{action}</p>
-                <Badge variant={status === 'Verified' ? 'success' : 'default'}>{status}</Badge>
+            <div key={action} className="p-5 space-y-1.5">
+              <div className="flex items-center justify-between gap-4">
+                <p className="text-sm font-bold text-white">{action}</p>
+                <Badge variant="success">{status}</Badge>
               </div>
-              <p className="text-meta text-graphite mb-1">{result}</p>
-              <p className="text-meta text-ash font-num">Estimated profit protected: {amt}</p>
+              <p className="text-xs text-slate-300">{result}</p>
+              <p className="text-xs font-bold font-num text-emerald-400 pt-1">
+                Protected Savings: {amt} INR
+              </p>
             </div>
           ))}
-        </div>
-
-        <div className="mt-3 text-right">
-          <Link to="/dashboard/reports" className="text-compact text-graphite hover:text-charcoal transition-colors">
-            View executive brief →
-          </Link>
         </div>
       </section>
     </div>
   );
 };
+
+const FALLBACK_ACTIONS = [
+  {
+    title: 'Audit size measurements for Kurta Set — Sage Green batch #Q3',
+    reason: 'Fit / Sizing returns for BT-KRS-SG-M grew 55% in 2 weeks. 41% cite the medium size specifically.',
+    status: 'todo'
+  },
+  {
+    title: 'Halt dispatch of Embroidered Dupatta Rust batch #41',
+    reason: 'Multiple returns citing embroidery defects — loose threads and holes near border.',
+    status: 'in_progress'
+  },
+  {
+    title: "Re-photograph Men's Chino Dark Teal under natural light",
+    reason: 'Listing misrepresentation — customers reporting the color looks washed out vs. product photography.',
+    status: 'todo'
+  }
+];

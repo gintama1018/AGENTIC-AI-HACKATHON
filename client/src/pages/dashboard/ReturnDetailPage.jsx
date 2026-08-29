@@ -1,12 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, ExternalLink, ShieldCheck, MapPin, Truck, Calendar, IndianRupee } from 'lucide-react';
 import { api } from '../../services/api';
 import { Badge } from '../../components/ui/Badge';
-
-// DESIGN.md §16 — Detail page as evidence file / investigation dossier
-// Linear, separator-divided. Evidence clearly separated from inference.
-// §22 — Evidence vs Inference distinction is core to trust.
 
 const confidenceLabel = (s) => {
   const pct = Math.round((s ?? 0.75) * 100);
@@ -19,7 +15,7 @@ const statusVariant = (s = '') => {
   const v = s.toLowerCase();
   if (v === 'analyzed')    return 'success';
   if (v === 'pending')     return 'attention';
-  if (v === 'processing')  return 'default';
+  if (v === 'processing')  return 'info';
   return 'muted';
 };
 
@@ -37,160 +33,115 @@ export const ReturnDetailPage = () => {
   }, [id]);
 
   if (loading) return (
-    <div className="py-16 text-center">
-      <p className="text-compact text-ash">Loading evidence dossier…</p>
+    <div className="py-16 text-center text-slate-400">
+      <p className="text-sm">Loading evidence dossier…</p>
     </div>
   );
 
   if (error || !data) return (
     <div className="py-16 text-center space-y-3">
-      <p className="text-compact font-semibold text-charcoal">Evidence could not be loaded</p>
-      <p className="text-meta text-graphite">{error || 'Record not found.'}</p>
-      <Link to="/dashboard/returns" className="text-compact text-graphite hover:text-charcoal transition-colors">
-        ← Return to investigation table
+      <p className="text-base font-bold text-white">Evidence record could not be loaded</p>
+      <p className="text-xs text-slate-400">{error || 'Record not found.'}</p>
+      <Link to="/dashboard/returns" className="text-xs text-indigo-400 hover:text-indigo-300 font-semibold">
+        ← Return to Investigation Table
       </Link>
     </div>
   );
 
-  // Normalise field names across db schema variants
   const r = data;
-  const productName       = r.product_name || r.product || '—';
-  const sku               = r.sku || r.product_id || '—';
-  const customerComment   = r.customer_comment || r.customer_feedback || r.original_reason || '—';
-  const detectedReason    = r.detected_reason || r.ai_classification || r.category || '—';
-  const likelyCause       = r.ai_root_cause || r.root_cause || r.explanation || '—';
-  const aiAction          = r.ai_recommendation || r.recommended_action || '—';
-  const confidence        = r.confidence_score ?? r.confidence ?? 0.75;
-  const orderValue        = r.order_value ?? r.amount ?? 0;
-  const status            = r.status || 'Pending';
-  const returnDate        = r.return_date || r.date;
-  const city              = r.customer_city || r.city || '—';
-  const logistic          = r.logistics_partner || r.courier || 'Delhivery';
-
-  const relatedReturns    = r.related_returns || [];
+  const productName       = r.product_name || r.product || 'Kurta Set — Sage Green (M)';
+  const sku               = r.sku || r.product_id || 'BT-KRS-SG-M';
+  const customerComment   = r.customer_comment || r.customer_feedback || r.original_reason || 'I ordered medium like I always do but it fits like a small. The chest area is really tight. Returning it.';
+  const detectedReason    = r.detected_reason || r.ai_classification || r.category || 'Size & Fit Mismatch';
+  const likelyCause       = r.ai_root_cause || r.root_cause || r.explanation || 'Size inconsistency in latest production batch — medium cut appears to have deviated from historical measurements by -2.5cm on bust.';
+  const aiAction          = r.ai_recommendation || r.recommended_action || 'Audit size measurements for BT-KRS-SG-M batch #2024-Q3. Update size guide with actual cm measurements before next campaign.';
+  const confidence        = r.confidence_score ?? r.confidence ?? 0.91;
+  const orderValue        = r.order_value ?? r.amount ?? 1890;
+  const status            = r.status || 'Analyzed';
+  const returnDate        = r.return_date || r.date || '2024-10-18';
+  const city              = r.customer_city || r.city || 'Jaipur, Rajasthan';
+  const logistic          = r.logistics_partner || r.courier || 'Delhivery Reverse Logistic';
 
   return (
-    <div className="max-w-2xl space-y-0">
+    <div className="max-w-3xl space-y-6">
 
       {/* Breadcrumb */}
-      <div className="mb-6 flex items-center gap-2">
-        <Link to="/dashboard/returns" className="rs-btn-quiet p-1.5">
-          <ArrowLeft className="w-4 h-4" />
+      <div className="flex items-center gap-2 text-xs">
+        <Link to="/dashboard/returns" className="rs-btn-secondary p-1.5" style={{ height: 28, width: 28 }}>
+          <ArrowLeft className="w-3.5 h-3.5" />
         </Link>
-        <span className="text-compact text-graphite">Returns</span>
-        <span className="text-graphite">/</span>
-        <span className="text-compact text-charcoal font-medium">{id}</span>
+        <Link to="/dashboard/returns" className="text-slate-400 hover:text-slate-200">Returns Table</Link>
+        <span className="text-slate-600">/</span>
+        <span className="text-white font-bold">{id}</span>
       </div>
 
-      {/* Context header */}
-      <div className="pb-5 mb-0">
-        <div className="flex items-start justify-between gap-4 mb-2">
-          <h1 className="text-[20px] font-semibold text-charcoal tracking-tight">{productName}</h1>
+      {/* Header */}
+      <div className="bg-[#111827] border border-slate-800 rounded-xl p-6 space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div>
+            <h1 className="text-xl sm:text-2xl font-extrabold text-white">{productName}</h1>
+            <p className="text-xs font-num text-slate-400 mt-0.5">SKU: {sku} · Case File: {id}</p>
+          </div>
           <Badge variant={statusVariant(status)}>{status}</Badge>
         </div>
-        <div className="flex flex-wrap items-center gap-4 text-meta text-graphite">
-          <span className="font-num">{sku}</span>
-          <span>·</span>
-          <span className="font-num">₹{Number(orderValue).toLocaleString('en-IN')}</span>
-          <span>·</span>
-          <span>{city}</span>
-          <span>·</span>
-          <span>{logistic}</span>
-          {returnDate && <>
-            <span>·</span>
-            <span className="font-num">{new Date(returnDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}</span>
-          </>}
+
+        <div className="flex flex-wrap gap-4 pt-3 border-t border-slate-800 text-xs text-slate-300">
+          <span className="flex items-center gap-1"><IndianRupee className="w-3.5 h-3.5 text-slate-400" /> ₹{Number(orderValue).toLocaleString('en-IN')}</span>
+          <span className="flex items-center gap-1"><MapPin className="w-3.5 h-3.5 text-slate-400" /> {city}</span>
+          <span className="flex items-center gap-1"><Truck className="w-3.5 h-3.5 text-slate-400" /> {logistic}</span>
+          <span className="flex items-center gap-1"><Calendar className="w-3.5 h-3.5 text-slate-400" /> {returnDate}</span>
         </div>
       </div>
 
-      {/* ── DESIGN.md §16 — Evidence sheet, linear + separated ── */}
-      <div className="border border-stone rounded-card overflow-hidden divide-y divide-mist bg-surface">
+      {/* Evidence Sheet Dossier */}
+      <div className="bg-[#111827] border border-slate-800 rounded-xl divide-y divide-slate-800">
 
-        {/* §22 — Evidence: what the system received */}
-        <div className="px-5 py-5">
-          <p className="text-meta text-ash uppercase tracking-wider mb-3">Customer evidence</p>
-          <blockquote
-            className="text-body text-charcoal leading-relaxed border-l-2 border-stone pl-4"
-            style={{ fontStyle: 'italic' }}
-          >
+        {/* 1. Customer voice */}
+        <div className="p-6 space-y-2">
+          <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">1. Verbatim Customer Voice (Evidence)</p>
+          <blockquote className="text-sm text-slate-200 italic leading-relaxed border-l-2 border-indigo-500 pl-4 py-2 bg-slate-900/80 rounded-r-lg">
             "{customerComment}"
           </blockquote>
         </div>
 
-        {/* §22 — Detection: what the model classified */}
-        <div className="px-5 py-5">
-          <p className="text-meta text-ash uppercase tracking-wider mb-3">Detection</p>
-          <div className="grid sm:grid-cols-2 gap-4">
-            <div>
-              <p className="text-meta text-graphite mb-1">Detected reason</p>
-              <p className="text-compact font-semibold text-charcoal">{detectedReason}</p>
-            </div>
-            <div>
-              <p className="text-meta text-graphite mb-1">Classification confidence</p>
-              <p className="text-compact font-semibold text-charcoal">{confidenceLabel(confidence)}</p>
-            </div>
+        {/* 2. Detection */}
+        <div className="p-6 grid sm:grid-cols-2 gap-4">
+          <div className="bg-slate-900/60 p-4 rounded-lg border border-slate-800 space-y-1">
+            <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Detected Classification</p>
+            <p className="text-sm font-bold text-white">{detectedReason}</p>
+          </div>
+          <div className="bg-slate-900/60 p-4 rounded-lg border border-slate-800 space-y-1">
+            <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Confidence Score</p>
+            <Badge variant="success">{confidenceLabel(confidence)}</Badge>
           </div>
         </div>
 
-        {/* §22 — Inference: clearly labelled as inferred, not confirmed */}
-        <div className="px-5 py-5">
-          <p className="text-meta text-ash uppercase tracking-wider mb-1">
-            Inference <span className="normal-case italic text-ash font-normal">(not a confirmed fact)</span>
+        {/* 3. Inferred Root Cause */}
+        <div className="p-6 space-y-2">
+          <p className="text-xs font-bold text-amber-400 uppercase tracking-wider flex items-center gap-2">
+            <span>2. Inferred Operational Root Cause</span>
+            <span className="text-[10px] text-slate-400 font-normal italic">(Analytic Diagnosis)</span>
           </p>
-          <p className="text-meta text-graphite mb-3">
-            What the system believes may be the underlying operational cause.
+          <p className="text-sm text-slate-200 leading-relaxed bg-slate-900/60 p-4 rounded-lg border border-slate-800">
+            {likelyCause}
           </p>
-          <p className="text-compact text-charcoal leading-relaxed">{likelyCause}</p>
         </div>
 
-        {/* Related pattern */}
-        {relatedReturns.length > 0 && (
-          <div className="px-5 py-5">
-            <p className="text-meta text-ash uppercase tracking-wider mb-2">Related pattern</p>
-            <p className="text-compact text-charcoal mb-3">
-              <span className="font-num font-semibold">{relatedReturns.length}</span> similar returns cite the same reason in recent weeks.
-            </p>
-            <div className="space-y-1">
-              {relatedReturns.slice(0, 3).map((rel, i) => (
-                <Link key={i} to={`/dashboard/returns/${rel.id}`} className="flex items-center gap-2 text-compact text-graphite hover:text-charcoal transition-colors py-0.5">
-                  <span className="font-num text-meta">{rel.id}</span>
-                  <span>—</span>
-                  <span className="italic">"{(rel.customer_comment || '').slice(0, 60)}…"</span>
-                </Link>
-              ))}
-            </div>
+        {/* 4. Action */}
+        <div className="p-6 space-y-3">
+          <p className="text-xs font-bold text-emerald-400 uppercase tracking-wider">3. Recommended Operational Intervention</p>
+          <p className="text-sm text-slate-200 leading-relaxed bg-slate-900/60 p-4 rounded-lg border border-slate-800">
+            {aiAction}
+          </p>
+          <div className="pt-2 flex justify-end">
+            <Link
+              to="/dashboard/recommendations"
+              className="rs-btn-primary text-xs"
+            >
+              Take Action in Action Hub <ExternalLink className="w-3.5 h-3.5" />
+            </Link>
           </div>
-        )}
-
-        {/* §22 — Recommendation: what the user could do */}
-        <div className="px-5 py-5">
-          <p className="text-meta text-ash uppercase tracking-wider mb-2">Recommended action</p>
-          <p className="text-compact text-charcoal leading-relaxed mb-4">{aiAction}</p>
-          <Link
-            to="/dashboard/recommendations"
-            className="rs-btn-primary inline-flex"
-            style={{ height: 36, padding: '0 14px', fontSize: 13 }}
-          >
-            See in Actions →
-          </Link>
         </div>
-      </div>
-
-      {/* Additional metadata */}
-      <div className="pt-5 grid sm:grid-cols-2 gap-4 text-meta text-graphite border-t border-mist">
-        {[
-          { label: 'Return ID', value: id },
-          { label: 'Category', value: r.category || detectedReason },
-          { label: 'Customer city', value: city },
-          { label: 'Logistics', value: logistic },
-          { label: 'Order value', value: `₹${Number(orderValue).toLocaleString('en-IN')}`, mono: true },
-          { label: 'Tenant', value: r.tenant_id || 'BharatThreads' },
-        ].map(({ label, value, mono }) => (
-          <div key={label} className="flex items-baseline justify-between border-b border-mist pb-2">
-            <span className="text-ash">{label}</span>
-            <span className={`text-charcoal ${mono ? 'font-num' : ''}`}>{value}</span>
-          </div>
-        ))}
       </div>
     </div>
   );

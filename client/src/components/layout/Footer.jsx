@@ -3,29 +3,32 @@ import { Link } from 'react-router-dom';
 import { Shield } from 'lucide-react';
 
 export const Footer = () => (
-  <footer className="bg-surface border-t border-stone mt-16">
-    <div className="max-w-workstation mx-auto px-8 py-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+  <footer className="bg-[#0D121F] border-t border-slate-800 mt-20">
+    <div className="max-w-6xl mx-auto px-6 py-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
       <div className="flex items-center gap-2.5">
-        <div className="w-5 h-5 rounded-control bg-ink flex items-center justify-center">
-          <Shield className="w-3 h-3 text-surface" />
+        <div className="w-7 h-7 rounded-lg bg-indigo-600 flex items-center justify-center text-white">
+          <Shield className="w-4 h-4" />
         </div>
-        <span className="text-compact font-semibold text-charcoal">ReturnShield</span>
+        <div>
+          <span className="text-sm font-bold text-white block">ReturnShield</span>
+          <span className="text-[11px] text-slate-400">Return Intelligence System</span>
+        </div>
       </div>
 
-      <p className="text-meta text-ash">
-        Return investigation and action system for Indian D2C e-commerce teams.
+      <p className="text-xs text-slate-400 max-w-md">
+        Automated return investigation and action engine designed for Indian D2C brands.
       </p>
 
-      <div className="flex items-center gap-5 text-meta text-graphite">
-        <Link to="/login"      className="hover:text-charcoal transition-colors">Sign in</Link>
-        <Link to="/dashboard"  className="hover:text-charcoal transition-colors">Workstation</Link>
-        <a href="#how-it-works" className="hover:text-charcoal transition-colors">How it works</a>
+      <div className="flex items-center gap-6 text-xs text-slate-400 font-semibold">
+        <Link to="/login" className="hover:text-white transition-colors">Sign In</Link>
+        <Link to="/dashboard" className="hover:text-white transition-colors">Workstation</Link>
+        <a href="#how-it-works" className="hover:text-white transition-colors">Documentation</a>
       </div>
     </div>
 
-    <div className="border-t border-mist">
-      <div className="max-w-workstation mx-auto px-8 py-4 flex items-center justify-between text-meta text-ash">
-        <span>BharatThreads Lifestyle Pvt. Ltd. — Powered by n8n + Gemini</span>
+    <div className="border-t border-slate-800/80 bg-[#080C14]">
+      <div className="max-w-6xl mx-auto px-6 py-4 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-slate-500">
+        <span>BharatThreads Lifestyle Pvt. Ltd. · Sonu Jangir (gintama1018)</span>
         <span>Agentic AI Hackathon 2026</span>
       </div>
     </div>
