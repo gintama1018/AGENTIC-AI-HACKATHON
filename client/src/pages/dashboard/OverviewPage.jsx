@@ -15,11 +15,17 @@ export const OverviewPage = () => {
   const [loading, setLoading]   = useState(true);
 
   useEffect(() => {
-    Promise.all([api.getDashboardStats(), api.getReturns(), api.getRecommendations()])
+    Promise.all([
+      api.getDashboardStats().catch(() => ({ data: {} })),
+      api.getReturns().catch(() => ({ data: [] })),
+      api.getRecommendations().catch(() => ({ data: [] }))
+    ])
       .then(([s, r, a]) => {
-        setStats(s.data);
-        setReturns((r.data || []).slice(0, 5));
-        setActions((a.data || []).slice(0, 3));
+        setStats(s?.data || s || {});
+        const returnList = Array.isArray(r?.data) ? r.data : (Array.isArray(r) ? r : []);
+        setReturns(returnList.slice(0, 5));
+        const actionList = Array.isArray(a?.data) ? a.data : (Array.isArray(a) ? a : []);
+        setActions(actionList.slice(0, 3));
       })
       .catch(console.error)
       .finally(() => setLoading(false));

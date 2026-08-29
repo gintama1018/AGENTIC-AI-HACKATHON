@@ -13,8 +13,14 @@ export const ReportsPage = () => {
   const today = new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'long', year: 'numeric' });
 
   useEffect(() => {
-    Promise.all([api.getDashboardStats(), api.getRecommendations()])
-      .then(([s, a]) => { setStats(s.data); setActions(a.data || []); })
+    Promise.all([
+      api.getDashboardStats().catch(() => ({ data: {} })),
+      api.getRecommendations().catch(() => ({ data: [] }))
+    ])
+      .then(([s, a]) => {
+        setStats(s?.data || s || {});
+        setActions(Array.isArray(a?.data) ? a.data : (Array.isArray(a) ? a : []));
+      })
       .catch(console.error)
       .finally(() => setLoading(false));
   }, []);
