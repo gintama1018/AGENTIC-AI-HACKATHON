@@ -2104,6 +2104,15 @@
   ],
   "runs": [
     {
+      "id": "rs_mtfl82tm_jwelsb",
+      "merchant_id": "unspecified_merchant",
+      "generated_at": "2026-08-30T09:09:09.608Z",
+      "status": "success",
+      "analysis_confidence": "low",
+      "records_analyzed": 5,
+      "verification_passed": true
+    },
+    {
       "id": "rs_mtfl2nyr_4ezrsq",
       "merchant_id": "unspecified_merchant",
       "generated_at": "2026-08-30T09:04:52.744Z",
@@ -2197,6 +2206,578 @@
     }
   ],
   "analyses": [
+    {
+      "run_id": "rs_mtfl82tm_jwelsb",
+      "analysis": {
+        "product": "ReturnShield AI",
+        "run": {
+          "id": "rs_mtfl82tm_jwelsb",
+          "generated_at": "2026-08-30T09:09:09.608Z",
+          "status": "success"
+        },
+        "analysis": {
+          "generated_at": "2026-08-30T09:09:09.608Z",
+          "records_analyzed": 5,
+          "analysis_confidence": "low",
+          "run_id": "rs_mtfl82tm_jwelsb"
+        },
+        "metrics": {
+          "returned_orders": 4,
+          "rto_orders": 1,
+          "delivered_orders": 0,
+          "cancelled_orders": 0,
+          "return_value_inr": 7569,
+          "rto_value_inr": 1890,
+          "affected_order_value_inr": 9459,
+          "actual_cost_inr": null,
+          "estimated_cost_inr": 1100,
+          "cost_basis": "ESTIMATED (flat Rs 220/event - no real cost fields supplied)",
+          "rates": {
+            "rates_available": true,
+            "return_rate_pct": 8.9,
+            "rto_rate_pct": 2,
+            "overall_failure_rate_pct": 10,
+            "cod_rto_rate_pct": 3.3,
+            "prepaid_rto_rate_pct": 0
+          }
+        },
+        "cod_vs_prepaid": {
+          "cod_rto_share_within_cod_pct": 33.3,
+          "prepaid_rto_share_within_prepaid_pct": 0,
+          "cod_sample_size": 3,
+          "prepaid_sample_size": 2,
+          "sufficient_evidence": false
+        },
+        "segments": {
+          "sku": [
+            {
+              "dimension": "sku",
+              "value": "BT-KRS-SG-M",
+              "returned_count": 3,
+              "rto_count": 1,
+              "count": 4,
+              "order_value_lost_inr": 7560,
+              "rto_share_within_segment_pct": 25,
+              "overall_rto_share_pct": 20,
+              "uplift_vs_baseline": 1.25,
+              "sufficient_evidence": false,
+              "status": "normal"
+            },
+            {
+              "dimension": "sku",
+              "value": "BT-DPT-RS-OS",
+              "returned_count": 1,
+              "rto_count": 0,
+              "count": 1,
+              "order_value_lost_inr": 1899,
+              "rto_share_within_segment_pct": 0,
+              "overall_rto_share_pct": 20,
+              "uplift_vs_baseline": 0,
+              "sufficient_evidence": false,
+              "status": "normal"
+            }
+          ],
+          "courier": [
+            {
+              "dimension": "courier",
+              "value": "Delhivery",
+              "returned_count": 3,
+              "rto_count": 0,
+              "count": 3,
+              "order_value_lost_inr": 5670,
+              "rto_share_within_segment_pct": 0,
+              "overall_rto_share_pct": 20,
+              "uplift_vs_baseline": 0,
+              "sufficient_evidence": false,
+              "status": "normal"
+            },
+            {
+              "dimension": "courier",
+              "value": "Xpress Logistics",
+              "returned_count": 0,
+              "rto_count": 1,
+              "count": 1,
+              "order_value_lost_inr": 1890,
+              "rto_share_within_segment_pct": 100,
+              "overall_rto_share_pct": 20,
+              "uplift_vs_baseline": 5,
+              "sufficient_evidence": false,
+              "status": "hotspot_hypothesis_insufficient_sample"
+            },
+            {
+              "dimension": "courier",
+              "value": "BlueDart",
+              "returned_count": 1,
+              "rto_count": 0,
+              "count": 1,
+              "order_value_lost_inr": 1899,
+              "rto_share_within_segment_pct": 0,
+              "overall_rto_share_pct": 20,
+              "uplift_vs_baseline": 0,
+              "sufficient_evidence": false,
+              "status": "normal"
+            }
+          ],
+          "pincode": [
+            {
+              "dimension": "pincode",
+              "value": "305001",
+              "returned_count": 2,
+              "rto_count": 1,
+              "count": 3,
+              "order_value_lost_inr": 5670,
+              "rto_share_within_segment_pct": 33.3,
+              "overall_rto_share_pct": 20,
+              "uplift_vs_baseline": 1.67,
+              "sufficient_evidence": false,
+              "status": "hotspot_hypothesis_insufficient_sample"
+            },
+            {
+              "dimension": "pincode",
+              "value": "110001",
+              "returned_count": 1,
+              "rto_count": 0,
+              "count": 1,
+              "order_value_lost_inr": 1890,
+              "rto_share_within_segment_pct": 0,
+              "overall_rto_share_pct": 20,
+              "uplift_vs_baseline": 0,
+              "sufficient_evidence": false,
+              "status": "normal"
+            },
+            {
+              "dimension": "pincode",
+              "value": "400001",
+              "returned_count": 1,
+              "rto_count": 0,
+              "count": 1,
+              "order_value_lost_inr": 1899,
+              "rto_share_within_segment_pct": 0,
+              "overall_rto_share_pct": 20,
+              "uplift_vs_baseline": 0,
+              "sufficient_evidence": false,
+              "status": "normal"
+            }
+          ],
+          "zone": [
+            {
+              "dimension": "zone",
+              "value": "UNKNOWN_ZONE",
+              "returned_count": 4,
+              "rto_count": 1,
+              "count": 5,
+              "order_value_lost_inr": 9459,
+              "rto_share_within_segment_pct": 20,
+              "overall_rto_share_pct": 20,
+              "uplift_vs_baseline": 1,
+              "sufficient_evidence": false,
+              "status": "normal"
+            }
+          ],
+          "category": [
+            {
+              "dimension": "category",
+              "value": "Ethnic Wear",
+              "returned_count": 4,
+              "rto_count": 1,
+              "count": 5,
+              "order_value_lost_inr": 9459,
+              "rto_share_within_segment_pct": 20,
+              "overall_rto_share_pct": 20,
+              "uplift_vs_baseline": 1,
+              "sufficient_evidence": false,
+              "status": "normal"
+            }
+          ],
+          "payment_method": [
+            {
+              "dimension": "payment_method",
+              "value": "COD",
+              "returned_count": 2,
+              "rto_count": 1,
+              "count": 3,
+              "order_value_lost_inr": 5670,
+              "rto_share_within_segment_pct": 33.3,
+              "overall_rto_share_pct": 20,
+              "uplift_vs_baseline": 1.67,
+              "sufficient_evidence": false,
+              "status": "hotspot_hypothesis_insufficient_sample"
+            },
+            {
+              "dimension": "payment_method",
+              "value": "Prepaid",
+              "returned_count": 2,
+              "rto_count": 0,
+              "count": 2,
+              "order_value_lost_inr": 3789,
+              "rto_share_within_segment_pct": 0,
+              "overall_rto_share_pct": 20,
+              "uplift_vs_baseline": 0,
+              "sufficient_evidence": false,
+              "status": "normal"
+            }
+          ]
+        },
+        "reason_analysis": {
+          "return_categories": [
+            {
+              "category": "Sizing/Fit",
+              "count": 3,
+              "order_value_lost_inr": 5670,
+              "sufficient_evidence": false,
+              "sample_order_ids": [
+                "ORD-LIVE-001",
+                "ORD-LIVE-004",
+                "ORD-LIVE-005"
+              ]
+            },
+            {
+              "category": "Quality Defect",
+              "count": 1,
+              "order_value_lost_inr": 1899,
+              "sufficient_evidence": false,
+              "sample_order_ids": [
+                "ORD-LIVE-003"
+              ]
+            }
+          ],
+          "rto_categories": [
+            {
+              "category": "Courier Issue",
+              "count": 1,
+              "order_value_lost_inr": 1890,
+              "sufficient_evidence": false,
+              "sample_order_ids": [
+                "ORD-LIVE-002"
+              ]
+            }
+          ],
+          "unclassified_count": 0
+        },
+        "time_trend": {
+          "available": false,
+          "note": "order_date missing on most records - trend analysis skipped."
+        },
+        "trends": [
+          {
+            "available": true,
+            "compared_to_run_id": "rs_mtfl2nyr_4ezrsq",
+            "compared_to_generated_at": "2026-08-30T09:04:52.744Z",
+            "returned_count_change": 0,
+            "rto_count_change": 0,
+            "affected_order_value_change_inr": 0,
+            "affected_order_value_change_pct": 0,
+            "previous_top_problem": "Elevated returns and RTO for pincode 305001",
+            "note": "Comparison is against the most recent prior run recorded by this workflow instance."
+          }
+        ],
+        "top_problems": [
+          {
+            "rank": 1,
+            "dimension": "pincode",
+            "segment_value": "305001",
+            "problem": "Elevated returns and RTO for pincode 305001",
+            "evidence": "3 records, with 2 returns and 1 RTO; 33.3% RTO share within segment and 1.67x uplift vs baseline.",
+            "business_impact": "5670 INR affected order value",
+            "likely_cause": "Small sample size in pincode 305001 resulting in inflated return and RTO metrics.",
+            "alternative_explanation": "High return and RTO rates in 305001 could be driven by a small, non-representative sample of customers.",
+            "confidence": "low",
+            "status": "hypothesis",
+            "hypotheses": [
+              {
+                "hypothesis": "Localized delivery service issues or customer intent patterns specific to this pincode.",
+                "supporting_evidence": "Consistently flagged in comparison to previous run.",
+                "contradicting_evidence": "none available in current data",
+                "confidence": "low",
+                "next_test": "Analyze the trend of returns/RTOs for this pincode over a longer timeframe to establish a stable baseline."
+              }
+            ],
+            "order_count": 3,
+            "order_value_lost_inr": 5670,
+            "uplift_vs_baseline": 1.67,
+            "sufficient_evidence": false,
+            "segment_matched": true,
+            "priority_score": 0.62,
+            "priority_tier": "P2"
+          },
+          {
+            "rank": 2,
+            "dimension": "payment_method",
+            "segment_value": "COD",
+            "problem": "Elevated RTO for payment method COD",
+            "evidence": "3 COD orders resulting in 2 returns and 1 RTO; 33.3% RTO share within segment.",
+            "business_impact": "5670 INR affected order value",
+            "likely_cause": "Insufficient sample size for COD orders, leading to volatile RTO metrics.",
+            "alternative_explanation": "The COD RTO share may be inflated by a small sample size rather than inherent payment method risk.",
+            "confidence": "low",
+            "status": "hypothesis",
+            "hypotheses": [
+              {
+                "hypothesis": "COD orders experiencing higher refusal rates due to lack of upfront financial commitment.",
+                "supporting_evidence": "COD_rto_share_within_cod_pct is 33.3% compared to 0% for prepaid.",
+                "contradicting_evidence": "prepaid_rto_rate_pct is 0, which is consistent with lower risk but based on only 2 orders.",
+                "confidence": "low",
+                "next_test": "Compare average order value and category distribution between COD and prepaid segments."
+              }
+            ],
+            "order_count": 3,
+            "order_value_lost_inr": 5670,
+            "uplift_vs_baseline": 1.67,
+            "sufficient_evidence": false,
+            "segment_matched": true,
+            "priority_score": 0.62,
+            "priority_tier": "P2"
+          },
+          {
+            "rank": 3,
+            "dimension": "courier",
+            "segment_value": "Xpress Logistics",
+            "problem": "Elevated RTO for courier Xpress Logistics",
+            "evidence": "1 RTO recorded with 100% share within segment and 5x uplift vs baseline.",
+            "business_impact": "1890 INR affected order value",
+            "likely_cause": "Single RTO event with Xpress Logistics leading to high segment share due to low overall volume.",
+            "alternative_explanation": "The RTO on Xpress Logistics might be a single stochastic event unrelated to courier performance given the very small sample size.",
+            "confidence": "low",
+            "status": "hypothesis",
+            "hypotheses": [
+              {
+                "hypothesis": "Courier failed to make adequate delivery attempts for this specific order.",
+                "supporting_evidence": "Courier Issue identified as the sole RTO reason category in the current dataset.",
+                "contradicting_evidence": "none available in current data",
+                "confidence": "low",
+                "next_test": "Cross-reference courier delivery logs with order attempt count and timestamp records."
+              }
+            ],
+            "order_count": 1,
+            "order_value_lost_inr": 1890,
+            "uplift_vs_baseline": 5,
+            "sufficient_evidence": false,
+            "segment_matched": true,
+            "priority_score": 0.49,
+            "priority_tier": "P2"
+          }
+        ],
+        "root_causes": [
+          {
+            "dimension": "pincode",
+            "segment_value": "305001",
+            "problem": "Elevated returns and RTO for pincode 305001",
+            "evidence": "3 records, with 2 returns and 1 RTO; 33.3% RTO share within segment and 1.67x uplift vs baseline.",
+            "business_impact": "5670 INR affected order value",
+            "likely_cause": "Small sample size in pincode 305001 resulting in inflated return and RTO metrics.",
+            "alternative_explanation": "High return and RTO rates in 305001 could be driven by a small, non-representative sample of customers.",
+            "confidence": "low",
+            "status": "hypothesis",
+            "hypotheses": [
+              {
+                "hypothesis": "Localized delivery service issues or customer intent patterns specific to this pincode.",
+                "supporting_evidence": "Consistently flagged in comparison to previous run.",
+                "contradicting_evidence": "none available in current data",
+                "confidence": "low",
+                "next_test": "Analyze the trend of returns/RTOs for this pincode over a longer timeframe to establish a stable baseline."
+              }
+            ],
+            "order_count": 3,
+            "order_value_lost_inr": 5670,
+            "uplift_vs_baseline": 1.67,
+            "sufficient_evidence": false,
+            "segment_matched": true,
+            "priority_score": 0.62,
+            "priority_tier": "P2"
+          },
+          {
+            "dimension": "payment_method",
+            "segment_value": "COD",
+            "problem": "Elevated RTO for payment method COD",
+            "evidence": "3 COD orders resulting in 2 returns and 1 RTO; 33.3% RTO share within segment.",
+            "business_impact": "5670 INR affected order value",
+            "likely_cause": "Insufficient sample size for COD orders, leading to volatile RTO metrics.",
+            "alternative_explanation": "The COD RTO share may be inflated by a small sample size rather than inherent payment method risk.",
+            "confidence": "low",
+            "status": "hypothesis",
+            "hypotheses": [
+              {
+                "hypothesis": "COD orders experiencing higher refusal rates due to lack of upfront financial commitment.",
+                "supporting_evidence": "COD_rto_share_within_cod_pct is 33.3% compared to 0% for prepaid.",
+                "contradicting_evidence": "prepaid_rto_rate_pct is 0, which is consistent with lower risk but based on only 2 orders.",
+                "confidence": "low",
+                "next_test": "Compare average order value and category distribution between COD and prepaid segments."
+              }
+            ],
+            "order_count": 3,
+            "order_value_lost_inr": 5670,
+            "uplift_vs_baseline": 1.67,
+            "sufficient_evidence": false,
+            "segment_matched": true,
+            "priority_score": 0.62,
+            "priority_tier": "P2"
+          },
+          {
+            "dimension": "courier",
+            "segment_value": "Xpress Logistics",
+            "problem": "Elevated RTO for courier Xpress Logistics",
+            "evidence": "1 RTO recorded with 100% share within segment and 5x uplift vs baseline.",
+            "business_impact": "1890 INR affected order value",
+            "likely_cause": "Single RTO event with Xpress Logistics leading to high segment share due to low overall volume.",
+            "alternative_explanation": "The RTO on Xpress Logistics might be a single stochastic event unrelated to courier performance given the very small sample size.",
+            "confidence": "low",
+            "status": "hypothesis",
+            "hypotheses": [
+              {
+                "hypothesis": "Courier failed to make adequate delivery attempts for this specific order.",
+                "supporting_evidence": "Courier Issue identified as the sole RTO reason category in the current dataset.",
+                "contradicting_evidence": "none available in current data",
+                "confidence": "low",
+                "next_test": "Cross-reference courier delivery logs with order attempt count and timestamp records."
+              }
+            ],
+            "order_count": 1,
+            "order_value_lost_inr": 1890,
+            "uplift_vs_baseline": 5,
+            "sufficient_evidence": false,
+            "segment_matched": true,
+            "priority_score": 0.49,
+            "priority_tier": "P2"
+          }
+        ],
+        "hypotheses": [
+          {
+            "source_problem": "Elevated returns and RTO for pincode 305001",
+            "dimension": "pincode",
+            "segment_value": "305001",
+            "hypothesis": "Localized delivery service issues or customer intent patterns specific to this pincode.",
+            "supporting_evidence": "Consistently flagged in comparison to previous run.",
+            "contradicting_evidence": "none available in current data",
+            "confidence": "low",
+            "next_test": "Analyze the trend of returns/RTOs for this pincode over a longer timeframe to establish a stable baseline."
+          },
+          {
+            "source_problem": "Elevated RTO for payment method COD",
+            "dimension": "payment_method",
+            "segment_value": "COD",
+            "hypothesis": "COD orders experiencing higher refusal rates due to lack of upfront financial commitment.",
+            "supporting_evidence": "COD_rto_share_within_cod_pct is 33.3% compared to 0% for prepaid.",
+            "contradicting_evidence": "prepaid_rto_rate_pct is 0, which is consistent with lower risk but based on only 2 orders.",
+            "confidence": "low",
+            "next_test": "Compare average order value and category distribution between COD and prepaid segments."
+          },
+          {
+            "source_problem": "Elevated RTO for courier Xpress Logistics",
+            "dimension": "courier",
+            "segment_value": "Xpress Logistics",
+            "hypothesis": "Courier failed to make adequate delivery attempts for this specific order.",
+            "supporting_evidence": "Courier Issue identified as the sole RTO reason category in the current dataset.",
+            "contradicting_evidence": "none available in current data",
+            "confidence": "low",
+            "next_test": "Cross-reference courier delivery logs with order attempt count and timestamp records."
+          }
+        ],
+        "recommendations": [
+          {
+            "priority": "P2",
+            "action": "Pilot an address verification call for all orders destined for pincode 305001 before dispatch to validate customer intent.",
+            "target": "pincode: 305001",
+            "reason": "The current data is insufficient and represents a small sample size, requiring a validation step before scaling any intervention.",
+            "evidence": "3 records, with 2 returns and 1 RTO; 33.3% RTO share within segment and 1.67x uplift vs baseline.",
+            "expected_metric": "hypothesis to test: Does pre-dispatch verification reduce RTO for this pincode?",
+            "effort": "low",
+            "confidence": 0.3,
+            "unverified_target": false,
+            "requires_human_approval": false,
+            "approval_reason": null
+          },
+          {
+            "priority": "P2",
+            "action": "Run a controlled experiment to offer a small discount or loyalty points to customers opting for prepaid payment methods over COD to minimize RTO risk.",
+            "target": "payment_method: COD",
+            "reason": "The current data lacks sufficient evidence due to a small sample size, making a controlled pilot necessary to isolate payment behavior.",
+            "evidence": "3 COD orders resulting in 2 returns and 1 RTO; 33.3% RTO share within segment.",
+            "expected_metric": "hypothesis to test: Does incentivizing prepaid payments reduce the overall RTO rate?",
+            "effort": "medium",
+            "confidence": 0.3,
+            "unverified_target": false,
+            "requires_human_approval": true,
+            "approval_reason": "Affects customer-facing pricing or refunds. Route through human approval before execution (see Section 16 / Record Feedback workflow)."
+          },
+          {
+            "priority": "P2",
+            "action": "Review delivery attempt logs for Xpress Logistics and initiate a performance feedback loop with their local area manager for the affected zone.",
+            "target": "courier: Xpress Logistics",
+            "reason": "The high RTO share is based on a single event, requiring investigation into delivery performance logs before assuming courier-wide issues.",
+            "evidence": "1 RTO recorded with 100% share within segment and 5x uplift vs baseline.",
+            "expected_metric": "hypothesis to test: Is there a correlation between delivery attempt history and the recorded RTO?",
+            "effort": "low",
+            "confidence": 0.3,
+            "unverified_target": false,
+            "requires_human_approval": false,
+            "approval_reason": null
+          }
+        ],
+        "verification": {
+          "checks_performed": [
+            "recommendation_target_traceability",
+            "recommendation_confidence_vs_evidence_cap",
+            "root_cause_confidence_vs_sufficient_evidence",
+            "root_cause_segment_traceability",
+            "required_field_presence",
+            "consequential_action_flagging"
+          ],
+          "issues_found": [],
+          "corrections_applied": [],
+          "status": "passed"
+        },
+        "data_quality": {
+          "run_id": "rs_mtfl82tm_jwelsb",
+          "input_truncated": false,
+          "max_rows_cap": 5000,
+          "records_analyzed": 5,
+          "invalid_records": 0,
+          "invalid_reasons": {},
+          "field_completeness_pct": {
+            "order_date": 100,
+            "product_category": 100,
+            "size": 100,
+            "return_reason_raw": 100,
+            "rto_reason_raw": 0,
+            "customer_comment": 100,
+            "payment_method": 100,
+            "courier": 100,
+            "pincode": 100,
+            "shipping_zone": 0,
+            "delivery_attempts": 0,
+            "refund_amount": 0,
+            "forward_shipping_cost": 0,
+            "return_shipping_cost": 0
+          },
+          "fields_largely_missing": [
+            "rto_reason_raw",
+            "shipping_zone",
+            "delivery_attempts",
+            "refund_amount",
+            "forward_shipping_cost",
+            "return_shipping_cost"
+          ],
+          "average_completeness_pct": 57,
+          "has_order_summary": true,
+          "analysis_confidence": "low",
+          "stage_failures": []
+        },
+        "data_gaps": [
+          "No refund_amount/shipping cost fields supplied - cost figures are ESTIMATED, not actual.",
+          "order_date missing on most records - trend analysis skipped.",
+          "Sparsely populated fields (<20% of records): rto_reason_raw, shipping_zone, delivery_attempts, refund_amount, forward_shipping_cost, return_shipping_cost"
+        ],
+        "next_best_questions": [
+          "Why is pincode \"305001\" our biggest problem right now?",
+          "What evidence supports the recommendation for \"pincode: 305001\"?",
+          "What changed since the last analysis?",
+          "Which action has the highest expected impact for the effort involved?"
+        ],
+        "intelligence_source": "n8n",
+        "fallback_used": false
+      },
+      "created_at": "2026-08-30T09:09:12.686Z"
+    },
     {
       "run_id": "rs_mtfl2nyr_4ezrsq",
       "analysis": {
