@@ -3,7 +3,12 @@ import jwt from 'jsonwebtoken';
 import { v4 as uuidv4 } from 'uuid';
 import { getDb, saveDb } from '../config/db.js';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'returnshield-secret-key-2026';
+const JWT_SECRET = process.env.JWT_SECRET;
+if (process.env.NODE_ENV === 'production' && !JWT_SECRET) {
+  throw new Error('FATAL: JWT_SECRET environment variable is required in production mode. Server fails closed.');
+}
+
+const EFFECTIVE_JWT_SECRET = JWT_SECRET || 'dev_only_unsecure_secret_for_local_development_only';
 
 export const signup = async (req, res) => {
   try {
@@ -24,21 +29,25 @@ export const signup = async (req, res) => {
       _id: uuidv4(),
       name: name || 'Operations Lead',
       email: email.toLowerCase(),
+      company_name: company_name || 'BharatThreads Lifestyle Pvt. Ltd.',
       password_hash,
-      company_name: company_name || 'Bharat Direct Commerce',
-      role: 'Operations Lead',
+      role: 'admin',
       created_at: new Date().toISOString()
     };
 
     db.users.push(newUser);
     saveDb();
 
-    const token = jwt.sign({ userId: newUser._id, email: newUser.email }, JWT_SECRET, { expiresIn: '7d' });
+    const token = jwt.sign(
+      { userId: newUser._id, email: newUser.email, role: newUser.role },
+      EFFECTIVE_JWT_SECRET,
+      { expiresIn: '7d' }
+    );
 
     res.status(201).json({
       token,
       user: {
-        _id: newUser._id,
+        id: newUser._id,
         name: newUser.name,
         email: newUser.email,
         company_name: newUser.company_name,
@@ -53,46 +62,32 @@ export const signup = async (req, res) => {
 export const login = async (req, res) => {
   try {
     const { email, password } = req.body;
-    const db = getDb();
 
-    // If demo login button clicked with no explicit credentials
-    if (!email && !password) {
-      const demoUser = db.users[0] || {
-        _id: 'user_demo_001',
-        name: 'Sonu Jangir',
-        email: 'Sonu.jangir2024@uem.edu.in',
-        company_name: 'BharatThreads Lifestyle Pvt. Ltd.',
-        role: 'Head of E-Commerce Operations'
-      };
-      const token = jwt.sign({ userId: demoUser._id, email: demoUser.email }, JWT_SECRET, { expiresIn: '7d' });
-      return res.json({
-        token,
-        user: {
-          _id: demoUser._id,
-          name: demoUser.name,
-          email: demoUser.email,
-          company_name: demoUser.company_name,
-          role: demoUser.role
-        }
-      });
+    if (!email || !password) {
+      return res.status(400).json({ message: 'Email and password are required' });
     }
 
-    const user = db.users.find(u => u.email.toLowerCase() === (email || '').toLowerCase());
+    const db = getDb();
+    const user = db.users.find(u => u.email.toLowerCase() === email.toLowerCase());
     if (!user) {
       return res.status(401).json({ message: 'Invalid email or password' });
     }
 
-    const isMatch = bcrypt.compareSync(password, user.password_hash);
-    if (!isMatch) {
+    const valid = bcrypt.compareSync(password, user.password_hash);
+    if (!valid) {
       return res.status(401).json({ message: 'Invalid email or password' });
     }
 
-    const token = jwt.sign({ userId: user._id, email: user.email }, JWT_SECRET, { expiresIn: '7d' });
+    const token = jwt.sign(
+      { userId: user._id, email: user.email, role: user.role },
+      EFFECTIVE_JWT_SECRET,
+      { expiresIn: '7d' }
+    );
 
     res.json({
       token,
       user: {
-        _id: user._id,
+        id: user._id,
         name: user.name,
         email: user.email,
         company_name: user.company_name,
@@ -104,18 +99,22 @@ export const login = async (req, res) => {
   }
 };
 
-export const getCurrentUser = async (req, res) => {
-  if (!req.user) {
-    return res.status(401).json({ message: 'Not authenticated' });
-  }
-
-  res.json({
-    user: {
-      _id: req.user._id,
-      name: req.user.name,
-      email: req.user.email,
-      company_name: req.user.company_name,
-      role: req.user.role
+export const getMe = async (req, res) => {
+  try {
+    if (!req.user) {
+      return res.status(401).json({ message: 'Not authenticated' });
     }
-  });
+
+    res.json({
+      user: {
+        id: req.user._id,
+        name: req.user.name,
+        email: req.user.email,
+        company_name: req.user.company_name,
+        role: req.user.role
+      }
+    });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
 };

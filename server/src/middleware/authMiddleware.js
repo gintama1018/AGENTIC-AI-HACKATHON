@@ -1,7 +1,12 @@
 import jwt from 'jsonwebtoken';
 import { getDb } from '../config/db.js';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'returnshield-secret-key-2026';
+const JWT_SECRET = process.env.JWT_SECRET;
+if (process.env.NODE_ENV === 'production' && !JWT_SECRET) {
+  throw new Error('FATAL: JWT_SECRET environment variable is required in production mode. Server fails closed.');
+}
+
+const EFFECTIVE_JWT_SECRET = JWT_SECRET || 'dev_only_unsecure_secret_for_local_development_only';
 
 export const authMiddleware = (req, res, next) => {
   const authHeader = req.headers.authorization;
@@ -29,7 +34,7 @@ export const authMiddleware = (req, res, next) => {
   const token = authHeader.split(' ')[1];
 
   try {
-    const decoded = jwt.verify(token, JWT_SECRET);
+    const decoded = jwt.verify(token, EFFECTIVE_JWT_SECRET);
     const db = getDb();
     const user = (db.users || []).find(u => u._id === decoded.userId || u.email === decoded.email);
 
