@@ -5,9 +5,17 @@ import { normalizeAnalysis } from './analysisNormalizer.js';
 
 dotenv.config();
 
-const ANALYSIS_WEBHOOK = process.env.N8N_ANALYSIS_WEBHOOK_URL || 'https://sonujangid105.app.n8n.cloud/webhook/returns-agent';
-const FOLLOWUP_WEBHOOK = process.env.N8N_FOLLOWUP_WEBHOOK_URL || 'https://sonujangid105.app.n8n.cloud/webhook/returnshield-ask';
-const FEEDBACK_WEBHOOK = process.env.N8N_FEEDBACK_WEBHOOK_URL || 'https://sonujangid105.app.n8n.cloud/webhook/returnshield-feedback';
+const getWebhookUrl = (envVarName, devFallback) => {
+  const url = process.env[envVarName];
+  if (!url && process.env.NODE_ENV === 'production') {
+    throw new Error(`FATAL: ${envVarName} environment variable must be configured in production mode.`);
+  }
+  return url || devFallback;
+};
+
+const ANALYSIS_WEBHOOK = getWebhookUrl('N8N_ANALYSIS_WEBHOOK_URL', 'https://sonujangid105.app.n8n.cloud/webhook/returns-agent');
+const FOLLOWUP_WEBHOOK = getWebhookUrl('N8N_FOLLOWUP_WEBHOOK_URL', 'https://sonujangid105.app.n8n.cloud/webhook/returnshield-ask');
+const FEEDBACK_WEBHOOK = getWebhookUrl('N8N_FEEDBACK_WEBHOOK_URL', 'https://sonujangid105.app.n8n.cloud/webhook/returnshield-feedback');
 const WEBHOOK_SECRET   = process.env.N8N_WEBHOOK_SECRET || '';
 
 const getHeaders = () => {

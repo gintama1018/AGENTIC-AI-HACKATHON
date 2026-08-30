@@ -40,7 +40,7 @@ export const AskReturnShieldDrawer = ({ isOpen, onClose, runId }) => {
         text: res.answer,
         confidence: res.confidence,
         caveats: res.caveats || [],
-        tools_used: res.tools_used || ['get_segment_metrics']
+        tools_used: Array.isArray(res.tools_used) ? res.tools_used : []
       };
       setMessages(prev => [...prev, assistantMsg]);
     } catch (err) {

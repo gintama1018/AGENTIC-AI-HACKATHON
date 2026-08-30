@@ -16,7 +16,8 @@ export const normalizeAnalysis = (rawAnalysis, runIdFallback = 'current', intell
         topReason: 'No analysis data',
         topReasonCount: 0,
         totalFinancialLoss: 0,
-        avgConfidence: 0,
+        analysisConfidence: 'low',
+        avgConfidence: null,
         runId: runIdFallback,
         intelligenceSource,
         verificationPassed: false
@@ -98,7 +99,7 @@ export const normalizeAnalysis = (rawAnalysis, runIdFallback = 'current', intell
     };
   });
 
-  // Normalize Products / SKUs
+  // Normalize Products / SKUs (Strict Zero Semantic Inventions)
   const rawSkus = rawAnalysis.product_analysis || rawAnalysis.segments?.sku || [];
   const products = rawSkus.map(s => {
     const skuName = s.product_name || s.name || s.sku || s.value || 'UNKNOWN_SKU';
@@ -112,12 +113,12 @@ export const normalizeAnalysis = (rawAnalysis, runIdFallback = 'current', intell
       sku: skuCode,
       return_rate: typeof s.return_rate === 'number' ? s.return_rate : null,
       week_delta: typeof s.week_delta === 'number' ? s.week_delta : (s.delta ?? null),
-      dominant_reason: s.dominant_reason || s.primary_reason || reasonDistribution[0]?.name || 'Return recorded',
+      dominant_reason: s.dominant_reason || s.primary_reason || null,
       reason_pct: share,
       recent_return_count: count,
       variant_count: s.variant_count || 1,
       priority,
-      sample_comment: s.sample_comment || s.comments?.[0] || 'No specific comment recorded'
+      sample_comment: s.sample_comment || s.comments?.[0] || null
     };
   });
 
@@ -159,6 +160,7 @@ export const normalizeAnalysis = (rawAnalysis, runIdFallback = 'current', intell
   };
 
   const verificationPassed = String(verification.status || '').toLowerCase().includes('passed');
+  const analysisConfidence = rawAnalysis.data_quality?.analysis_confidence || run.analysis_confidence || 'medium';
 
   return {
     run: {
@@ -166,7 +168,7 @@ export const normalizeAnalysis = (rawAnalysis, runIdFallback = 'current', intell
       merchant_id: run.merchant_id || rawAnalysis.merchant_id || 'unspecified_merchant',
       generated_at: run.generated_at || run.created_at || new Date().toISOString(),
       status: run.status || 'success',
-      analysis_confidence: rawAnalysis.data_quality?.analysis_confidence || run.analysis_confidence || 'medium',
+      analysis_confidence: analysisConfidence,
       records_analyzed: totalEvents,
       verification_passed: verificationPassed
     },
@@ -180,7 +182,8 @@ export const normalizeAnalysis = (rawAnalysis, runIdFallback = 'current', intell
       topReason: reasonDistribution[0]?.name || topProblems[0]?.segment_value || 'No events analyzed',
       topReasonCount: reasonDistribution[0]?.count || 0,
       totalFinancialLoss: totalValue,
-      avgConfidence: rawAnalysis.data_quality?.analysis_confidence === 'high' ? 95 : 85,
+      analysisConfidence,
+      avgConfidence: typeof rawAnalysis.metrics?.avg_confidence === 'number' ? rawAnalysis.metrics.avg_confidence : null,
       runId,
       intelligenceSource: rawAnalysis.intelligence_source || intelligenceSource,
       verificationPassed
