@@ -1,12 +1,13 @@
 import axios from 'axios';
 import dotenv from 'dotenv';
 import { runLocalDeterministicAnalysis } from './aiEngine.js';
+import { normalizeAnalysis } from './analysisNormalizer.js';
 
 dotenv.config();
 
-const ANALYSIS_WEBHOOK = process.env.N8N_ANALYSIS_WEBHOOK_URL || 'http://localhost:5678/webhook/returns-agent';
-const FOLLOWUP_WEBHOOK = process.env.N8N_FOLLOWUP_WEBHOOK_URL || 'http://localhost:5678/webhook/returnshield-ask';
-const FEEDBACK_WEBHOOK = process.env.N8N_FEEDBACK_WEBHOOK_URL || 'http://localhost:5678/webhook/returnshield-feedback';
+const ANALYSIS_WEBHOOK = process.env.N8N_ANALYSIS_WEBHOOK_URL || 'https://sonujangid105.app.n8n.cloud/webhook/returns-agent';
+const FOLLOWUP_WEBHOOK = process.env.N8N_FOLLOWUP_WEBHOOK_URL || 'https://sonujangid105.app.n8n.cloud/webhook/returnshield-ask';
+const FEEDBACK_WEBHOOK = process.env.N8N_FEEDBACK_WEBHOOK_URL || 'https://sonujangid105.app.n8n.cloud/webhook/returnshield-feedback';
 const WEBHOOK_SECRET   = process.env.N8N_WEBHOOK_SECRET || '';
 
 const getHeaders = () => {
@@ -115,7 +116,7 @@ export const n8nClient = {
         answer: result.data.answer,
         confidence: result.data.confidence ?? 0.92,
         caveats: result.data.caveats || [],
-        tools_used: result.data.tools_used || ['get_segment_metrics'],
+        tools_used: Array.isArray(result.data.tools_used) ? result.data.tools_used : [],
         intelligence_source: 'n8n'
       };
     }
@@ -155,7 +156,7 @@ export const n8nClient = {
 };
 
 /**
- * Local grounded question responder strictly bound to verified run context.
+ * Local grounded question responder strictly bound to canonical normalized analysis state.
  * Tags tools_used honestly as ['local_run_context'] when offline.
  */
 const generateLocalGroundedAnswer = (question, context) => {
@@ -170,31 +171,30 @@ const generateLocalGroundedAnswer = (question, context) => {
     };
   }
 
+  // Canonical schema normalization ensures zero shape mismatch bugs
+  const normalized = normalizeAnalysis(context, context?.run?.id || 'current', 'fallback');
   const q = (question || '').toLowerCase();
-  const topProblems = context.top_problems || [];
-  const metrics = context.metrics || {};
-  const hypotheses = context.hypotheses || [];
-  const recs = context.recommendations || [];
-  const runId = context.run?.id || 'current';
+  const topProblems = normalized.topProblems || [];
+  const couriers = normalized.couriers || [];
+  const products = normalized.products || [];
+  const hypotheses = normalized.hypotheses || [];
+  const recs = normalized.recommendations || [];
+  const m = normalized.metrics || {};
+  const runId = normalized.run?.id || 'current';
 
-  const totalEvents = metrics.total_events ?? (metrics.total_returns || 0) + (metrics.total_rto || 0);
-  const totalValue = metrics.affected_order_value_inr || 0;
-
-  let answer = `Analysis Run ${runId} contains ${totalEvents} return/RTO events (₹${totalValue.toLocaleString('en-IN')} affected order value).`;
+  let answer = `Analysis Run ${runId} contains ${m.totalEvents} return/RTO events (₹${m.totalFinancialLoss.toLocaleString('en-IN')} affected order value). Top reason: ${m.topReason}.`;
   const tools_used = ['local_run_context'];
 
   // Courier query
   if (q.includes('courier') || q.includes('rto') || q.includes('logistics') || q.includes('xpress') || q.includes('delhivery')) {
     const courierProb = topProblems.find(p => p.dimension === 'courier');
     if (courierProb) {
-      answer = `Courier analysis for Run ${runId}: ${courierProb.segment_value} accounts for ${courierProb.count || courierProb.order_count} events (${courierProb.share_pct}% share) with priority tier ${courierProb.priority || courierProb.priority_tier}.`;
+      answer = `Courier analysis for Run ${runId}: ${courierProb.segment_value} accounts for ${courierProb.count} events (${courierProb.share_pct}% share) with priority tier ${courierProb.priority}.`;
+    } else if (couriers.length > 0) {
+      const topCourier = couriers[0];
+      answer = `Top courier by volume in Run ${runId} is ${topCourier.courier} with ${topCourier.count || topCourier.rtoCount} events.`;
     } else {
-      const topCourier = context.segments?.courier?.[0];
-      if (topCourier) {
-        answer = `Top courier by volume is ${topCourier.courier || topCourier.name} with ${topCourier.count || topCourier.rtoCount || 0} events.`;
-      } else {
-        answer = `Courier breakdown is not available in the current analysis run (${runId}).`;
-      }
+      answer = `Courier breakdown is not available in the current analysis run (${runId}).`;
     }
   }
   // SKU / Root Cause query
@@ -204,8 +204,9 @@ const generateLocalGroundedAnswer = (question, context) => {
 
     if (skuProb && hyp) {
       answer = `Top SKU issue is "${skuProb.segment_value}". Root cause hypothesis: "${hyp.hypothesis}". Supporting evidence: ${hyp.supporting_evidence}. Recommended test: ${hyp.next_test}.`;
-    } else if (skuProb) {
-      answer = `Top problem detected is "${skuProb.segment_value}" with ${skuProb.count || skuProb.order_count} returns (${skuProb.share_pct}% share).`;
+    } else if (products.length > 0) {
+      const topProd = products[0];
+      answer = `Top problem detected is "${topProd.product_name}" with ${topProd.recent_return_count} returns. Dominant reason: ${topProd.dominant_reason}.`;
     } else {
       answer = `No specific SKU anomaly cleared the minimum sample threshold in Run ${runId}.`;
     }
@@ -214,23 +215,19 @@ const generateLocalGroundedAnswer = (question, context) => {
   else if (q.includes('action') || q.includes('recommend') || q.includes('fix') || q.includes('next')) {
     const topRec = recs[0];
     if (topRec) {
-      answer = `Top prescribed action: "${topRec.action || topRec.title}" on ${topRec.target}. Expected metric: ${topRec.expected_metric || 'Reduce return concentration'}. Tracking plan: ${topRec.measurement_plan?.metric_to_track || 'Monitor weekly rates'}.`;
+      answer = `Top prescribed action: "${topRec.action}" on ${topRec.target}. Expected metric: ${topRec.expected_metric || 'Reduce return concentration'}. Tracking plan: ${topRec.measurement_plan?.metric_to_track || 'Monitor weekly rates'}.`;
     } else {
       answer = `No actionable recommendations generated for Run ${runId}.`;
     }
   }
   // Trends / Change query
   else if (q.includes('trend') || q.includes('change') || q.includes('previous') || q.includes('week')) {
-    const trend = context.trends?.[0];
+    const trend = normalized.trends?.[0];
     if (trend && trend.available) {
-      answer = `Comparison against prior run (${trend.compared_to_run_id}): Return count change: ${trend.returned_count_change || 0}, Affected value change: ${trend.affected_order_value_change_inr || 0} INR.`;
+      answer = `Comparison against prior run (${trend.compared_to_run_id}): Return count change: ${trend.returned_count_change || 0}, Affected value change: ${trend.affected_order_value_change_inr || 0}.`;
     } else {
       answer = `No prior baseline run available for longitudinal trend diffing. This is initial run ${runId}.`;
     }
-  }
-  // Fallback for unanswerable question
-  else {
-    answer = `Based on stored analysis ${runId}, ${totalEvents} return events were analyzed across ${context.top_problems?.length || 0} identified problem clusters.`;
   }
 
   return {

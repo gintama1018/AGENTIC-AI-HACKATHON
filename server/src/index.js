@@ -133,6 +133,7 @@ const startServer = async () => {
         merchant_id: 'bharatthreads_prod',
         created_at: new Date().toISOString(),
         source: 'seed_init',
+        data_source: 'demo',
         status: initialAnalysis.run?.status || 'success',
         records_count: canonicalReturns.length,
         analysis_confidence: initialAnalysis.data_quality?.analysis_confidence || 'high',

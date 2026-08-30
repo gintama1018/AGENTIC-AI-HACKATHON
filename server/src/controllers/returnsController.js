@@ -259,12 +259,13 @@ export const importReturns = async (req, res) => {
     const analysisResult = await n8nClient.analyzeBatch(canonicalPayload);
     const finalRunId = analysisResult.run?.id || clientRunId;
 
-    // Persist Run in Database
+    // Persist Run in Database with explicit data_source provenance
     const runRecord = {
       id: finalRunId,
       merchant_id: merchantId,
       created_at: new Date().toISOString(),
       source: req.file ? 'csv' : 'api',
+      data_source: req.file ? 'uploaded' : 'api',
       status: analysisResult.run?.status || 'success',
       records_count: normalizedReturns.length,
       analysis_confidence: analysisResult.run?.analysis_confidence || 'medium',
@@ -429,6 +430,7 @@ export const seedDemoData = async (req, res) => {
       merchant_id: req.user?.company_name || 'BharatThreads Lifestyle Pvt. Ltd.',
       created_at: new Date().toISOString(),
       source: 'seed_demo',
+      data_source: 'demo',
       status: analysisResult.run?.status || 'success',
       records_count: seed.returns.length,
       analysis_confidence: analysisResult.data_quality?.analysis_confidence || 'high',
