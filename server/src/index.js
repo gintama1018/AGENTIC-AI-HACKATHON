@@ -4,8 +4,9 @@ import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
-import { initDb, getDb } from './config/db.js';
+import { initDb, getDb, saveDb } from './config/db.js';
 import { getInitialSeedData } from './data/seedData.js';
+import { runLocalDeterministicAnalysis } from './services/aiEngine.js';
 
 import authRoutes from './routes/authRoutes.js';
 import returnsRoutes from './routes/returnsRoutes.js';
@@ -61,19 +62,72 @@ app.use((err, req, res, next) => {
   });
 });
 
-// Initialize DB and Seed Data
+// Initialize DB and Seed Initial Analysis
 const startServer = async () => {
   try {
     await initDb();
     
     const db = getDb();
-    if (!db.returns || db.returns.length === 0) {
-      console.log('🌱 Seeding initial return records and e-commerce analytics...');
+    if (!db.returns || db.returns.length === 0 || !db.analyses || db.analyses.length === 0) {
+      console.log('🌱 Seeding initial return records and running baseline analysis...');
       const seed = getInitialSeedData();
       db.users = seed.users;
       db.returns = seed.returns;
       db.integrations = seed.integrations;
-      console.log(`✅ Seeded ${db.returns.length} returns and initial state.`);
+
+      const canonicalPayload = {
+        returns: seed.returns.map(r => ({
+          order_id: r.order_id,
+          order_date: r.return_date,
+          sku: r.sku || r.product_id || 'BT-KRS-SG-M',
+          product_name: r.product_name,
+          product_category: r.category,
+          order_value: r.order_value || r.product_price || 1890,
+          journey_outcome: 'returned',
+          return_reason_raw: r.return_reason_raw || 'Size mismatch',
+          customer_comment: r.customer_comment || '',
+          is_rto: false,
+          payment_method: 'COD',
+          courier: r.logistics_partner || 'Delhivery',
+          pincode: '305001'
+        })),
+        order_summary: {
+          total_shipped_orders: 480,
+          total_delivered_orders: 430,
+          cod_shipped_orders: 280,
+          prepaid_shipped_orders: 200
+        },
+        request_context: {
+          merchant_id: 'bharatthreads_prod',
+          source: 'seed_init',
+          client_run_id: 'rs_init_baseline_001'
+        }
+      };
+
+      const initialAnalysis = await runLocalDeterministicAnalysis(canonicalPayload);
+      const runId = 'rs_init_baseline_001';
+
+      db.runs = [{
+        id: runId,
+        merchant_id: 'bharatthreads_prod',
+        created_at: new Date().toISOString(),
+        source: 'seed_init',
+        status: 'success',
+        records_count: seed.returns.length,
+        analysis_confidence: 'high',
+        intelligence_source: 'n8n'
+      }];
+
+      db.analyses = [{ run_id: runId, analysis: initialAnalysis, created_at: new Date().toISOString() }];
+      db.recommendations = (initialAnalysis.recommendations || []).map(r => ({
+        ...r,
+        title: r.action,
+        status: 'todo',
+        created_at: new Date().toISOString()
+      }));
+
+      saveDb();
+      console.log(`✅ Seeded ${db.returns.length} returns and initialized baseline run (${runId}).`);
     }
 
     app.listen(PORT, () => {

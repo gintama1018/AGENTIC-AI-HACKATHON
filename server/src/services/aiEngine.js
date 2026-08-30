@@ -1,5 +1,8 @@
 import { v4 as uuidv4 } from 'uuid';
 
+export const recalculateStatsAndRecommendations = async () => {};
+export const processReturnBatch = async (items = []) => items;
+
 /**
  * Deterministic NLP category classifier for Indian E-Commerce returns/RTOs
  */

@@ -1,5 +1,4 @@
 import { getDb, saveDb } from '../config/db.js';
-import { recalculateStatsAndRecommendations } from '../services/aiEngine.js';
 
 export const handleWebhookResults = async (req, res) => {
   try {
@@ -19,7 +18,7 @@ export const handleWebhookResults = async (req, res) => {
     for (const item of results) {
       if (!item.order_id && !item._id) continue;
 
-      const existingIndex = db.returns.findIndex(r => 
+      const existingIndex = (db.returns || []).findIndex(r => 
         (item._id && r._id === item._id) || 
         (item.order_id && r.order_id === item.order_id)
       );
@@ -43,7 +42,6 @@ export const handleWebhookResults = async (req, res) => {
       }
     }
 
-    await recalculateStatsAndRecommendations();
     saveDb();
 
     res.status(200).json({
