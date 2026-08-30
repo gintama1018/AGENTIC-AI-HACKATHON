@@ -10,7 +10,12 @@ export const authMiddleware = (req, res, next) => {
   // Explicit demo bypass with audit trace
   if (isExplicitDemo) {
     const db = getDb();
-    req.user = db.users?.[0] || { _id: 'demo_user', name: 'Demo Operator', email: 'demo@returnshield.ai', company_name: 'BharatThreads Lifestyle Pvt. Ltd.' };
+    req.user = db.users?.[0] || {
+      _id: 'demo_user',
+      name: 'Demo Operator',
+      email: 'demo@returnshield.ai',
+      company_name: 'BharatThreads Lifestyle Pvt. Ltd.'
+    };
     return next();
   }
 
@@ -29,13 +34,10 @@ export const authMiddleware = (req, res, next) => {
     const user = (db.users || []).find(u => u._id === decoded.userId || u.email === decoded.email);
 
     if (!user) {
-      req.user = {
-        _id: decoded.userId,
-        email: decoded.email,
-        name: decoded.name || 'Merchant Operator',
-        company_name: decoded.company_name || 'BharatThreads Lifestyle Pvt. Ltd.'
-      };
-      return next();
+      return res.status(401).json({
+        error: true,
+        message: 'Unauthorized: User associated with token not found in tenant database.'
+      });
     }
 
     req.user = user;

@@ -155,7 +155,8 @@ export const n8nClient = {
 };
 
 /**
- * Local grounded question responder strictly bound to verified run context (Zero Hallucinated Inventions)
+ * Local grounded question responder strictly bound to verified run context.
+ * Tags tools_used honestly as ['local_run_context'] when offline.
  */
 const generateLocalGroundedAnswer = (question, context) => {
   if (!context) {
@@ -164,7 +165,7 @@ const generateLocalGroundedAnswer = (question, context) => {
       answer: 'No analysis run data is currently loaded. Please import a return batch first.',
       confidence: 0.5,
       caveats: ['Run context uninitialized.'],
-      tools_used: [],
+      tools_used: ['local_run_context'],
       intelligence_source: 'fallback'
     };
   }
@@ -180,19 +181,17 @@ const generateLocalGroundedAnswer = (question, context) => {
   const totalValue = metrics.affected_order_value_inr || 0;
 
   let answer = `Analysis Run ${runId} contains ${totalEvents} return/RTO events (₹${totalValue.toLocaleString('en-IN')} affected order value).`;
-  let tools_used = ['get_segment_metrics'];
+  const tools_used = ['local_run_context'];
 
   // Courier query
   if (q.includes('courier') || q.includes('rto') || q.includes('logistics') || q.includes('xpress') || q.includes('delhivery')) {
     const courierProb = topProblems.find(p => p.dimension === 'courier');
     if (courierProb) {
       answer = `Courier analysis for Run ${runId}: ${courierProb.segment_value} accounts for ${courierProb.count || courierProb.order_count} events (${courierProb.share_pct}% share) with priority tier ${courierProb.priority || courierProb.priority_tier}.`;
-      tools_used = ['get_segment_metrics', 'get_top_problems'];
     } else {
       const topCourier = context.segments?.courier?.[0];
       if (topCourier) {
         answer = `Top courier by volume is ${topCourier.courier || topCourier.name} with ${topCourier.count || topCourier.rtoCount || 0} events.`;
-        tools_used = ['get_segment_metrics'];
       } else {
         answer = `Courier breakdown is not available in the current analysis run (${runId}).`;
       }
@@ -205,10 +204,8 @@ const generateLocalGroundedAnswer = (question, context) => {
 
     if (skuProb && hyp) {
       answer = `Top SKU issue is "${skuProb.segment_value}". Root cause hypothesis: "${hyp.hypothesis}". Supporting evidence: ${hyp.supporting_evidence}. Recommended test: ${hyp.next_test}.`;
-      tools_used = ['get_top_problems', 'get_hypotheses'];
     } else if (skuProb) {
       answer = `Top problem detected is "${skuProb.segment_value}" with ${skuProb.count || skuProb.order_count} returns (${skuProb.share_pct}% share).`;
-      tools_used = ['get_top_problems'];
     } else {
       answer = `No specific SKU anomaly cleared the minimum sample threshold in Run ${runId}.`;
     }
@@ -218,7 +215,6 @@ const generateLocalGroundedAnswer = (question, context) => {
     const topRec = recs[0];
     if (topRec) {
       answer = `Top prescribed action: "${topRec.action || topRec.title}" on ${topRec.target}. Expected metric: ${topRec.expected_metric || 'Reduce return concentration'}. Tracking plan: ${topRec.measurement_plan?.metric_to_track || 'Monitor weekly rates'}.`;
-      tools_used = ['get_recommendations'];
     } else {
       answer = `No actionable recommendations generated for Run ${runId}.`;
     }
@@ -228,10 +224,8 @@ const generateLocalGroundedAnswer = (question, context) => {
     const trend = context.trends?.[0];
     if (trend && trend.available) {
       answer = `Comparison against prior run (${trend.compared_to_run_id}): Return count change: ${trend.returned_count_change || 0}, Affected value change: ${trend.affected_order_value_change_inr || 0} INR.`;
-      tools_used = ['compare_to_previous_run'];
     } else {
       answer = `No prior baseline run available for longitudinal trend diffing. This is initial run ${runId}.`;
-      tools_used = ['compare_to_previous_run'];
     }
   }
   // Fallback for unanswerable question

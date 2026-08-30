@@ -8,6 +8,8 @@ const getHeaders = (isMultipart = false) => {
   }
   if (token) {
     headers['Authorization'] = `Bearer ${token}`;
+  } else {
+    headers['X-Demo-Mode'] = 'true';
   }
   return headers;
 };
@@ -62,39 +64,30 @@ export const api = {
     const res = await fetch(`${API_BASE}/returns/${id}`, {
       headers: getHeaders()
     });
-    if (!res.ok) throw new Error('Failed to fetch return details');
+    if (!res.ok) throw new Error('Return record not found');
     return res.json();
   },
 
-  importReturns: async (formDataOrFile) => {
-    let body = formDataOrFile;
-    if (formDataOrFile instanceof File) {
-      body = new FormData();
-      body.append('file', formDataOrFile);
-    }
+  createReturn: async (returnData) => {
+    const res = await fetch(`${API_BASE}/returns/single`, {
+      method: 'POST',
+      headers: getHeaders(),
+      body: JSON.stringify(returnData)
+    });
+    if (!res.ok) throw new Error('Failed to create return record');
+    return res.json();
+  },
+
+  importReturns: async (formData) => {
     const res = await fetch(`${API_BASE}/returns/import`, {
       method: 'POST',
       headers: getHeaders(true),
-      body
+      body: formData
     });
     if (!res.ok) {
       const err = await res.json().catch(() => ({}));
       throw new Error(err.message || 'Import failed');
     }
-    return res.json();
-  },
-
-  importReturnsCsv: async (file) => {
-    return api.importReturns(file);
-  },
-
-  createSingleReturn: async (data) => {
-    const res = await fetch(`${API_BASE}/returns/single`, {
-      method: 'POST',
-      headers: getHeaders(),
-      body: JSON.stringify(data)
-    });
-    if (!res.ok) throw new Error('Failed to submit return');
     return res.json();
   },
 
@@ -107,44 +100,44 @@ export const api = {
     return res.json();
   },
 
-  clearAllReturns: async () => {
+  clearAllData: async () => {
     const res = await fetch(`${API_BASE}/returns/clear-all`, {
       method: 'DELETE',
       headers: getHeaders()
     });
-    if (!res.ok) throw new Error('Failed to clear returns');
+    if (!res.ok) throw new Error('Failed to clear database');
     return res.json();
   },
 
-  deleteReturn: async (id) => {
-    const res = await fetch(`${API_BASE}/returns/${id}`, {
-      method: 'DELETE',
-      headers: getHeaders()
-    });
-    if (!res.ok) throw new Error('Failed to delete return');
-    return res.json();
-  },
-
-  exportReturns: async () => {
+  exportReturns: async (format = 'csv') => {
     try {
-      const res = await fetch(`${API_BASE}/returns?limit=500`, {
-        headers: getHeaders()
-      });
-      const json = await res.json();
-      const records = json.data || [];
-      if (records.length === 0) return;
+      const res = await api.getReturns({ limit: 1000 });
+      const returns = res.data || [];
+      if (returns.length === 0) return;
 
-      const headers = ['id', 'order_id', 'product_name', 'sku', 'category', 'detected_reason', 'confidence_score', 'order_value', 'customer_city', 'return_date', 'status'];
+      const headers = ['Order ID', 'Date', 'SKU', 'Product Name', 'Category', 'Reason', 'Root Cause', 'Confidence', 'Order Value (INR)', 'City', 'Courier'];
       const csvRows = [
         headers.join(','),
-        ...records.map(r => headers.map(h => JSON.stringify(r[h] ?? '')).join(','))
+        ...returns.map(r => [
+          r.order_id,
+          r.return_date,
+          `"${r.sku || ''}"`,
+          `"${r.product_name || ''}"`,
+          `"${r.category || ''}"`,
+          `"${r.ai_reason_category || r.detected_reason || ''}"`,
+          `"${(r.ai_root_cause || '').replace(/"/g, '""')}"`,
+          r.confidence_score,
+          r.order_value,
+          `"${r.customer_city || ''}"`,
+          `"${r.logistics_partner || ''}"`
+        ].join(','))
       ];
 
       const blob = new Blob([csvRows.join('\n')], { type: 'text/csv;charset=utf-8;' });
-      const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
+      const url = URL.createObjectURL(blob);
       link.setAttribute('href', url);
-      link.setAttribute('download', `returns_export_${new Date().toISOString().slice(0, 10)}.csv`);
+      link.setAttribute('download', `returnshield_export_${new Date().toISOString().slice(0, 10)}.csv`);
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -167,16 +160,17 @@ export const api = {
     const metrics = res.metrics || {};
     return {
       data: {
-        total_returns: metrics.totalReturns || 0,
-        total_rto: metrics.totalRto || 0,
-        total_events: metrics.totalEvents || metrics.totalReturns || 0,
-        return_rate: metrics.returnRate || 10.4,
-        rto_rate: metrics.rtoRate || 6.8,
-        top_reason: metrics.topReason || 'Size & Fit Mismatch',
-        top_reason_count: res.reasonDistribution?.[0]?.count || 17,
-        total_financial_loss: metrics.totalFinancialLoss || 184500,
-        avg_confidence: metrics.avgConfidence || 91,
-        run_id: metrics.runId || 'current',
+        total_returns: metrics.totalReturns ?? 0,
+        total_rto: metrics.totalRto ?? 0,
+        total_events: metrics.totalEvents ?? 0,
+        return_rate: metrics.returnRate ?? null,
+        rto_rate: metrics.rtoRate ?? null,
+        rates_available: !!metrics.ratesAvailable,
+        top_reason: metrics.topReason || 'No return events analyzed',
+        top_reason_count: res.reasonDistribution?.[0]?.count ?? 0,
+        total_financial_loss: metrics.totalFinancialLoss ?? 0,
+        avg_confidence: metrics.avgConfidence ?? 85,
+        run_id: metrics.runId || 'uninitialized',
         intelligence_source: metrics.intelligenceSource || 'n8n',
         verification_passed: metrics.verificationPassed ?? true,
         top_problems: res.topProblems || [],
@@ -248,59 +242,45 @@ export const api = {
       headers: getHeaders(),
       body: JSON.stringify({ note, recorded_by: recordedBy })
     });
-    if (!res.ok) {
-      const err = await res.json().catch(() => ({}));
-      throw new Error(err.message || 'Failed to approve recommendation');
-    }
+    if (!res.ok) throw new Error('Failed to approve recommendation');
     return res.json();
   },
 
-  updateRecommendationStatus: async (id, status, notes = '') => {
+  updateRecommendation: async (id, data) => {
     const res = await fetch(`${API_BASE}/recommendations/${id}`, {
       method: 'PATCH',
       headers: getHeaders(),
-      body: JSON.stringify({ status, notes })
+      body: JSON.stringify(data)
     });
-    if (!res.ok) throw new Error('Failed to update recommendation');
+    if (!res.ok) throw new Error('Failed to update recommendation status');
     return res.json();
   },
 
-  updateRecommendation: async (id, data = {}) => {
-    const status = typeof data === 'string' ? data : data.status;
-    const notes = data.notes || '';
-    return api.updateRecommendationStatus(id, status, notes);
-  },
-
-  // Integrations & Settings
+  // Settings & Integrations
   getIntegrations: async () => {
-    const res = await fetch(`${API_BASE}/settings/integration`, {
+    const res = await fetch(`${API_BASE}/settings/integrations`, {
       headers: getHeaders()
     });
-    if (!res.ok) throw new Error('Failed to load settings');
+    if (!res.ok) throw new Error('Failed to load integrations');
     return res.json();
   },
 
   updateIntegrations: async (data) => {
-    const res = await fetch(`${API_BASE}/settings/integration`, {
+    const res = await fetch(`${API_BASE}/settings/integrations`, {
       method: 'PUT',
       headers: getHeaders(),
       body: JSON.stringify(data)
     });
-    if (!res.ok) throw new Error('Failed to update settings');
+    if (!res.ok) throw new Error('Failed to update integrations');
     return res.json();
   },
 
-  testWebhookConnection: async (url = 'http://localhost:5678/webhook/returns-agent') => {
+  testWebhook: async (webhookUrl) => {
     const res = await fetch(`${API_BASE}/settings/test-webhook`, {
       method: 'POST',
       headers: getHeaders(),
-      body: JSON.stringify({ webhook_url: url })
+      body: JSON.stringify({ webhook_url: webhookUrl })
     });
-    if (!res.ok) throw new Error('Webhook test failed');
     return res.json();
-  },
-
-  triggerN8nWebhook: async (data = {}) => {
-    return api.testWebhookConnection(data.url);
   }
 };
