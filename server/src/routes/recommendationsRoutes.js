@@ -5,12 +5,13 @@ import {
   createRecommendation,
   approveRecommendation
 } from '../controllers/recommendationsController.js';
+import { authMiddleware } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
-router.get('/', getRecommendations);
-router.post('/', createRecommendation);
-router.patch('/:id', updateRecommendationStatus);
-router.post('/:id/approve', approveRecommendation);
+router.get('/', authMiddleware, getRecommendations);
+router.post('/', authMiddleware, createRecommendation);
+router.patch('/:id', authMiddleware, updateRecommendationStatus);
+router.post('/:id/approve', authMiddleware, approveRecommendation);
 
 export default router;

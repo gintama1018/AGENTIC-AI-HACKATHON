@@ -48,6 +48,19 @@ const postWithRetry = async (url, payload, options = { maxRetries: 2, retryDelay
   return { success: false, error: lastError };
 };
 
+/**
+ * Strict schema validator for Workflow 1 response contract
+ */
+const validateAnalysisSchema = (data) => {
+  if (!data || typeof data !== 'object') return { valid: false, reason: 'Payload is not an object' };
+  if (!data.run || typeof data.run.id !== 'string') return { valid: false, reason: 'Missing or invalid run.id' };
+  if (!data.metrics || typeof data.metrics !== 'object') return { valid: false, reason: 'Missing metrics object' };
+  if (!Array.isArray(data.top_problems)) return { valid: false, reason: 'Missing top_problems array' };
+  if (!Array.isArray(data.recommendations)) return { valid: false, reason: 'Missing recommendations array' };
+  if (!data.verification || typeof data.verification.status !== 'string') return { valid: false, reason: 'Missing verification.status' };
+  return { valid: true };
+};
+
 export const n8nClient = {
   /**
    * Workflow 1: Main Return Intelligence Analysis Pipeline (returns-agent)
@@ -57,19 +70,21 @@ export const n8nClient = {
 
     const result = await postWithRetry(ANALYSIS_WEBHOOK, canonicalPayload);
 
-    if (result.success && result.data && typeof result.data === 'object') {
-      const data = result.data;
-      if (data.run && data.metrics) {
-        console.log(`[n8nClient] Received verified analysis from n8n (Run ID: ${data.run?.id || 'unknown'}).`);
+    if (result.success && result.data) {
+      const validation = validateAnalysisSchema(result.data);
+      if (validation.valid) {
+        console.log(`[n8nClient] Received verified analysis from n8n (Run ID: ${result.data.run?.id}).`);
         return {
-          ...data,
+          ...result.data,
           intelligence_source: 'n8n',
           fallback_used: false
         };
+      } else {
+        console.warn(`[n8nClient] n8n response failed schema validation (${validation.reason}).`);
       }
     }
 
-    console.warn(`[n8nClient] n8n Workflow 1 unavailable (${result.error?.message || 'invalid response'}). Executing deterministic fallback engine...`);
+    console.warn(`[n8nClient] n8n Workflow 1 unavailable (${result.error?.message || 'invalid schema'}). Executing deterministic fallback engine...`);
     
     const fallbackResult = await runLocalDeterministicAnalysis(canonicalPayload);
     return {
@@ -94,10 +109,10 @@ export const n8nClient = {
 
     const result = await postWithRetry(FOLLOWUP_WEBHOOK, payload, { maxRetries: 1, retryDelay: 1500, timeout: 20000 });
 
-    if (result.success && result.data) {
+    if (result.success && result.data && typeof result.data.answer === 'string') {
       return {
         success: true,
-        answer: result.data.answer || result.data.text || 'Analysis completed.',
+        answer: result.data.answer,
         confidence: result.data.confidence ?? 0.92,
         caveats: result.data.caveats || [],
         tools_used: result.data.tools_used || ['get_segment_metrics'],
@@ -105,7 +120,7 @@ export const n8nClient = {
       };
     }
 
-    console.warn(`[n8nClient] n8n Ask Agent unreachable (${result.error?.message}). Generating grounded response from local analysis state...`);
+    console.warn(`[n8nClient] n8n Ask Agent unreachable (${result.error?.message || 'invalid response'}). Answering strictly from verified run context...`);
     return generateLocalGroundedAnswer(question, context);
   },
 
@@ -140,51 +155,96 @@ export const n8nClient = {
 };
 
 /**
- * Local grounded question responder for when Workflow 2 is offline
+ * Local grounded question responder strictly bound to verified run context (Zero Hallucinated Inventions)
  */
 const generateLocalGroundedAnswer = (question, context) => {
-  const q = (question || '').toLowerCase();
-  const topProblems = context?.top_problems || [];
-  const metrics = context?.metrics || {};
-  const hypotheses = context?.hypotheses || [];
-  const recs = context?.recommendations || [];
-  const runId = context?.run?.id || 'current';
+  if (!context) {
+    return {
+      success: true,
+      answer: 'No analysis run data is currently loaded. Please import a return batch first.',
+      confidence: 0.5,
+      caveats: ['Run context uninitialized.'],
+      tools_used: [],
+      intelligence_source: 'fallback'
+    };
+  }
 
-  let answer = `Based on Run ${runId}, there are ${metrics.total_events || metrics.total_returns || 50} analyzed return/RTO events (₹${(metrics.affected_order_value_inr || 101950).toLocaleString('en-IN')} affected order value). Top reason: ${metrics.top_reason || 'Size & Fit Mismatch'}.`;
+  const q = (question || '').toLowerCase();
+  const topProblems = context.top_problems || [];
+  const metrics = context.metrics || {};
+  const hypotheses = context.hypotheses || [];
+  const recs = context.recommendations || [];
+  const runId = context.run?.id || 'current';
+
+  const totalEvents = metrics.total_events ?? (metrics.total_returns || 0) + (metrics.total_rto || 0);
+  const totalValue = metrics.affected_order_value_inr || 0;
+
+  let answer = `Analysis Run ${runId} contains ${totalEvents} return/RTO events (₹${totalValue.toLocaleString('en-IN')} affected order value).`;
   let tools_used = ['get_segment_metrics'];
 
-  if (q.includes('rto') || q.includes('courier') || q.includes('xpress') || q.includes('delhivery') || q.includes('logistic')) {
+  // Courier query
+  if (q.includes('courier') || q.includes('rto') || q.includes('logistics') || q.includes('xpress') || q.includes('delhivery')) {
     const courierProb = topProblems.find(p => p.dimension === 'courier');
-    const courierName = courierProb?.segment_value || 'Xpress Logistics';
-    const count = courierProb?.count || 14;
-    const share = courierProb?.share_pct || 28;
-    const uplift = courierProb?.uplift || 1.84;
-    const priority = courierProb?.priority || 'P0';
-
-    answer = `Courier analysis reveals ${courierName} accounts for ${count} RTO events (${share}% share) with an uplift ratio of ${uplift}× over pan-India baseline. Concentrated primarily on COD dispatches in tier-2/3 pincodes (PIN 305001). Priority tier: ${priority}.`;
-    tools_used = ['get_segment_metrics', 'get_top_problems'];
-  } else if (q.includes('root') || q.includes('cause') || q.includes('kurta') || q.includes('sku') || q.includes('product') || q.includes('size') || q.includes('fit') || q.includes('defect')) {
+    if (courierProb) {
+      answer = `Courier analysis for Run ${runId}: ${courierProb.segment_value} accounts for ${courierProb.count || courierProb.order_count} events (${courierProb.share_pct}% share) with priority tier ${courierProb.priority || courierProb.priority_tier}.`;
+      tools_used = ['get_segment_metrics', 'get_top_problems'];
+    } else {
+      const topCourier = context.segments?.courier?.[0];
+      if (topCourier) {
+        answer = `Top courier by volume is ${topCourier.courier || topCourier.name} with ${topCourier.count || topCourier.rtoCount || 0} events.`;
+        tools_used = ['get_segment_metrics'];
+      } else {
+        answer = `Courier breakdown is not available in the current analysis run (${runId}).`;
+      }
+    }
+  }
+  // SKU / Root Cause query
+  else if (q.includes('sku') || q.includes('product') || q.includes('root') || q.includes('cause') || q.includes('fit') || q.includes('size')) {
+    const skuProb = topProblems.find(p => p.dimension === 'sku') || topProblems[0];
     const hyp = hypotheses.find(h => h.dimension === 'sku') || hypotheses[0];
-    answer = `For Kurta Set Sage Green (BT-KRS-SG-M), the primary root cause hypothesis is: "${hyp?.hypothesis || 'Garment bodice dimensions run 2-2.5 inches tighter than standard Indian size matrix specs.'}" Supporting evidence: ${hyp?.supporting_evidence || '17 customer return comments specifically cite chest/shoulder tightness.'} Recommended next test: ${hyp?.next_test || 'Physical dimensional QA audit at Bhiwandi warehouse staging.'}`;
-    tools_used = ['get_top_problems', 'get_hypotheses'];
-  } else if (q.includes('cod') || q.includes('payment') || q.includes('prepaid')) {
-    answer = `COD orders exhibit a 3.1× higher RTO rate compared to prepaid orders, with highest concentration in pincode 305001. Customer comments indicate fake delivery attempts and delayed address confirmation as primary drivers.`;
-    tools_used = ['get_segment_metrics', 'get_reason_distribution'];
-  } else if (q.includes('recommend') || q.includes('action') || q.includes('next') || q.includes('fix')) {
+
+    if (skuProb && hyp) {
+      answer = `Top SKU issue is "${skuProb.segment_value}". Root cause hypothesis: "${hyp.hypothesis}". Supporting evidence: ${hyp.supporting_evidence}. Recommended test: ${hyp.next_test}.`;
+      tools_used = ['get_top_problems', 'get_hypotheses'];
+    } else if (skuProb) {
+      answer = `Top problem detected is "${skuProb.segment_value}" with ${skuProb.count || skuProb.order_count} returns (${skuProb.share_pct}% share).`;
+      tools_used = ['get_top_problems'];
+    } else {
+      answer = `No specific SKU anomaly cleared the minimum sample threshold in Run ${runId}.`;
+    }
+  }
+  // Recommendation / Action query
+  else if (q.includes('action') || q.includes('recommend') || q.includes('fix') || q.includes('next')) {
     const topRec = recs[0];
-    answer = `Top recommended intervention: "${topRec?.action || 'Update size chart with accurate cm measurements for Kurta Set'}" on target ${topRec?.target || 'BT-KRS-SG-M'}. Expected impact: ${topRec?.expected_metric || 'Reduce fit-related returns by 35%'}. Measurement plan tracks: ${topRec?.measurement_plan?.metric_to_track || 'Fit return rate over 21 days'}.`;
-    tools_used = ['get_recommendations'];
-  } else if (q.includes('trend') || q.includes('change') || q.includes('previous') || q.includes('week') || q.includes('last')) {
-    answer = `Compared to the previous analysis run (rs_baseline_001), total returns increased by +9 events (+18,400 INR affected value), with fit-related complaints in ethnic wear growing by 55%.`;
-    tools_used = ['compare_to_previous_run'];
+    if (topRec) {
+      answer = `Top prescribed action: "${topRec.action || topRec.title}" on ${topRec.target}. Expected metric: ${topRec.expected_metric || 'Reduce return concentration'}. Tracking plan: ${topRec.measurement_plan?.metric_to_track || 'Monitor weekly rates'}.`;
+      tools_used = ['get_recommendations'];
+    } else {
+      answer = `No actionable recommendations generated for Run ${runId}.`;
+    }
+  }
+  // Trends / Change query
+  else if (q.includes('trend') || q.includes('change') || q.includes('previous') || q.includes('week')) {
+    const trend = context.trends?.[0];
+    if (trend && trend.available) {
+      answer = `Comparison against prior run (${trend.compared_to_run_id}): Return count change: ${trend.returned_count_change || 0}, Affected value change: ${trend.affected_order_value_change_inr || 0} INR.`;
+      tools_used = ['compare_to_previous_run'];
+    } else {
+      answer = `No prior baseline run available for longitudinal trend diffing. This is initial run ${runId}.`;
+      tools_used = ['compare_to_previous_run'];
+    }
+  }
+  // Fallback for unanswerable question
+  else {
+    answer = `Based on stored analysis ${runId}, ${totalEvents} return events were analyzed across ${context.top_problems?.length || 0} identified problem clusters.`;
   }
 
   return {
     success: true,
     answer,
-    confidence: 0.92,
-    caveats: context?.intelligence_source === 'n8n' ? [] : ['Served via local deterministic responder with grounded run state.'],
+    confidence: 0.90,
+    caveats: ['Answered directly from verified run state (n8n Ask Agent offline).'],
     tools_used,
-    intelligence_source: context?.intelligence_source || 'fallback'
+    intelligence_source: 'fallback'
   };
 };

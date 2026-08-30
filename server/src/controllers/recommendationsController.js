@@ -37,7 +37,7 @@ export const getRecommendations = async (req, res) => {
 export const approveRecommendation = async (req, res) => {
   try {
     const { id } = req.params;
-    const { note = '', recorded_by = 'Sonu Jangir' } = req.body;
+    const { note = '', recorded_by = '' } = req.body;
     const db = getDb();
 
     const rec = (db.recommendations || []).find(r => r.id === id || r._id === id);
@@ -47,20 +47,21 @@ export const approveRecommendation = async (req, res) => {
 
     const run_id = rec.run_id || db.analyses?.[0]?.run_id || 'rs_current';
     const target = rec.target || rec.product_name || 'General';
+    const operatorName = recorded_by || req.user?.name || req.user?.email || 'Operator';
 
     // Dispatch to published n8n Workflow 3 (returnshield-feedback)
     const feedbackResult = await n8nClient.recordFeedback({
       run_id,
       target,
       outcome: 'approved',
-      note: note || `Approved human-in-the-loop intervention: ${rec.action || rec.title}`,
-      recorded_by: recorded_by || req.user?.name || 'Sonu Jangir'
+      note: note || `Approved intervention: ${rec.action || rec.title}`,
+      recorded_by: operatorName
     });
 
-    // Update recommendation status
+    // Update recommendation status to in_progress
     rec.status = 'in_progress';
     rec.approved_at = new Date().toISOString();
-    rec.approved_by = recorded_by;
+    rec.approved_by = operatorName;
 
     // Create persistent intervention tracking record
     const intervention = {
@@ -70,11 +71,11 @@ export const approveRecommendation = async (req, res) => {
       target,
       action: rec.action || rec.title,
       status: 'active',
-      baseline_metric: rec.measurement_plan?.baseline_value || '28.4% RTO',
-      target_metric: rec.measurement_plan?.target_value || '<18% RTO',
+      baseline_metric: rec.measurement_plan?.baseline_value || 'Pending baseline evaluation',
+      target_metric: rec.measurement_plan?.target_value || 'Target evaluation window',
       evaluation_window_days: rec.measurement_plan?.evaluation_window_days || 14,
       note,
-      approved_by: recorded_by,
+      approved_by: operatorName,
       created_at: new Date().toISOString()
     };
 
@@ -96,7 +97,12 @@ export const approveRecommendation = async (req, res) => {
 export const updateRecommendationStatus = async (req, res) => {
   try {
     const { id } = req.params;
-    const { status, notes = '' } = req.body;
+    const { status, notes = '', measured_outcome = null } = req.body;
+
+    const VALID_STATUSES = ['todo', 'in_progress', 'implemented', 'measurement_pending', 'validated', 'ineffective', 'rejected'];
+    if (!VALID_STATUSES.includes(status)) {
+      return res.status(400).json({ message: `Status must be one of: ${VALID_STATUSES.join(', ')}` });
+    }
 
     const db = getDb();
     const recIndex = (db.recommendations || []).findIndex(r => r.id === id || r._id === id);
@@ -105,23 +111,24 @@ export const updateRecommendationStatus = async (req, res) => {
       return res.status(404).json({ message: 'Recommendation not found' });
     }
 
-    db.recommendations[recIndex].status = status;
-    db.recommendations[recIndex].notes = notes;
-    db.recommendations[recIndex].updated_at = new Date().toISOString();
+    const rec = db.recommendations[recIndex];
+    rec.status = status;
+    rec.notes = notes;
+    rec.updated_at = new Date().toISOString();
 
-    if (status === 'done') {
-      db.recommendations[recIndex].outcome = 'Verified return reduction achieved over test period.';
-      db.recommendations[recIndex].profit_protected = '₹1.8L';
-
-      // Log outcome in Workflow 3
-      n8nClient.recordFeedback({
-        run_id: db.recommendations[recIndex].run_id || 'rs_current',
-        target: db.recommendations[recIndex].target || 'General',
-        outcome: 'implemented',
-        note: `Action completed. Measured outcome verified.`,
-        recorded_by: req.user?.name || 'Sonu Jangir'
-      }).catch(console.warn);
+    // Honest outcome recording: only record measured outcome if provided by real test
+    if (measured_outcome) {
+      rec.measured_outcome = measured_outcome;
     }
+
+    // Log status transition in Workflow 3
+    n8nClient.recordFeedback({
+      run_id: rec.run_id || 'rs_current',
+      target: rec.target || 'General',
+      outcome: status === 'validated' ? 'resolved' : (status === 'implemented' ? 'implemented' : 'accepted'),
+      note: notes || `Status transitioned to ${status}`,
+      recorded_by: req.user?.name || req.user?.email || 'Operator'
+    }).catch(console.warn);
 
     saveDb();
 
@@ -147,8 +154,8 @@ export const createRecommendation = async (req, res) => {
       target: target || 'Storewide',
       reason: text,
       category: category || 'General',
-      priority: priority || 'Medium',
-      estimated_savings: estimated_savings || 15000,
+      priority: priority || 'P1',
+      estimated_savings: estimated_savings || null,
       status: 'todo',
       requires_human_approval: false,
       measurement_plan: measurement_plan || null,

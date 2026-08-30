@@ -5,6 +5,44 @@ import { getDb, saveDb } from '../config/db.js';
 import { n8nClient } from '../services/n8nClient.js';
 import { getInitialSeedData } from '../data/seedData.js';
 
+const toStr = (v, fallback = null) => {
+  if (v === undefined || v === null || String(v).trim() === '') return fallback;
+  return String(v).trim();
+};
+
+const toNum = (v) => {
+  if (v === undefined || v === null || v === '') return null;
+  const n = Number(String(v).replace(/[,₹\s]/g, ''));
+  return Number.isFinite(n) ? n : null;
+};
+
+const toBool = (v) => {
+  if (typeof v === 'boolean') return v;
+  if (v === undefined || v === null) return false;
+  const s = String(v).trim().toLowerCase();
+  return ['true', '1', 'yes', 'y', 'rto'].includes(s);
+};
+
+const normalizePayment = (v) => {
+  if (!v) return 'Unknown';
+  const s = String(v).trim().toLowerCase();
+  if (s.includes('cod') || s.includes('cash')) return 'COD';
+  if (s.includes('prepaid') || s.includes('online') || s.includes('card') || s.includes('upi')) return 'Prepaid';
+  return 'Unknown';
+};
+
+const deriveOutcome = (row, isRto) => {
+  const explicit = toStr(row.journey_outcome || row.outcome, '').toLowerCase();
+  if (['delivered', 'returned', 'rto', 'cancelled', 'unknown'].includes(explicit)) return explicit;
+
+  const status = toStr(row.order_status || row.status, '').toLowerCase();
+  if (isRto || status.includes('rto') || status.includes('return to origin') || status.includes('undelivered')) return 'rto';
+  if (status.includes('cancel')) return 'cancelled';
+  if (status.includes('return')) return 'returned';
+  if (status.includes('deliver')) return 'delivered';
+  return 'unknown';
+};
+
 export const getReturns = async (req, res) => {
   try {
     const db = getDb();
@@ -123,7 +161,7 @@ export const getReturnById = async (req, res) => {
 
 /**
  * Production Ingestion Flow:
- * CSV Upload -> Normalize -> Canonical n8n Payload -> Dispatch to Workflow 1 -> Validate & Store -> Return to UI
+ * CSV Upload -> Normalize (NO FAKE DEFAULTS) -> Canonical Payload -> n8n Workflow 1 -> Validate & Persist
  */
 export const importReturns = async (req, res) => {
   try {
@@ -159,50 +197,52 @@ export const importReturns = async (req, res) => {
       return res.status(400).json({ message: 'No valid return records found in payload' });
     }
 
-    // Build Canonical n8n Payload
-    const normalizedReturns = rawItems.map((row) => {
-      const order_value = Number(String(row.order_value || row.product_price || row.price || row['Price'] || 1499).replace(/[^\d.]/g, '')) || 1499;
-      const is_rto = String(row.is_rto || row.journey_outcome || row.order_status || '').toLowerCase().includes('rto');
-      const journey_outcome = is_rto ? 'rto' : (String(row.journey_outcome || row.order_status || 'returned').toLowerCase());
+    // Build Canonical n8n Payload with strict honest value mapping
+    const normalizedReturns = rawItems.map((row, idx) => {
+      const is_rto = toBool(row.is_rto || row.rto || row.isRTO);
+      const journey_outcome = deriveOutcome(row, is_rto);
+      const order_value = toNum(row.order_value || row.product_price || row.price || row['Price'] || row.amount);
 
       return {
-        order_id: String(row.order_id || row['Order ID'] || `ORD-${Math.floor(10000 + Math.random() * 90000)}`),
-        order_date: row.order_date || row['Return Date'] || row.return_date || new Date().toISOString(),
-        sku: String(row.sku || row.product_id || row['Product ID'] || 'BT-KRS-SG-M'),
-        product_name: String(row.product_name || row['Product Name'] || 'Kurta Set Sage Green'),
-        product_category: String(row.category || row.product_category || 'Apparel'),
-        product_variant: String(row.size || row.variant || 'M'),
-        size: String(row.size || 'M'),
+        order_id: toStr(row.order_id || row['Order ID'] || row.orderId, `ORD-${idx + 1}`),
+        order_date: toStr(row.order_date || row['Return Date'] || row.return_date || row.orderDate, null),
+        sku: toStr(row.sku || row.SKU || row.product_sku || row.product_id || row['Product ID'], 'UNKNOWN_SKU'),
+        product_name: toStr(row.product_name || row['Product Name'] || row.productName || row.name, null),
+        product_category: toStr(row.product_category || row.category || row['Category'], 'UNKNOWN_CATEGORY'),
+        product_variant: toStr(row.product_variant || row.variant || null, null),
+        size: toStr(row.size, null),
         order_value,
-        order_status: is_rto ? 'rto' : 'returned',
+        order_status: toStr(row.order_status || row.status, journey_outcome),
         journey_outcome,
-        return_reason_raw: String(row.return_reason_raw || row.reason || row['Return Reason'] || 'Size mismatch'),
-        customer_comment: String(row.customer_comment || row.comment || row['Customer Comment'] || row.customer_feedback || ''),
-        rto_reason_raw: String(row.rto_reason_raw || (is_rto ? 'Customer unreachable / refused delivery' : '')),
+        return_reason_raw: toStr(row.return_reason_raw || row.reason_text || row.reason || row['Return Reason'], ''),
+        customer_comment: toStr(row.customer_comment || row.comment || row['Customer Comment'] || row.customer_feedback, ''),
+        rto_reason_raw: toStr(row.rto_reason_raw || row.rto_reason, ''),
         is_rto,
-        payment_method: String(row.payment_method || (row.is_cod ? 'COD' : 'COD')),
-        courier: String(row.courier || row.logistics_partner || 'Delhivery'),
-        pincode: String(row.pincode || row.pin_code || '305001'),
-        shipping_zone: String(row.shipping_zone || row.zone || 'North'),
-        delivery_attempts: Number(row.delivery_attempts) || 1,
-        dispatch_delay_days: Number(row.dispatch_delay_days) || 0,
-        delivery_delay_days: Number(row.delivery_delay_days) || 0,
-        customer_type: String(row.customer_type || 'Retail'),
-        refund_amount: order_value,
-        forward_shipping_cost: 120,
-        return_shipping_cost: 90,
-        discount_amount: 0,
-        warehouse: String(row.warehouse || 'Bhiwandi-W1')
+        payment_method: normalizePayment(row.payment_method || row.paymentMethod || row.payment || (toBool(row.cod_flag || row.is_cod) ? 'COD' : undefined)),
+        courier: toStr(row.courier || row.courier_partner || row.logistics_partner || row.courierPartner, 'UNKNOWN_COURIER'),
+        pincode: toStr(row.pincode || row.pin_code || row.zip || row.zipcode, 'UNKNOWN_PINCODE'),
+        shipping_zone: toStr(row.shipping_zone || row.zone, 'UNKNOWN_ZONE'),
+        delivery_attempts: toNum(row.delivery_attempts || row.attempts),
+        dispatch_delay_days: toNum(row.dispatch_delay_days),
+        delivery_delay_days: toNum(row.delivery_delay_days),
+        customer_type: toStr(row.customer_type, 'UNKNOWN'),
+        is_first_order: toBool(row.is_first_order || row.first_order),
+        refund_amount: toNum(row.refund_amount),
+        forward_shipping_cost: toNum(row.forward_shipping_cost),
+        return_shipping_cost: toNum(row.return_shipping_cost),
+        discount_amount: toNum(row.discount_amount),
+        warehouse: toStr(row.warehouse, null)
       };
     });
 
     const clientRunId = 'rs_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 6);
+    const merchantId = req.user?.company_name || req.user?.email || 'unspecified_merchant';
 
     const canonicalPayload = {
       returns: normalizedReturns,
       order_summary: req.body?.order_summary || null, // Optional honest denominator
       request_context: {
-        merchant_id: req.user?.company_name || 'bharatthreads_prod',
+        merchant_id: merchantId,
         source: req.file ? 'csv' : 'api',
         client_run_id: clientRunId
       }
@@ -215,12 +255,12 @@ export const importReturns = async (req, res) => {
     // Persist Run in Database
     const runRecord = {
       id: finalRunId,
-      merchant_id: req.user?.company_name || 'bharatthreads_prod',
+      merchant_id: merchantId,
       created_at: new Date().toISOString(),
       source: req.file ? 'csv' : 'api',
       status: analysisResult.run?.status || 'success',
       records_count: normalizedReturns.length,
-      analysis_confidence: analysisResult.run?.analysis_confidence || 'high',
+      analysis_confidence: analysisResult.run?.analysis_confidence || 'medium',
       intelligence_source: analysisResult.intelligence_source || 'n8n'
     };
 
@@ -238,19 +278,20 @@ export const importReturns = async (req, res) => {
       id: r.order_id,
       order_id: r.order_id,
       sku: r.sku,
-      product_name: r.product_name,
+      product_name: r.product_name || r.sku,
       category: r.product_category,
-      detected_reason: r.return_reason_raw || 'Size & Fit Mismatch',
-      ai_reason_category: r.return_reason_raw || 'Size & Fit Mismatch',
-      ai_root_cause: analysisResult.root_causes?.[0]?.likely_cause || 'Pattern identified during run analysis',
-      confidence_score: 0.91,
+      detected_reason: r.return_reason_raw || (r.is_rto ? 'RTO Delivery Failure' : 'Customer Return'),
+      ai_reason_category: r.return_reason_raw || (r.is_rto ? 'RTO Delivery Failure' : 'Customer Return'),
+      ai_root_cause: analysisResult.root_causes?.[0]?.likely_cause || 'Identified via run analysis',
+      confidence_score: 0.90,
       order_value: r.order_value,
-      customer_city: r.pincode ? `PIN ${r.pincode}` : 'Jaipur',
-      return_date: r.order_date,
+      customer_city: r.pincode !== 'UNKNOWN_PINCODE' ? `PIN ${r.pincode}` : 'Unknown Location',
+      return_date: r.order_date || new Date().toISOString(),
       status: 'analyzed',
       logistics_partner: r.courier,
       customer_comment: r.customer_comment,
-      run_id: finalRunId
+      run_id: finalRunId,
+      is_rto: r.is_rto
     }));
 
     db.returns = [...tableItems, ...(db.returns || [])];
@@ -268,8 +309,8 @@ export const importReturns = async (req, res) => {
         evidence: rec.evidence,
         evidence_summary: rec.evidence,
         expected_metric: rec.expected_metric,
-        priority: rec.priority || 'P0',
-        confidence: rec.confidence || 0.90,
+        priority: rec.priority || rec.priority_tier || 'P1',
+        confidence: rec.confidence || 0.85,
         status: 'todo',
         requires_human_approval: !!rec.requires_human_approval,
         approval_reason: rec.approval_reason || null,
@@ -302,17 +343,17 @@ export const createSingleReturn = async (req, res) => {
       _id: uuidv4(),
       id: item.order_id || `ORD-${Math.floor(10000 + Math.random() * 90000)}`,
       order_id: item.order_id || `ORD-${Math.floor(10000 + Math.random() * 90000)}`,
-      sku: item.sku || item.product_id || 'BT-KRS-SG-M',
-      product_name: item.product_name || 'Kurta Set Sage Green',
-      category: item.category || 'Apparel',
-      detected_reason: item.return_reason_raw || 'Size & Fit Mismatch',
-      confidence_score: 0.92,
-      order_value: Number(item.product_price) || 1890,
-      customer_city: item.city || 'Jaipur',
+      sku: item.sku || item.product_id || 'UNKNOWN_SKU',
+      product_name: item.product_name || 'Unspecified Product',
+      category: item.category || 'General',
+      detected_reason: item.return_reason_raw || '',
+      confidence_score: 0.90,
+      order_value: toNum(item.product_price || item.order_value),
+      customer_city: item.city || (item.pincode ? `PIN ${item.pincode}` : 'Unknown Location'),
       return_date: new Date().toISOString(),
       status: 'analyzed',
       customer_comment: item.customer_comment || '',
-      logistics_partner: item.courier || 'Delhivery'
+      logistics_partner: item.courier || 'UNKNOWN_COURIER'
     };
 
     db.returns.unshift(newRecord);
@@ -333,31 +374,24 @@ export const seedDemoData = async (req, res) => {
     db.returns = seed.returns;
     db.integrations = seed.integrations;
 
-    // Build canonical payload from seed returns and run through analysis pipeline
     const canonicalPayload = {
       returns: seed.returns.map(r => ({
         order_id: r.order_id,
         order_date: r.return_date,
-        sku: r.sku || r.product_id || 'BT-KRS-SG-M',
+        sku: r.sku || r.product_id,
         product_name: r.product_name,
         product_category: r.category,
-        product_variant: 'M',
-        size: 'M',
-        order_value: r.order_value || r.product_price || 1890,
-        order_status: 'returned',
-        journey_outcome: 'returned',
-        return_reason_raw: r.return_reason_raw || 'Size mismatch',
+        order_value: r.order_value || r.product_price,
+        order_status: r.is_rto ? 'rto' : 'returned',
+        journey_outcome: r.is_rto ? 'rto' : 'returned',
+        return_reason_raw: r.return_reason_raw || '',
         customer_comment: r.customer_comment || '',
-        is_rto: false,
-        payment_method: 'COD',
+        is_rto: !!r.is_rto,
+        payment_method: r.payment_method || 'COD',
         courier: r.logistics_partner || 'Delhivery',
-        pincode: '305001',
+        pincode: r.pincode || '305001',
         shipping_zone: 'North',
-        delivery_attempts: 1,
-        dispatch_delay_days: 0,
-        delivery_delay_days: 0,
-        customer_type: 'Retail',
-        refund_amount: r.order_value || 1890
+        delivery_attempts: r.is_rto ? 3 : 1
       })),
       order_summary: {
         total_shipped_orders: 480,
@@ -366,7 +400,7 @@ export const seedDemoData = async (req, res) => {
         prepaid_shipped_orders: 200
       },
       request_context: {
-        merchant_id: 'bharatthreads_prod',
+        merchant_id: req.user?.company_name || 'BharatThreads Lifestyle Pvt. Ltd.',
         source: 'seed_demo',
         client_run_id: 'rs_demo_seed_001'
       }
@@ -377,7 +411,7 @@ export const seedDemoData = async (req, res) => {
 
     db.runs = [{
       id: runId,
-      merchant_id: 'bharatthreads_prod',
+      merchant_id: req.user?.company_name || 'BharatThreads Lifestyle Pvt. Ltd.',
       created_at: new Date().toISOString(),
       source: 'seed_demo',
       status: 'success',
@@ -400,7 +434,7 @@ export const seedDemoData = async (req, res) => {
         evidence: rec.evidence,
         evidence_summary: rec.evidence,
         expected_metric: rec.expected_metric,
-        priority: rec.priority || 'P0',
+        priority: rec.priority || rec.priority_tier || 'P1',
         confidence: rec.confidence || 0.90,
         status: 'todo',
         requires_human_approval: !!rec.requires_human_approval,
