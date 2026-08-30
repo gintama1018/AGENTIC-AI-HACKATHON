@@ -13,9 +13,9 @@ const getWebhookUrl = (envVarName, devFallback) => {
   return url || devFallback;
 };
 
-const ANALYSIS_WEBHOOK = getWebhookUrl('N8N_ANALYSIS_WEBHOOK_URL', 'https://sonujangid105.app.n8n.cloud/webhook/returns-agent');
-const FOLLOWUP_WEBHOOK = getWebhookUrl('N8N_FOLLOWUP_WEBHOOK_URL', 'https://sonujangid105.app.n8n.cloud/webhook/returnshield-ask');
-const FEEDBACK_WEBHOOK = getWebhookUrl('N8N_FEEDBACK_WEBHOOK_URL', 'https://sonujangid105.app.n8n.cloud/webhook/returnshield-feedback');
+const ANALYSIS_WEBHOOK = getWebhookUrl('N8N_ANALYSIS_WEBHOOK_URL', 'http://localhost:5678/webhook/returns-agent');
+const FOLLOWUP_WEBHOOK = getWebhookUrl('N8N_FOLLOWUP_WEBHOOK_URL', 'http://localhost:5678/webhook/returnshield-ask');
+const FEEDBACK_WEBHOOK = getWebhookUrl('N8N_FEEDBACK_WEBHOOK_URL', 'http://localhost:5678/webhook/returnshield-feedback');
 const WEBHOOK_SECRET   = process.env.N8N_WEBHOOK_SECRET || '';
 
 const getHeaders = () => {
@@ -214,7 +214,7 @@ const generateLocalGroundedAnswer = (question, context) => {
       answer = `Top SKU issue is "${skuProb.segment_value}". Root cause hypothesis: "${hyp.hypothesis}". Supporting evidence: ${hyp.supporting_evidence}. Recommended test: ${hyp.next_test}.`;
     } else if (products.length > 0) {
       const topProd = products[0];
-      answer = `Top problem detected is "${topProd.product_name}" with ${topProd.recent_return_count} returns. Dominant reason: ${topProd.dominant_reason}.`;
+      answer = `Top problem detected is "${topProd.product_name}" with ${topProd.recent_return_count} returns. Dominant reason: ${topProd.dominant_reason || 'General Return'}.`;
     } else {
       answer = `No specific SKU anomaly cleared the minimum sample threshold in Run ${runId}.`;
     }
