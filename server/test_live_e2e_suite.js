@@ -1,6 +1,4 @@
-import fs from 'fs';
-import path from 'path';
-import { fileURLToPath } from 'url';
+import assert from 'assert';
 import dotenv from 'dotenv';
 dotenv.config();
 
@@ -8,21 +6,18 @@ import { n8nClient } from './src/services/n8nClient.js';
 import { normalizeAnalysis } from './src/services/analysisNormalizer.js';
 import { getDb, initDb, saveDb } from './src/config/db.js';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
-async function runLiveE2ESuite() {
+async function runStrictLiveE2EVerification() {
   console.log('\n======================================================');
-  console.log('🚀 RUNNING 3-PART LIVE PRODUCTION N8N VERIFICATION');
+  console.log('🚀 RUNNING RIGOROUS PRODUCTION LIVE 3-WORKFLOW VERIFICATION');
   console.log('======================================================\n');
 
   await initDb();
   const db = getDb();
 
   // ----------------------------------------------------
-  // TEST #1: Real Batch Ingest -> Workflow 1 -> Gemini -> Normalizer -> DB
+  // TEST #1: Ingesting Real Batch to Workflow 1 (/returns-agent)
   // ----------------------------------------------------
-  console.log('--- TEST #1: Ingesting Real Batch to Workflow 1 (/returns-agent) ---');
+  console.log('--- TEST #1: Dispatching Batch to Workflow 1 (/returns-agent) ---');
   const sampleBatch = [
     {
       order_id: 'ORD-LIVE-001',
@@ -71,6 +66,38 @@ async function runLiveE2ESuite() {
       pincode: '400001',
       is_rto: false,
       payment_method: 'Prepaid'
+    },
+    {
+      order_id: 'ORD-LIVE-004',
+      order_date: '2026-08-29T13:00:00Z',
+      sku: 'BT-KRS-SG-M',
+      product_name: 'Kurta Set Sage Green',
+      product_category: 'Ethnic Wear',
+      size: 'M',
+      order_value: 1890,
+      journey_outcome: 'returned',
+      return_reason_raw: 'fitting is too tight on bust',
+      customer_comment: 'Need large size, M is cut too small',
+      courier: 'Delhivery',
+      pincode: '305001',
+      is_rto: false,
+      payment_method: 'COD'
+    },
+    {
+      order_id: 'ORD-LIVE-005',
+      order_date: '2026-08-29T14:00:00Z',
+      sku: 'BT-KRS-SG-M',
+      product_name: 'Kurta Set Sage Green',
+      product_category: 'Ethnic Wear',
+      size: 'M',
+      order_value: 1890,
+      journey_outcome: 'returned',
+      return_reason_raw: 'size measurement defect',
+      customer_comment: 'Bust measurement is 2 inches smaller than chart',
+      courier: 'Delhivery',
+      pincode: '110001',
+      is_rto: false,
+      payment_method: 'Prepaid'
     }
   ];
 
@@ -84,25 +111,36 @@ async function runLiveE2ESuite() {
     },
     request_context: {
       merchant_id: 'bharatthreads_prod',
-      source: 'live_test_suite',
-      client_run_id: 'rs_live_e2e_' + Date.now().toString(36)
+      source: 'strict_e2e_suite',
+      client_run_id: 'rs_strict_' + Date.now().toString(36)
     }
   };
 
   const w1Result = await n8nClient.analyzeBatch(canonicalPayload);
-  const normalized = normalizeAnalysis(w1Result, w1Result.run?.id || 'live_run', w1Result.intelligence_source);
+  
+  // Strict Assertions for Workflow 1
+  assert.ok(w1Result, 'Workflow 1 must return a non-null result object');
+  assert.strictEqual(w1Result.intelligence_source, 'n8n', 'Workflow 1 must execute live via n8n cloud instance');
+  assert.ok(w1Result.run && typeof w1Result.run.id === 'string', 'Workflow 1 must return a valid run.id string');
+  assert.ok(w1Result.run.id.startsWith('rs_'), 'Run ID must start with "rs_" prefix');
+  assert.ok(Array.isArray(w1Result.top_problems), 'top_problems must be an array');
+  assert.ok(Array.isArray(w1Result.recommendations) && w1Result.recommendations.length > 0, 'Workflow 1 must generate prescribed recommendations');
+  assert.ok(w1Result.verification && typeof w1Result.verification.status === 'string', 'Workflow 1 must contain verification node status');
 
-  console.log('✅ Workflow 1 Output Verified:');
-  console.log('   - Intelligence Source:', normalized.metrics.intelligenceSource);
-  console.log('   - Run ID:', normalized.run.id);
-  console.log('   - Total Events:', normalized.metrics.totalEvents);
-  console.log('   - Returned vs RTO:', `${normalized.metrics.totalReturns} Returns / ${normalized.metrics.totalRto} RTOs`);
-  console.log('   - Top Reason:', normalized.metrics.topReason);
-  console.log('   - Self-Verification Status:', normalized.verification.status);
-  console.log('   - Top Problems count:', normalized.topProblems.length);
-  console.log('   - Prescribed Recommendations:', normalized.recommendations.map(r => r.action));
+  const normalized = normalizeAnalysis(w1Result, w1Result.run.id, w1Result.intelligence_source);
+  assert.ok(String(normalized.verification.status).toLowerCase().includes('passed'), 'Self-verification status must be "passed"');
+  assert.strictEqual(normalized.metrics.totalEvents, 5, 'Total events must accurately equal 5');
+  assert.strictEqual(normalized.metrics.totalReturns, 4, 'Total returns must accurately equal 4');
+  assert.strictEqual(normalized.metrics.totalRto, 1, 'Total RTO must accurately equal 1');
 
-  // Save to DB
+  console.log('✅ TEST #1 PASSED:');
+  console.log(`   - Run ID: ${normalized.run.id}`);
+  console.log(`   - Intelligence Source: ${normalized.metrics.intelligenceSource}`);
+  console.log(`   - Self-Verification: ${normalized.verification.status}`);
+  console.log(`   - Events Processed: ${normalized.metrics.totalEvents}`);
+  console.log(`   - Prescribed Recommendations: ${normalized.recommendations.length}`);
+
+  // Persist to DB
   db.runs.unshift(normalized.run);
   db.analyses.unshift({ run_id: normalized.run.id, analysis: w1Result, created_at: new Date().toISOString() });
   saveDb();
@@ -111,37 +149,51 @@ async function runLiveE2ESuite() {
   // TEST #2: Ask ReturnShield Follow-up -> Workflow 2 -> LangChain Tools
   // ----------------------------------------------------
   console.log('\n--- TEST #2: Querying Ask ReturnShield Agent (/returnshield-ask) ---');
-  const question = 'Why is RTO high and which courier is causing it?';
+  const question = 'Why are returns concentrated on Kurta Set Sage Green?';
   const w2Result = await n8nClient.askQuestion(question, w1Result, normalized.run.id);
 
-  console.log('✅ Workflow 2 Output Verified:');
-  console.log('   - Intelligence Source:', w2Result.intelligence_source);
-  console.log('   - Tools Used:', w2Result.tools_used);
-  console.log('   - Confidence:', w2Result.confidence);
-  console.log('   - Answer:', w2Result.answer);
+  // Strict Assertions for Workflow 2
+  assert.ok(w2Result, 'Workflow 2 must return a response object');
+  assert.strictEqual(w2Result.intelligence_source, 'n8n', 'Workflow 2 must execute live via n8n cloud agent');
+  assert.ok(typeof w2Result.answer === 'string' && w2Result.answer.length > 20, 'Workflow 2 must return a substantive answer');
+  assert.ok(Array.isArray(w2Result.tools_used), 'tools_used must be an array');
+  assert.ok(w2Result.tools_used.length > 0, 'Workflow 2 agent must have executed at least 1 analytical tool');
+
+  console.log('✅ TEST #2 PASSED:');
+  console.log(`   - Intelligence Source: ${w2Result.intelligence_source}`);
+  console.log(`   - Tools Executed: [ ${w2Result.tools_used.join(', ')} ]`);
+  console.log(`   - Grounded Answer Snippet: "${w2Result.answer.slice(0, 140)}..."`);
 
   // ----------------------------------------------------
-  // TEST #3: Action Approval -> Workflow 3 -> Feedback & Intervention Logging
+  // TEST #3: Human Action Approval -> Workflow 3 -> Feedback Loop
   // ----------------------------------------------------
   console.log('\n--- TEST #3: Human Approval & Feedback Loop (/returnshield-feedback) ---');
-  const targetRecommendation = normalized.recommendations[0] || { target: 'Xpress Logistics', action: 'Require pre-dispatch OTP on COD orders' };
-  
+  const targetRec = normalized.recommendations[0] || { target: 'sku: BT-KRS-SG-M', action: 'Update size chart' };
   const w3Result = await n8nClient.recordFeedback({
     run_id: normalized.run.id,
-    target: targetRecommendation.target,
+    target: targetRec.target,
     outcome: 'approved',
-    note: `Live human approval recorded for: ${targetRecommendation.action}`,
+    note: `Strict verification human approval for: ${targetRec.action}`,
     recorded_by: 'Sonu Jangir (Lead Architect)'
   });
 
-  console.log('✅ Workflow 3 Output Verified:');
-  console.log('   - Intelligence Source:', w3Result.intelligence_source);
-  console.log('   - Stored in n8n/Local:', w3Result.stored);
-  console.log('   - Feedback Record:', w3Result.record);
+  // Strict Assertions for Workflow 3
+  assert.ok(w3Result, 'Workflow 3 must return a response object');
+  assert.strictEqual(w3Result.intelligence_source, 'n8n', 'Workflow 3 must record live via n8n cloud webhook');
+  assert.strictEqual(w3Result.stored, true, 'Workflow 3 must confirm storage');
+  assert.strictEqual(w3Result.record.outcome, 'approved', 'Outcome must match approved');
+
+  console.log('✅ TEST #3 PASSED:');
+  console.log(`   - Intelligence Source: ${w3Result.intelligence_source}`);
+  console.log(`   - Stored in Cloud/Local: ${w3Result.stored}`);
+  console.log(`   - Approved Target: ${w3Result.record.target}`);
 
   console.log('\n======================================================');
-  console.log('🏆 ALL 3 LIVE PRODUCTION WORKFLOW TESTS COMPLETED SUCCESSFULLY!');
+  console.log('🏆 ALL STRICT PRODUCTION ASSERTIONS PASSED WITH 100% SUCCESS!');
   console.log('======================================================\n');
 }
 
-runLiveE2ESuite().catch(console.error);
+runStrictLiveE2EVerification().catch((err) => {
+  console.error('\n❌ STRICT E2E VERIFICATION FAILED:', err.message);
+  process.exit(1);
+});

@@ -18,9 +18,15 @@ import askRoutes from './routes/askRoutes.js';
 
 dotenv.config();
 
-if (process.env.NODE_ENV === 'production' && !process.env.JWT_SECRET) {
-  console.error('FATAL: JWT_SECRET environment variable must be set in production mode.');
-  process.exit(1);
+if (process.env.NODE_ENV === 'production') {
+  if (!process.env.JWT_SECRET) {
+    console.error('FATAL: JWT_SECRET environment variable must be set in production mode.');
+    process.exit(1);
+  }
+  if (!process.env.N8N_WEBHOOK_SECRET) {
+    console.error('FATAL: N8N_WEBHOOK_SECRET environment variable must be set in production mode.');
+    process.exit(1);
+  }
 }
 
 const __filename = fileURLToPath(import.meta.url);

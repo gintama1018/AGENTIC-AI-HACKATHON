@@ -13,10 +13,14 @@ const getWebhookUrl = (envVarName, devFallback) => {
   return url || devFallback;
 };
 
-const ANALYSIS_WEBHOOK = getWebhookUrl('N8N_ANALYSIS_WEBHOOK_URL', 'http://localhost:5678/webhook/returns-agent');
-const FOLLOWUP_WEBHOOK = getWebhookUrl('N8N_FOLLOWUP_WEBHOOK_URL', 'http://localhost:5678/webhook/returnshield-ask');
-const FEEDBACK_WEBHOOK = getWebhookUrl('N8N_FEEDBACK_WEBHOOK_URL', 'http://localhost:5678/webhook/returnshield-feedback');
+const ANALYSIS_WEBHOOK = getWebhookUrl('N8N_ANALYSIS_WEBHOOK_URL', 'https://sonujangid105.app.n8n.cloud/webhook/returns-agent');
+const FOLLOWUP_WEBHOOK = getWebhookUrl('N8N_FOLLOWUP_WEBHOOK_URL', 'https://sonujangid105.app.n8n.cloud/webhook/returnshield-ask');
+const FEEDBACK_WEBHOOK = getWebhookUrl('N8N_FEEDBACK_WEBHOOK_URL', 'https://sonujangid105.app.n8n.cloud/webhook/returnshield-feedback');
 const WEBHOOK_SECRET   = process.env.N8N_WEBHOOK_SECRET || '';
+
+if (process.env.NODE_ENV === 'production' && !WEBHOOK_SECRET) {
+  throw new Error('FATAL: N8N_WEBHOOK_SECRET environment variable is mandatory in production mode.');
+}
 
 const getHeaders = () => {
   const headers = { 'Content-Type': 'application/json' };
@@ -165,7 +169,7 @@ export const n8nClient = {
 
 /**
  * Local grounded question responder strictly bound to canonical normalized analysis state.
- * Tags tools_used honestly as ['local_run_context'] when offline.
+ * Uses strictly conservative epistemic language (distinguishes correlation from causality).
  */
 const generateLocalGroundedAnswer = (question, context) => {
   if (!context) {
@@ -190,14 +194,14 @@ const generateLocalGroundedAnswer = (question, context) => {
   const m = normalized.metrics || {};
   const runId = normalized.run?.id || 'current';
 
-  let answer = `Analysis Run ${runId} contains ${m.totalEvents} return/RTO events (₹${m.totalFinancialLoss.toLocaleString('en-IN')} affected order value). Top reason: ${m.topReason}.`;
+  let answer = `Analysis Run ${runId} contains ${m.totalEvents} return/RTO events (₹${m.totalFinancialLoss.toLocaleString('en-IN')} affected order value). Primary category: ${m.topReason}.`;
   const tools_used = ['local_run_context'];
 
   // Courier query
   if (q.includes('courier') || q.includes('rto') || q.includes('logistics') || q.includes('xpress') || q.includes('delhivery')) {
     const courierProb = topProblems.find(p => p.dimension === 'courier');
     if (courierProb) {
-      answer = `Courier analysis for Run ${runId}: ${courierProb.segment_value} accounts for ${courierProb.count} events (${courierProb.share_pct}% share) with priority tier ${courierProb.priority}.`;
+      answer = `Courier analysis for Run ${runId}: ${courierProb.segment_value} is associated with ${courierProb.count} events (${courierProb.share_pct}% share) with priority tier ${courierProb.priority}. Note: Correlation identified across available samples; causality is not proven without controlled testing.`;
     } else if (couriers.length > 0) {
       const topCourier = couriers[0];
       answer = `Top courier by volume in Run ${runId} is ${topCourier.courier} with ${topCourier.count || topCourier.rtoCount} events.`;
@@ -211,10 +215,10 @@ const generateLocalGroundedAnswer = (question, context) => {
     const hyp = hypotheses.find(h => h.dimension === 'sku') || hypotheses[0];
 
     if (skuProb && hyp) {
-      answer = `Top SKU issue is "${skuProb.segment_value}". Root cause hypothesis: "${hyp.hypothesis}". Supporting evidence: ${hyp.supporting_evidence}. Recommended test: ${hyp.next_test}.`;
+      answer = `Top problem cluster in Run ${runId} is "${skuProb.segment_value}". Root cause hypothesis: "${hyp.hypothesis}". Supporting evidence: ${hyp.supporting_evidence}. Recommended verification test: ${hyp.next_test}.`;
     } else if (products.length > 0) {
       const topProd = products[0];
-      answer = `Top problem detected is "${topProd.product_name}" with ${topProd.recent_return_count} returns. Dominant reason: ${topProd.dominant_reason || 'General Return'}.`;
+      answer = `Highest volume return cluster is "${topProd.product_name}" with ${topProd.recent_return_count} returns. Dominant reason: ${topProd.dominant_reason || 'General Return'}.`;
     } else {
       answer = `No specific SKU anomaly cleared the minimum sample threshold in Run ${runId}.`;
     }
@@ -223,7 +227,7 @@ const generateLocalGroundedAnswer = (question, context) => {
   else if (q.includes('action') || q.includes('recommend') || q.includes('fix') || q.includes('next')) {
     const topRec = recs[0];
     if (topRec) {
-      answer = `Top prescribed action: "${topRec.action}" on ${topRec.target}. Expected metric: ${topRec.expected_metric || 'Reduce return concentration'}. Tracking plan: ${topRec.measurement_plan?.metric_to_track || 'Monitor weekly rates'}.`;
+      answer = `Top prescribed operational action: "${topRec.action}" for ${topRec.target}. Target metric: ${topRec.expected_metric || 'Reduce return concentration'}. Measurement plan: ${topRec.measurement_plan?.metric_to_track || 'Monitor weekly rates'}.`;
     } else {
       answer = `No actionable recommendations generated for Run ${runId}.`;
     }
@@ -232,7 +236,7 @@ const generateLocalGroundedAnswer = (question, context) => {
   else if (q.includes('trend') || q.includes('change') || q.includes('previous') || q.includes('week')) {
     const trend = normalized.trends?.[0];
     if (trend && trend.available) {
-      answer = `Comparison against prior run (${trend.compared_to_run_id}): Return count change: ${trend.returned_count_change || 0}, Affected value change: ${trend.affected_order_value_change_inr || 0}.`;
+      answer = `Longitudinal comparison against prior run (${trend.compared_to_run_id}): Return count delta: ${trend.returned_count_change || 0}, Affected value delta: ${trend.affected_order_value_change_inr || 0} INR.`;
     } else {
       answer = `No prior baseline run available for longitudinal trend diffing. This is initial run ${runId}.`;
     }
