@@ -62,7 +62,7 @@ app.use((err, req, res, next) => {
   });
 });
 
-// Initialize DB and Seed Initial Analysis
+// Initialize DB and Seed Initial Analysis with Realistic Indian D2C Data
 const startServer = async () => {
   try {
     await initDb();
@@ -72,25 +72,40 @@ const startServer = async () => {
       console.log('🌱 Seeding initial return records and running baseline analysis...');
       const seed = getInitialSeedData();
       db.users = seed.users;
-      db.returns = seed.returns;
       db.integrations = seed.integrations;
 
-      const canonicalPayload = {
-        returns: seed.returns.map(r => ({
+      // Realistic Indian D2C Returns + RTOs batch (50 records)
+      const canonicalReturns = seed.returns.map((r, i) => {
+        const isRto = i < 14; // First 14 are RTO events on Xpress Logistics
+        const courier = isRto ? 'Xpress Logistics' : (i < 28 ? 'Delhivery' : (i < 40 ? 'BlueDart' : 'Shadowfax'));
+        const pincode = isRto ? '305001' : (i < 25 ? '110001' : (i < 38 ? '400001' : '560001'));
+        const sku = i < 17 ? 'BT-KRS-SG-M' : (i < 28 ? 'BT-DPT-RS-OS' : (i < 38 ? 'BT-CHN-DT-32' : r.product_id));
+        const productName = i < 17 ? 'Kurta Set — Sage Green' : (i < 28 ? 'Embroidered Dupatta — Rust' : (i < 38 ? "Men's Chino — Dark Teal" : r.product_name));
+
+        return {
           order_id: r.order_id,
           order_date: r.return_date,
-          sku: r.sku || r.product_id || 'BT-KRS-SG-M',
-          product_name: r.product_name,
+          sku,
+          product_name: productName,
           product_category: r.category,
-          order_value: r.order_value || r.product_price || 1890,
-          journey_outcome: 'returned',
-          return_reason_raw: r.return_reason_raw || 'Size mismatch',
+          product_variant: 'M',
+          size: 'M',
+          order_value: r.product_price || 1890,
+          order_status: isRto ? 'rto' : 'returned',
+          journey_outcome: isRto ? 'rto' : 'returned',
+          return_reason_raw: isRto ? 'Customer unreachable / delivery rejected' : r.return_reason_raw,
           customer_comment: r.customer_comment || '',
-          is_rto: false,
-          payment_method: 'COD',
-          courier: r.logistics_partner || 'Delhivery',
-          pincode: '305001'
-        })),
+          is_rto: isRto,
+          payment_method: isRto ? 'COD' : (i % 2 === 0 ? 'COD' : 'Prepaid'),
+          courier,
+          pincode,
+          shipping_zone: 'North',
+          delivery_attempts: isRto ? 3 : 1
+        };
+      });
+
+      const canonicalPayload = {
+        returns: canonicalReturns,
         order_summary: {
           total_shipped_orders: 480,
           total_delivered_orders: 430,
@@ -113,12 +128,32 @@ const startServer = async () => {
         created_at: new Date().toISOString(),
         source: 'seed_init',
         status: 'success',
-        records_count: seed.returns.length,
+        records_count: canonicalReturns.length,
         analysis_confidence: 'high',
         intelligence_source: 'n8n'
       }];
 
       db.analyses = [{ run_id: runId, analysis: initialAnalysis, created_at: new Date().toISOString() }];
+      db.returns = canonicalReturns.map(r => ({
+        _id: `ret_${r.order_id}`,
+        id: r.order_id,
+        order_id: r.order_id,
+        sku: r.sku,
+        product_name: r.product_name,
+        category: r.product_category,
+        detected_reason: r.return_reason_raw || 'Size & Fit Mismatch',
+        ai_reason_category: r.return_reason_raw || 'Size & Fit Mismatch',
+        ai_root_cause: 'Bodice dimensions run 2 - 2.5 inches tighter than standard Indian size matrix specs.',
+        confidence_score: 0.95,
+        order_value: r.order_value,
+        customer_city: `PIN ${r.pincode}`,
+        return_date: r.order_date,
+        status: 'analyzed',
+        logistics_partner: r.courier,
+        customer_comment: r.customer_comment,
+        is_rto: r.is_rto
+      }));
+
       db.recommendations = (initialAnalysis.recommendations || []).map(r => ({
         ...r,
         title: r.action,

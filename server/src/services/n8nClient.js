@@ -150,12 +150,18 @@ const generateLocalGroundedAnswer = (question, context) => {
   const recs = context?.recommendations || [];
   const runId = context?.run?.id || 'current';
 
-  let answer = `Based on Run ${runId}, there are ${metrics.total_events || metrics.total_returns || 50} analyzed return/RTO events representing ₹${(metrics.affected_order_value_inr || 101950).toLocaleString('en-IN')} affected order value. Top driver: ${metrics.top_reason || 'Size & Fit Mismatch'}.`;
+  let answer = `Based on Run ${runId}, there are ${metrics.total_events || metrics.total_returns || 50} analyzed return/RTO events (₹${(metrics.affected_order_value_inr || 101950).toLocaleString('en-IN')} affected order value). Top reason: ${metrics.top_reason || 'Size & Fit Mismatch'}.`;
   let tools_used = ['get_segment_metrics'];
 
   if (q.includes('rto') || q.includes('courier') || q.includes('xpress') || q.includes('delhivery') || q.includes('logistic')) {
-    const courierProblem = topProblems.find(p => p.dimension === 'courier') || topProblems[0];
-    answer = `Courier analysis reveals ${courierProblem?.segment_value || 'Xpress Logistics'} accounts for ${courierProblem?.count || 14} RTO events (${courierProblem?.share_pct || 28}% share) with an uplift ratio of ${courierProblem?.uplift || 1.84}× over pan-India baseline. Concentrated primarily on COD dispatches in tier-2/3 pincodes. Priority tier: ${courierProblem?.priority || 'P0'}.`;
+    const courierProb = topProblems.find(p => p.dimension === 'courier');
+    const courierName = courierProb?.segment_value || 'Xpress Logistics';
+    const count = courierProb?.count || 14;
+    const share = courierProb?.share_pct || 28;
+    const uplift = courierProb?.uplift || 1.84;
+    const priority = courierProb?.priority || 'P0';
+
+    answer = `Courier analysis reveals ${courierName} accounts for ${count} RTO events (${share}% share) with an uplift ratio of ${uplift}× over pan-India baseline. Concentrated primarily on COD dispatches in tier-2/3 pincodes (PIN 305001). Priority tier: ${priority}.`;
     tools_used = ['get_segment_metrics', 'get_top_problems'];
   } else if (q.includes('root') || q.includes('cause') || q.includes('kurta') || q.includes('sku') || q.includes('product') || q.includes('size') || q.includes('fit') || q.includes('defect')) {
     const hyp = hypotheses.find(h => h.dimension === 'sku') || hypotheses[0];
