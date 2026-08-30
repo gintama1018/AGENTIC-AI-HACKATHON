@@ -1,0 +1,16 @@
+order_id,order_date,sku,product_name,category,size,order_value,journey_outcome,return_reason_raw,customer_comment,courier,pincode,payment_method,shipping_zone,delivery_attempts
+ORD-IN-9101,2026-08-28,BT-KRS-SG-M,Kurta Set Sage Green,Ethnic Wear,M,1890,returned,Size too small,Ordered M as per chart but bodice chest is way too tight,Delhivery,305001,COD,North,1
+ORD-IN-9102,2026-08-28,BT-KRS-SG-M,Kurta Set Sage Green,Ethnic Wear,M,1890,returned,Size mismatch,Chest and shoulders run 2 inches tighter than size guide,BlueDart,305001,Prepaid,North,1
+ORD-IN-9103,2026-08-27,BT-KRS-SG-M,Kurta Set Sage Green,Ethnic Wear,L,1890,returned,Chest tight,Shoulder seam pulls tight across back,Delhivery,110001,COD,North,1
+ORD-IN-9104,2026-08-27,BT-KRS-SG-M,Kurta Set Sage Green,Ethnic Wear,M,1890,rto,Delivery attempt failed,Customer unreachable on phone delivery boy rejected,Xpress Logistics,305001,COD,North,3
+ORD-IN-9105,2026-08-26,BT-KRS-SG-M,Kurta Set Sage Green,Ethnic Wear,M,1890,rto,Customer refused at door,Buyer refused COD payment on delivery,Xpress Logistics,305001,COD,North,3
+ORD-IN-9106,2026-08-26,BT-DPT-RS-OS,Embroidered Dupatta Rust,Ethnic Wear,FreeSize,1899,returned,Quality defect,Zari embroidery thread loose and unraveling near border,BlueDart,400001,Prepaid,West,1
+ORD-IN-9107,2026-08-25,BT-DPT-RS-OS,Embroidered Dupatta Rust,Ethnic Wear,FreeSize,1899,returned,Fabric damaged,Two small puncture holes near border embroidery,Delhivery,400001,COD,West,1
+ORD-IN-9108,2026-08-25,BT-CHN-DT-32,Men's Chino Dark Teal,Apparel,32,1599,returned,Color different,Color in daylight is washed out compared to website photos,Shadowfax,560001,Prepaid,South,1
+ORD-IN-9109,2026-08-24,BT-KRS-SG-M,Kurta Set Sage Green,Ethnic Wear,M,1890,rto,Fake delivery attempt,Delivery boy marked address not found without calling,Xpress Logistics,305001,COD,North,3
+ORD-IN-9110,2026-08-24,BT-KRS-SG-M,Kurta Set Sage Green,Ethnic Wear,M,1890,rto,Customer not available,NDR attempt 3 failed at Ajmer hub,Xpress Logistics,305001,COD,North,3
+ORD-IN-9111,2026-08-23,BT-KRS-SG-M,Kurta Set Sage Green,Ethnic Wear,M,1890,returned,Size too small,Bust measurement is 37 inches instead of 40 inches,Delhivery,305001,COD,North,1
+ORD-IN-9112,2026-08-23,BT-DPT-RS-OS,Embroidered Dupatta Rust,Ethnic Wear,FreeSize,1899,returned,Quality defect,Metallic zari thread causing skin itching and peeling,Delhivery,110001,Prepaid,North,1
+ORD-IN-9113,2026-08-22,BT-KRS-SG-M,Kurta Set Sage Green,Ethnic Wear,M,1890,rto,Delivery rejected,Customer cancelled COD order after dispatch,Xpress Logistics,305001,COD,North,3
+ORD-IN-9114,2026-08-22,BT-CHN-DT-32,Men's Chino Dark Teal,Apparel,34,1599,returned,Length too long,Inseam is 34 inches which is dragging under shoes,Delhivery,400001,COD,West,1
+ORD-IN-9115,2026-08-21,BT-KRS-SG-M,Kurta Set Sage Green,Ethnic Wear,M,1890,rto,Unreachable customer,Phone switched off for 3 days on delivery,Xpress Logistics,305001,COD,North,3
