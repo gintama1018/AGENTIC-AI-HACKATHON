@@ -28,8 +28,15 @@ export const ReportsPage = () => {
     </div>
   );
 
-  const doneActions = actions.filter((a) => a.status === 'done');
-  const pendingActions = actions.filter((a) => a.status !== 'done');
+  const doneActions = actions.filter((a) => a.status === 'validated' || a.status === 'implemented');
+  const pendingActions = actions.filter((a) => a.status !== 'validated' && a.status !== 'implemented');
+
+  const totalEvents = stats?.total_events ?? stats?.total_returns ?? 0;
+  const returnedOrders = stats?.total_returns ?? 0;
+  const rtoOrders = stats?.total_rto ?? 0;
+  const totalLoss = stats?.total_financial_loss ?? 0;
+  const topReason = stats?.top_reason || 'General Return';
+  const runId = stats?.run_id || 'active_run';
 
   return (
     <div className="max-w-4xl space-y-6">
@@ -56,63 +63,66 @@ export const ReportsPage = () => {
           <div>
             <span className="text-[10px] font-bold text-indigo-400 uppercase tracking-widest block">Executive Return Audit</span>
             <h2 className="text-xl font-extrabold text-white mt-1">BharatThreads Lifestyle Pvt. Ltd.</h2>
-            <p className="text-xs text-slate-400">Generated on {today} · Tenant ID: bharatthreads_prod</p>
+            <p className="text-xs text-slate-400">Generated on {today} · Analysis Run ID: {runId}</p>
           </div>
-          <Badge variant="success">Verified Dataset</Badge>
+          <Badge variant="success">Verified Analysis Run</Badge>
         </div>
 
         {/* 1. What changed */}
         <div className="p-6 space-y-3">
-          <p className="text-xs font-bold text-indigo-400 uppercase tracking-wider">A — What Changed This Period?</p>
+          <p className="text-xs font-bold text-indigo-400 uppercase tracking-wider">A — Operational Ingestion Summary</p>
           <p className="text-sm text-slate-200 leading-relaxed">
-            Total return volume stands at <strong className="text-white font-num">{stats?.total_returns || 50} orders</strong> (estimated <span className="text-amber-400 font-num">{stats?.return_rate || 10.4}% RTO/return rate</span>).
+            Total analyzed event volume stands at <strong className="text-white font-num">{totalEvents} orders</strong> (<span className="text-indigo-300 font-num">{returnedOrders} customer returns</span>, <span className="text-rose-400 font-num">{rtoOrders} RTO delivery failures</span>).
           </p>
           <div className="grid grid-cols-3 gap-4 pt-2">
-            <div className="bg-slate-900 border border-slate-800 p-3 rounded-lg text-center">
-              <p className="text-slate-400 text-[11px]">Total Returns</p>
-              <p className="font-num text-2xl font-bold text-white mt-1">{stats?.total_returns || 50}</p>
+            <div className="bg-[#0B0F17] p-3 rounded-lg border border-slate-800">
+              <p className="text-[10px] text-slate-400 uppercase font-bold">Total Events</p>
+              <p className="font-num text-lg font-bold text-white mt-0.5">{totalEvents}</p>
             </div>
-            <div className="bg-slate-900 border border-slate-800 p-3 rounded-lg text-center">
-              <p className="text-slate-400 text-[11px]">Return Rate</p>
-              <p className="font-num text-2xl font-bold text-amber-400 mt-1">{stats?.return_rate || 10.4}%</p>
+            <div className="bg-[#0B0F17] p-3 rounded-lg border border-slate-800">
+              <p className="text-[10px] text-slate-400 uppercase font-bold">Top Complaint Type</p>
+              <p className="font-bold text-amber-300 text-sm mt-0.5 truncate">{topReason}</p>
             </div>
-            <div className="bg-slate-900 border border-slate-800 p-3 rounded-lg text-center">
-              <p className="text-slate-400 text-[11px]">Financial Drag</p>
-              <p className="font-num text-2xl font-bold text-rose-400 mt-1">₹1.84L</p>
-            </div>
-          </div>
-        </div>
-
-        {/* 2. What deserves attention */}
-        <div className="p-6 space-y-3">
-          <p className="text-xs font-bold text-amber-400 uppercase tracking-wider">B — What Deserves Attention?</p>
-          <div className="space-y-2 text-xs">
-            <div className="flex items-center justify-between p-3 bg-slate-900 rounded-lg border border-slate-800">
-              <span className="font-bold text-white">1. Kurta Set — Sage Green (M)</span>
-              <span className="font-num text-amber-300 font-semibold">17 Returns (Fit Mismatch)</span>
-            </div>
-            <div className="flex items-center justify-between p-3 bg-slate-900 rounded-lg border border-slate-800">
-              <span className="font-bold text-white">2. Embroidered Dupatta — Rust</span>
-              <span className="font-num text-rose-300 font-semibold">11 Returns (Quality Defect)</span>
-            </div>
-            <div className="flex items-center justify-between p-3 bg-slate-900 rounded-lg border border-slate-800">
-              <span className="font-bold text-white">3. Men's Chino — Dark Teal</span>
-              <span className="font-num text-slate-300 font-semibold">9 Returns (Color Discrepancy)</span>
+            <div className="bg-[#0B0F17] p-3 rounded-lg border border-slate-800">
+              <p className="text-[10px] text-slate-400 uppercase font-bold">Impacted Order Value</p>
+              <p className="font-num text-lg font-bold text-emerald-400 mt-0.5">₹{totalLoss.toLocaleString('en-IN')}</p>
             </div>
           </div>
         </div>
 
-        {/* 3. Operational Outcomes */}
+        {/* 2. Problem Hotspots */}
         <div className="p-6 space-y-3">
-          <p className="text-xs font-bold text-emerald-400 uppercase tracking-wider">E — Measured Operational Outcomes</p>
+          <p className="text-xs font-bold text-indigo-400 uppercase tracking-wider">B — Verified Problem Hotspots & Hypotheses</p>
+          {stats?.top_problems?.length > 0 ? (
+            <div className="space-y-2">
+              {stats.top_problems.map((p, i) => (
+                <div key={i} className="bg-[#0B0F17] p-3.5 rounded-lg border border-slate-800/80 flex items-center justify-between text-xs">
+                  <div>
+                    <span className="font-bold text-white">{p.segment_value || p.problem}</span>
+                    <p className="text-slate-400 text-[11px] mt-0.5">{p.likely_cause || p.evidence}</p>
+                  </div>
+                  <Badge variant={p.priority === 'P0' ? 'attention' : 'muted'}>{p.priority || 'P1'}</Badge>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-xs text-slate-400">No anomalous concentration clusters flagged in current run.</p>
+          )}
+        </div>
+
+        {/* 3. Action plan */}
+        <div className="p-6 space-y-3">
+          <p className="text-xs font-bold text-indigo-400 uppercase tracking-wider">C — Actionable Recommendations & Measurement Plans</p>
           <div className="space-y-2">
-            <div className="p-4 bg-emerald-950/30 border border-emerald-800/60 rounded-lg text-xs space-y-1">
-              <div className="flex items-center justify-between">
-                <span className="font-bold text-white">Size matrix revision for Anarkali Kurti batch</span>
-                <span className="text-emerald-400 font-bold font-num">₹1,80,000 Protected</span>
+            {actions.map((act) => (
+              <div key={act.id} className="bg-[#0B0F17] p-3.5 rounded-lg border border-slate-800/80 space-y-1 text-xs">
+                <div className="flex items-center justify-between">
+                  <span className="font-bold text-white">{act.title || act.action}</span>
+                  <span className="text-[10px] px-2 py-0.5 rounded bg-slate-800 text-slate-300">Target: {act.target}</span>
+                </div>
+                <p className="text-slate-400 text-[11px]">{act.reason || act.rationale}</p>
               </div>
-              <p className="text-slate-300">Return rate reduced by 38% over 3 follow-up sales cycles.</p>
-            </div>
+            ))}
           </div>
         </div>
       </div>

@@ -48,19 +48,18 @@ export const ReturnDetailPage = () => {
     </div>
   );
 
-  const r = data;
-  const productName       = r.product_name || r.product || 'Kurta Set — Sage Green (M)';
-  const sku               = r.sku || r.product_id || 'BT-KRS-SG-M';
-  const customerComment   = r.customer_comment || r.customer_feedback || r.original_reason || 'I ordered medium like I always do but it fits like a small. The chest area is really tight. Returning it.';
-  const detectedReason    = r.detected_reason || r.ai_classification || r.category || 'Size & Fit Mismatch';
-  const likelyCause       = r.ai_root_cause || r.root_cause || r.explanation || 'Size inconsistency in latest production batch — medium cut appears to have deviated from historical measurements by -2.5cm on bust.';
-  const aiAction          = r.ai_recommendation || r.recommended_action || 'Audit size measurements for BT-KRS-SG-M batch #2024-Q3. Update size guide with actual cm measurements before next campaign.';
-  const confidence        = r.confidence_score ?? r.confidence ?? 0.91;
-  const orderValue        = r.order_value ?? r.amount ?? 1890;
+  const productName       = r.product_name || r.product || r.sku || 'Unspecified Product';
+  const sku               = r.sku || r.product_id || 'UNKNOWN_SKU';
+  const customerComment   = r.customer_comment || r.customer_feedback || r.original_reason || 'No customer comment recorded';
+  const detectedReason    = r.detected_reason || r.ai_classification || r.ai_reason_category || 'General Return';
+  const likelyCause       = r.ai_root_cause || r.root_cause || r.explanation || 'Root cause identified through cluster pattern analysis';
+  const aiAction          = r.ai_recommendation || r.recommended_action || r.ai_mitigation_fix || 'Review return signals and monitor quality metrics';
+  const confidence        = r.confidence_score ?? r.confidence ?? 0.85;
+  const orderValue        = r.order_value ?? r.amount ?? null;
   const status            = r.status || 'Analyzed';
-  const returnDate        = r.return_date || r.date || '2024-10-18';
-  const city              = r.customer_city || r.city || 'Jaipur, Rajasthan';
-  const logistic          = r.logistics_partner || r.courier || 'Delhivery Reverse Logistic';
+  const returnDate        = r.return_date || r.date || 'N/A';
+  const city              = r.customer_city || r.city || 'Unknown Location';
+  const logistic          = r.logistics_partner || r.courier || 'Unknown Courier';
 
   return (
     <div className="max-w-3xl space-y-6">

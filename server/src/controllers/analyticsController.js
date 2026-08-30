@@ -63,18 +63,15 @@ export const getFinancialImpact = async (req, res) => {
     const db = getDb();
     const latestAnalysis = db.analyses?.[0]?.analysis || null;
     const normalized = normalizeAnalysis(latestAnalysis);
+    const m = latestAnalysis?.metrics || {};
 
     res.json({
       totalLoss: normalized.metrics.totalFinancialLoss,
-      estimatedOperatingCost: Math.round(normalized.metrics.totalEvents * 220),
-      costBasis: 'Estimated standard reverse logistics cost (₹220/event)',
+      actualCost: m.actual_cost_inr || null,
+      estimatedOperatingCost: m.estimated_cost_inr || null,
+      costBasis: m.cost_basis || 'Cost breakdown fields not provided in raw return export',
       ratesAvailable: normalized.metrics.ratesAvailable,
-      costDrivers: [
-        { name: 'Reverse Logistics & Courier Freight', percentage: 45, avgPerReturn: '₹120' },
-        { name: 'Warehouse Reverse QC Inspection', percentage: 25, avgPerReturn: '₹60' },
-        { name: 'Damaged / Open-Box Markdown', percentage: 20, avgPerReturn: '₹40' },
-        { name: 'Customer Support & NDR Overhead', percentage: 10, avgPerReturn: '₹20' }
-      ]
+      costDrivers: m.cost_drivers || []
     });
   } catch (err) {
     res.status(500).json({ message: err.message });
