@@ -3,9 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "server": "npm --prefix server start",
-    "server:dev": "npm --prefix server run dev",
-    "client": "npm --prefix client run dev",
-    "install:all": "npm --prefix server install && npm --prefix client install"
+    "build": "npm run build --prefix client",
+    "start": "npm run start --prefix server"
   }
 }
