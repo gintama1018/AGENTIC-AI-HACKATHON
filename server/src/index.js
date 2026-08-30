@@ -40,7 +40,16 @@ app.use(cors());
 app.use(express.json({ limit: '20mb' }));
 app.use(express.urlencoded({ extended: true, limit: '20mb' }));
 
-// Health check endpoint
+// Root and health check endpoints
+app.get('/', (req, res) => {
+  res.json({
+    status: 'online',
+    service: 'ReturnShield AI Production Engine',
+    version: '4.0.0',
+    docs: '/api/health'
+  });
+});
+
 app.get('/api/health', (req, res) => {
   res.json({
     status: 'online',

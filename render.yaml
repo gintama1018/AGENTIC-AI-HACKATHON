@@ -1,0 +1,26 @@
+services:
+  - type: web
+    name: returnshield-backend
+    runtime: node
+    rootDir: server
+    buildCommand: npm install
+    startCommand: node src/index.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 5000
+      - key: JWT_SECRET
+        generateValue: true
+      - key: N8N_WEBHOOK_SECRET
+        sync: false
+      - key: N8N_BASE_URL
+        value: https://sonujangid105.app.n8n.cloud
+      - key: N8N_ANALYSIS_WEBHOOK_URL
+        value: https://sonujangid105.app.n8n.cloud/webhook/returns-agent
+      - key: N8N_FOLLOWUP_WEBHOOK_URL
+        value: https://sonujangid105.app.n8n.cloud/webhook/returnshield-ask
+      - key: N8N_FEEDBACK_WEBHOOK_URL
+        value: https://sonujangid105.app.n8n.cloud/webhook/returnshield-feedback
+      - key: ALLOW_DEMO_MODE
+        value: "true"
