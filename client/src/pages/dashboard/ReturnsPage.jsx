@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
-import { Search, Download, ChevronLeft, ChevronRight, ExternalLink, Eye, RefreshCw } from 'lucide-react';
+import { Search, Download, ChevronLeft, ChevronRight, ExternalLink, Eye, RefreshCw, Box, Truck } from 'lucide-react';
 import { api } from '../../services/api';
 import { Badge } from '../../components/ui/Badge';
 import { Modal } from '../../components/ui/Modal';
@@ -12,7 +12,7 @@ const confidenceVariant = (score) => {
 };
 
 const confidenceLabel = (score) => {
-  const pct = Math.round((score ?? 0.75) * 100);
+  const pct = Math.round((score ?? 0.85) * 100);
   if (score >= 0.85) return `High · ${pct}%`;
   if (score >= 0.65) return `Moderate · ${pct}%`;
   return `Low · ${pct}%`;
@@ -36,6 +36,10 @@ const CATEGORIES = [
   'Logistics & Transit Damage',
   'Warehouse Fulfillment Error',
   'Buyer Remorse / Intent Shift',
+  'Ethnic Wear',
+  'Electronics',
+  'Men Apparel',
+  'Footwear'
 ];
 
 export const ReturnsPage = () => {
@@ -76,7 +80,7 @@ export const ReturnsPage = () => {
         <div>
           <h1 className="text-xl sm:text-2xl font-extrabold text-white tracking-tight">Returns Investigation Table</h1>
           <p className="text-xs text-slate-400 mt-1">
-            <span className="font-num font-bold text-indigo-400">{totalCount} total records</span> · Scan for recurring signals, click to inspect evidence dossier.
+            <span className="font-num font-bold text-indigo-400">{totalCount} total evidence records</span> · Click eye for modal or link for full evidence dossier.
           </p>
         </div>
 
@@ -96,7 +100,7 @@ export const ReturnsPage = () => {
             type="text"
             value={search}
             onChange={(e) => { setSearch(e.target.value); setPage(1); }}
-            placeholder="Search product, SKU, customer..."
+            placeholder="Search product, SKU, customer comment..."
             className="rs-field pl-9"
           />
         </div>
@@ -104,28 +108,40 @@ export const ReturnsPage = () => {
         <select
           value={category}
           onChange={(e) => { setCategory(e.target.value); setPage(1); }}
-          className="rs-field w-auto min-w-[200px]"
+          className="rs-field sm:w-56"
         >
-          {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
+          {CATEGORIES.map((c) => (
+            <option key={c} value={c} className="bg-[#0B0F17] text-white">{c}</option>
+          ))}
         </select>
+
+        {(search || category !== 'All') && (
+          <button
+            onClick={() => { setSearch(''); setCategory('All'); setPage(1); }}
+            className="text-xs text-indigo-400 hover:text-indigo-300 font-semibold"
+          >
+            Clear Filters
+          </button>
+        )}
       </div>
 
       {/* Table */}
-      <div className="border border-slate-800 rounded-xl overflow-hidden bg-[#111827] shadow-sm">
+      <div className="bg-[#111827] border border-slate-800 rounded-xl overflow-hidden shadow-xl">
         <div className="overflow-x-auto">
-          <table className="w-full border-collapse text-left">
+          <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="border-b border-slate-800 bg-[#0D121F]">
-                <th className="px-5 py-3 text-xs font-bold text-slate-300 uppercase tracking-wider">Product & SKU</th>
-                <th className="px-5 py-3 text-xs font-bold text-slate-300 uppercase tracking-wider">Customer Signal</th>
-                <th className="px-5 py-3 text-xs font-bold text-slate-300 uppercase tracking-wider">Detected Reason</th>
-                <th className="px-5 py-3 text-xs font-bold text-slate-300 uppercase tracking-wider">Confidence</th>
-                <th className="px-5 py-3 text-xs font-bold text-slate-300 uppercase tracking-wider">Date</th>
-                <th className="px-5 py-3 text-xs font-bold text-slate-300 uppercase tracking-wider">Status</th>
-                <th className="px-5 py-3 text-right text-xs font-bold text-slate-300 uppercase tracking-wider">Action</th>
+              <tr className="border-b border-slate-800 bg-[#0D121F] text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                <th className="px-5 py-3.5">Product & SKU</th>
+                <th className="px-5 py-3.5">Customer Signal / Comment</th>
+                <th className="px-5 py-3.5">Detected Reason</th>
+                <th className="px-5 py-3.5">Confidence</th>
+                <th className="px-5 py-3.5">Date</th>
+                <th className="px-5 py-3.5">Status</th>
+                <th className="px-5 py-3.5 text-right">Action</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-800/80">
+
+            <tbody className="divide-y divide-slate-800/80 text-xs">
               {loading ? (
                 <tr>
                   <td colSpan={7} className="px-5 py-12 text-center text-slate-400">
@@ -135,77 +151,83 @@ export const ReturnsPage = () => {
                 </tr>
               ) : returns.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="px-5 py-12 text-center">
-                    <p className="text-sm font-semibold text-white mb-1">No returns match this filter</p>
-                    <p className="text-xs text-slate-400">Try adjusting your search or category filter.</p>
+                  <td colSpan={7} className="px-5 py-12 text-center text-slate-400">
+                    No return records found matching your filters.
                   </td>
                 </tr>
-              ) : returns.map((r, i) => (
-                <tr
-                  key={r.id || i}
-                  className="hover:bg-slate-800/50 cursor-pointer transition-colors"
-                  onClick={() => openQuickView(r)}
-                >
-                  {/* Product */}
-                  <td className="px-5 py-3.5">
-                    <p className="text-xs font-bold text-white leading-snug">{r.product_name || 'Item'}</p>
-                    <p className="text-[11px] font-num text-slate-400">{r.sku || 'SKU-N/A'}</p>
-                  </td>
+              ) : returns.map((r, i) => {
+                const recordId = r._id || r.id || r.order_id || `rec_${i}`;
+                const sku = r.sku || r.product_id || 'SKU-IND';
+                const reason = r.ai_reason_category || r.detected_reason || r.category || 'General Return';
+                const conf = r.ai_confidence ?? r.confidence_score ?? 0.88;
 
-                  {/* Customer signal */}
-                  <td className="px-5 py-3.5 max-w-sm">
-                    <p className="text-xs text-slate-300 italic line-clamp-2 leading-relaxed">
-                      "{(r.customer_comment || r.reason || 'No details provided').slice(0, 95)}…"
-                    </p>
-                  </td>
+                return (
+                  <tr
+                    key={recordId}
+                    onClick={() => openQuickView(r)}
+                    className="hover:bg-[#151E32] transition-colors cursor-pointer"
+                  >
+                    {/* Product & SKU */}
+                    <td className="px-5 py-3.5">
+                      <p className="text-xs font-bold text-white leading-snug">{r.product_name || 'Handcrafted Kurta Set'}</p>
+                      <p className="text-[11px] font-num text-slate-400">{sku}</p>
+                    </td>
 
-                  {/* Detected reason */}
-                  <td className="px-5 py-3.5">
-                    <span className="text-xs font-medium text-slate-200">{r.detected_reason || r.category || 'General'}</span>
-                  </td>
+                    {/* Customer signal */}
+                    <td className="px-5 py-3.5 max-w-sm">
+                      <p className="text-xs text-slate-300 italic line-clamp-2 leading-relaxed">
+                        "{(r.customer_comment || r.return_reason_raw || r.reason || 'No details provided')}"
+                      </p>
+                    </td>
 
-                  {/* Confidence */}
-                  <td className="px-5 py-3.5">
-                    <Badge variant={confidenceVariant(r.confidence_score ?? 0.8)}>
-                      {confidenceLabel(r.confidence_score ?? 0.8)}
-                    </Badge>
-                  </td>
+                    {/* Detected reason */}
+                    <td className="px-5 py-3.5">
+                      <span className="text-xs font-medium text-slate-200">{reason}</span>
+                    </td>
 
-                  {/* Date */}
-                  <td className="px-5 py-3.5">
-                    <span className="text-xs font-num text-slate-400">
-                      {r.return_date ? new Date(r.return_date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' }) : 'Recent'}
-                    </span>
-                  </td>
+                    {/* Confidence */}
+                    <td className="px-5 py-3.5">
+                      <Badge variant={confidenceVariant(conf)}>
+                        {confidenceLabel(conf)}
+                      </Badge>
+                    </td>
 
-                  {/* Status */}
-                  <td className="px-5 py-3.5">
-                    <Badge variant={statusVariant(r.status)}>
-                      {r.status || 'Pending'}
-                    </Badge>
-                  </td>
+                    {/* Date */}
+                    <td className="px-5 py-3.5">
+                      <span className="text-xs font-num text-slate-400">
+                        {r.return_date || r.order_date ? new Date(r.return_date || r.order_date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' }) : '29 Aug'}
+                      </span>
+                    </td>
 
-                  {/* Action */}
-                  <td className="px-5 py-3.5 text-right">
-                    <div className="flex items-center justify-end gap-1.5" onClick={(e) => e.stopPropagation()}>
-                      <button
-                        onClick={() => openQuickView(r)}
-                        className="rs-btn-quiet p-1.5"
-                        title="Quick View"
-                      >
-                        <Eye className="w-4 h-4 text-slate-400 hover:text-white" />
-                      </button>
-                      <Link
-                        to={`/dashboard/returns/${r.id}`}
-                        className="rs-btn-quiet p-1.5"
-                        title="Full Evidence Dossier"
-                      >
-                        <ExternalLink className="w-4 h-4 text-indigo-400 hover:text-indigo-300" />
-                      </Link>
-                    </div>
-                  </td>
-                </tr>
-              ))}
+                    {/* Status */}
+                    <td className="px-5 py-3.5">
+                      <Badge variant={statusVariant(r.status || 'analyzed')}>
+                        {r.status || 'analyzed'}
+                      </Badge>
+                    </td>
+
+                    {/* Action */}
+                    <td className="px-5 py-3.5 text-right">
+                      <div className="flex items-center justify-end gap-1.5" onClick={(e) => e.stopPropagation()}>
+                        <button
+                          onClick={() => openQuickView(r)}
+                          className="rs-btn-quiet p-1.5"
+                          title="Quick View"
+                        >
+                          <Eye className="w-4 h-4 text-slate-400 hover:text-white" />
+                        </button>
+                        <Link
+                          to={`/dashboard/returns/${recordId}`}
+                          className="rs-btn-quiet p-1.5"
+                          title="Full Evidence Dossier"
+                        >
+                          <ExternalLink className="w-4 h-4 text-indigo-400 hover:text-indigo-300" />
+                        </Link>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
@@ -237,42 +259,50 @@ export const ReturnsPage = () => {
       )}
 
       {/* Quick Inspection Modal */}
-      <Modal isOpen={modalOpen} onClose={() => setModalOpen(false)} title={`Return Evidence — ${selected?.product_name || selected?.id || ''}`}>
+      <Modal isOpen={modalOpen} onClose={() => setModalOpen(false)} title={`Return Evidence Dossier — ${selected?.order_id || selected?._id || ''}`}>
         {selected && (
           <div className="space-y-4">
             <div className="bg-slate-900 border border-slate-800 p-4 rounded-lg">
               <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5">Customer Statement</p>
               <blockquote className="text-sm text-slate-200 italic leading-relaxed">
-                "{selected.customer_comment || selected.reason || 'No customer comments'}"
+                "{selected.customer_comment || selected.return_reason_raw || selected.reason || 'No customer comments'}"
               </blockquote>
             </div>
 
             <div className="grid grid-cols-2 gap-3 text-xs">
-              <div className="bg-slate-900 border border-slate-800 p-3 rounded-lg">
-                <p className="text-slate-400 mb-0.5">Detected Classification</p>
-                <p className="font-bold text-white">{selected.detected_reason || selected.category || 'General'}</p>
+              <div className="bg-slate-900/60 p-3 rounded-lg border border-slate-800">
+                <p className="text-slate-500 font-semibold mb-1">Product & SKU</p>
+                <p className="font-bold text-white">{selected.product_name || 'Product'}</p>
+                <p className="font-num text-slate-400">{selected.sku || selected.product_id || 'N/A'}</p>
               </div>
-              <div className="bg-slate-900 border border-slate-800 p-3 rounded-lg">
-                <p className="text-slate-400 mb-0.5">Confidence Rating</p>
-                <Badge variant="success">{confidenceLabel(selected.confidence_score ?? 0.85)}</Badge>
-              </div>
-              <div className="bg-slate-900 border border-slate-800 p-3 rounded-lg">
-                <p className="text-slate-400 mb-0.5">Order Value</p>
-                <p className="font-bold font-num text-white">₹{(selected.order_value || 1490).toLocaleString('en-IN')}</p>
-              </div>
-              <div className="bg-slate-900 border border-slate-800 p-3 rounded-lg">
-                <p className="text-slate-400 mb-0.5">Reverse Courier</p>
-                <p className="font-bold text-white">{selected.logistics_partner || 'Delhivery'}</p>
+
+              <div className="bg-slate-900/60 p-3 rounded-lg border border-slate-800">
+                <p className="text-slate-500 font-semibold mb-1">Detected Root Cause</p>
+                <p className="font-bold text-amber-300">{selected.ai_reason_category || selected.detected_reason || selected.category || 'General Return'}</p>
+                <p className="text-slate-400">Confidence: {confidenceLabel(selected.ai_confidence ?? selected.confidence_score ?? 0.88)}</p>
               </div>
             </div>
 
-            <div className="pt-3 border-t border-slate-800 flex justify-end">
+            {selected.ai_root_cause && (
+              <div className="bg-indigo-950/30 border border-indigo-800/40 p-3 rounded-lg text-xs space-y-1">
+                <p className="text-indigo-300 font-bold uppercase tracking-wider text-[10px]">AI Root-Cause Diagnosis</p>
+                <p className="text-slate-200">{selected.ai_root_cause}</p>
+              </div>
+            )}
+
+            {selected.ai_mitigation_fix && (
+              <div className="bg-emerald-950/30 border border-emerald-800/40 p-3 rounded-lg text-xs space-y-1">
+                <p className="text-emerald-300 font-bold uppercase tracking-wider text-[10px]">Prescribed Mitigation Fix</p>
+                <p className="text-slate-200">{selected.ai_mitigation_fix}</p>
+              </div>
+            )}
+
+            <div className="pt-2 flex justify-end">
               <Link
-                to={`/dashboard/returns/${selected.id}`}
-                onClick={() => setModalOpen(false)}
-                className="rs-btn-primary"
+                to={`/dashboard/returns/${selected._id || selected.id || selected.order_id}`}
+                className="rs-btn-primary text-xs"
               >
-                Open Full Evidence Dossier <ExternalLink className="w-3.5 h-3.5" />
+                Open Full Forensic Dossier <ExternalLink className="w-3.5 h-3.5" />
               </Link>
             </div>
           </div>
