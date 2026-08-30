@@ -44,10 +44,10 @@ export const ImportPage = () => {
 
       const d = res?.data || res;
       setCounts({
-        total:    res?.total_records || d?.total_records || 15,
-        valid:    res?.valid_records || d?.valid_records || 15,
+        total:    res?.total_records ?? d?.total_records ?? d?.returns?.length ?? 0,
+        valid:    res?.valid_records ?? d?.valid_records ?? d?.returns?.length ?? 0,
         run_id:   res?.run_id || d?.run?.id || 'rs_live',
-        source:   d?.intelligence_source || 'n8n'
+        source:   d?.intelligence_source || res?.intelligence_source || 'n8n'
       });
       setStage('done');
     } catch (err) {
