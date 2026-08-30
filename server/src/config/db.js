@@ -1,7 +1,6 @@
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import mongoose from 'mongoose';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -13,7 +12,11 @@ let localDb = {
   returns: [],
   product_stats: [],
   recommendations: [],
-  integrations: []
+  integrations: [],
+  runs: [],
+  analyses: [],
+  interventions: [],
+  feedback: []
 };
 
 // Helper to save to disk
@@ -30,30 +33,27 @@ const loadLocalDb = () => {
   try {
     if (fs.existsSync(DB_FILE)) {
       const data = fs.readFileSync(DB_FILE, 'utf-8');
-      localDb = JSON.parse(data);
+      const parsed = JSON.parse(data);
+      localDb = {
+        users: parsed.users || [],
+        returns: parsed.returns || [],
+        product_stats: parsed.product_stats || [],
+        recommendations: parsed.recommendations || [],
+        integrations: parsed.integrations || [],
+        runs: parsed.runs || [],
+        analyses: parsed.analyses || [],
+        interventions: parsed.interventions || [],
+        feedback: parsed.feedback || []
+      };
     }
   } catch (err) {
     console.error('Failed to read DB file, initializing empty store:', err.message);
   }
 };
 
-let isConnectedToMongo = false;
-
 export const initDb = async () => {
   loadLocalDb();
-  
-  if (process.env.MONGODB_URI) {
-    try {
-      await mongoose.connect(process.env.MONGODB_URI);
-      isConnectedToMongo = true;
-      console.log(' Connected to MongoDB Atlas');
-    } catch (err) {
-      console.warn('⚠️ MongoDB connection failed, falling back to persistent JSON storage:', err.message);
-      isConnectedToMongo = false;
-    }
-  } else {
-    console.log(' Local Persistent Storage Engine active (zero-config, high speed)');
-  }
+  console.log(' Local Persistent Storage Engine active (runs, analyses, recommendations, interventions)');
 };
 
 export const getDb = () => localDb;
@@ -61,5 +61,3 @@ export const getDb = () => localDb;
 export const saveDb = () => {
   persistLocalDb();
 };
-
-export const isMongo = () => isConnectedToMongo;

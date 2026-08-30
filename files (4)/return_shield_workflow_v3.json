@@ -1,0 +1,827 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "returns-agent",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "7b666bd9-388f-4551-96c0-f719d6cd1ecb",
+      "name": "Webhook - Returns In",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        420,
+        560
+      ],
+      "webhookId": "362e451e-e956-46c6-879a-2a6044f86eea"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Accepts webhook body shaped like:\n// { \"returns\": [ {...records...} ], \"order_summary\": { total_shipped_orders, total_delivered_orders, cod_shipped_orders, prepaid_shipped_orders } (optional) }\n// Also tolerates a bare array as the whole body.\n\nconst body = $input.first().json.body !== undefined ? $input.first().json.body : $input.first().json;\n\n// ---- Run identity (v3: threaded through the whole pipeline via data_quality.run_id) ----\nfunction generateRunId() {\n  const rand = Math.random().toString(36).slice(2, 8);\n  return 'rs_' + Date.now().toString(36) + '_' + rand;\n}\nconst run_id = generateRunId();\n\n// ---- Row-count guard (v3: prevents a huge payload from taking down the demo) ----\nconst MAX_ROWS = 5000;\n\nlet rawRows = [];\nlet orderSummary = null;\nlet parseError = null;\n\nif (Array.isArray(body)) {\n  rawRows = body;\n} else if (body && Array.isArray(body.returns)) {\n  rawRows = body.returns;\n  orderSummary = body.order_summary || null;\n} else {\n  parseError = 'Payload must be an array of records, or an object with a \"returns\" array.';\n}\n\nlet truncated = false;\nif (!parseError && rawRows.length > MAX_ROWS) {\n  truncated = true;\n  rawRows = rawRows.slice(0, MAX_ROWS);\n}\n\nconst ALIASES = {\n  order_id: ['order_id', 'orderId', 'orderid'],\n  order_date: ['order_date', 'orderDate'],\n  sku: ['sku', 'SKU', 'product_sku'],\n  product_name: ['product_name', 'productName', 'name'],\n  product_category: ['product_category', 'category'],\n  product_variant: ['product_variant', 'variant'],\n  size: ['size'],\n  order_value: ['order_value', 'amount', 'order_amount', 'value'],\n  order_status: ['order_status', 'status'],\n  journey_outcome: ['journey_outcome', 'outcome'],\n  return_reason_raw: ['return_reason_raw', 'reason_text', 'reason', 'return_reason'],\n  customer_comment: ['customer_comment', 'comment', 'customerComment'],\n  rto_reason_raw: ['rto_reason_raw', 'rto_reason'],\n  is_rto: ['is_rto', 'rto', 'isRTO'],\n  payment_method: ['payment_method', 'paymentMethod', 'payment'],\n  cod_flag: ['cod_flag', 'is_cod'],\n  courier: ['courier', 'courier_partner', 'courierPartner'],\n  pincode: ['pincode', 'pin_code', 'zip', 'zipcode'],\n  shipping_zone: ['shipping_zone', 'zone'],\n  delivery_attempts: ['delivery_attempts', 'attempts'],\n  dispatch_delay_days: ['dispatch_delay_days'],\n  delivery_delay_days: ['delivery_delay_days'],\n  customer_type: ['customer_type'],\n  is_first_order: ['is_first_order', 'first_order'],\n  refund_amount: ['refund_amount'],\n  forward_shipping_cost: ['forward_shipping_cost'],\n  return_shipping_cost: ['return_shipping_cost'],\n  discount_amount: ['discount_amount'],\n  warehouse: ['warehouse']\n};\n\nfunction pick(row, field) {\n  for (const key of ALIASES[field]) {\n    if (row[key] !== undefined && row[key] !== null && row[key] !== '') return row[key];\n  }\n  return undefined;\n}\nfunction toStr(v, fallback) {\n  if (v === undefined || v === null) return fallback;\n  return String(v).trim();\n}\nfunction toNum(v) {\n  if (v === undefined || v === null || v === '') return 0;\n  const n = Number(String(v).replace(/[,\\u20b9\\s]/g, ''));\n  return Number.isFinite(n) ? n : 0;\n}\nfunction toBool(v) {\n  if (typeof v === 'boolean') return v;\n  if (v === undefined || v === null) return false;\n  const s = String(v).trim().toLowerCase();\n  return ['true', '1', 'yes', 'y', 'rto'].includes(s);\n}\nfunction normalizePayment(v) {\n  if (!v) return 'Unknown';\n  const s = String(v).trim().toLowerCase();\n  if (s.includes('cod') || s.includes('cash')) return 'COD';\n  if (s.includes('prepaid') || s.includes('online') || s.includes('card') || s.includes('upi')) return 'Prepaid';\n  return 'Unknown';\n}\n\n// Deterministic outcome derivation. The AI never touches this decision.\nfunction deriveOutcome(row, isRto) {\n  const explicit = toStr(pick(row, 'journey_outcome'), '').toLowerCase();\n  if (['delivered', 'returned', 'rto', 'cancelled', 'unknown'].includes(explicit)) return explicit;\n\n  const status = toStr(pick(row, 'order_status'), '').toLowerCase();\n  if (isRto || status.includes('rto') || status.includes('return to origin') || status.includes('undelivered')) return 'rto';\n  if (status.includes('cancel')) return 'cancelled';\n  if (status.includes('return')) return 'returned';\n  if (status.includes('deliver')) return 'delivered';\n  return 'unknown';\n}\n\nconst invalidReasons = {};\nconst records = [];\n\nif (!parseError) {\n  rawRows.forEach((row, i) => {\n    if (!row || typeof row !== 'object') {\n      invalidReasons['not_an_object'] = (invalidReasons['not_an_object'] || 0) + 1;\n      return;\n    }\n    const order_id = toStr(pick(row, 'order_id'), null);\n    if (!order_id) {\n      invalidReasons['missing_order_id'] = (invalidReasons['missing_order_id'] || 0) + 1;\n      return;\n    }\n    const is_rto = toBool(pick(row, 'is_rto'));\n    const journey_outcome = deriveOutcome(row, is_rto);\n\n    records.push({\n      order_id,\n      order_date: toStr(pick(row, 'order_date'), null),\n      sku: toStr(pick(row, 'sku'), 'UNKNOWN_SKU'),\n      product_name: toStr(pick(row, 'product_name'), null),\n      product_category: toStr(pick(row, 'product_category'), 'UNKNOWN_CATEGORY'),\n      product_variant: toStr(pick(row, 'product_variant'), null),\n      size: toStr(pick(row, 'size'), 'NA'),\n      order_value: toNum(pick(row, 'order_value')),\n      order_status: toStr(pick(row, 'order_status'), null),\n      journey_outcome,\n      return_reason_raw: toStr(pick(row, 'return_reason_raw'), ''),\n      customer_comment: toStr(pick(row, 'customer_comment'), ''),\n      rto_reason_raw: toStr(pick(row, 'rto_reason_raw'), ''),\n      is_rto,\n      payment_method: normalizePayment(pick(row, 'payment_method') || (toBool(pick(row, 'cod_flag')) ? 'COD' : undefined)),\n      courier: toStr(pick(row, 'courier'), 'UNKNOWN_COURIER'),\n      pincode: toStr(pick(row, 'pincode'), 'UNKNOWN_PINCODE'),\n      shipping_zone: toStr(pick(row, 'shipping_zone'), 'UNKNOWN_ZONE'),\n      delivery_attempts: toNum(pick(row, 'delivery_attempts')),\n      dispatch_delay_days: toNum(pick(row, 'dispatch_delay_days')),\n      delivery_delay_days: toNum(pick(row, 'delivery_delay_days')),\n      customer_type: toStr(pick(row, 'customer_type'), 'UNKNOWN'),\n      is_first_order: toBool(pick(row, 'is_first_order')),\n      refund_amount: pick(row, 'refund_amount') !== undefined ? toNum(pick(row, 'refund_amount')) : null,\n      forward_shipping_cost: pick(row, 'forward_shipping_cost') !== undefined ? toNum(pick(row, 'forward_shipping_cost')) : null,\n      return_shipping_cost: pick(row, 'return_shipping_cost') !== undefined ? toNum(pick(row, 'return_shipping_cost')) : null,\n      discount_amount: pick(row, 'discount_amount') !== undefined ? toNum(pick(row, 'discount_amount')) : null,\n      warehouse: toStr(pick(row, 'warehouse'), null)\n    });\n  });\n}\n\nconst total_input = Array.isArray(rawRows) ? rawRows.length : 0;\nconst valid_records = records.length;\nconst invalid_records = total_input - valid_records;\n\nreturn [{\n  json: {\n    records,\n    order_summary: orderSummary,\n    meta: {\n      valid: !parseError && valid_records > 0,\n      parse_error: parseError,\n      total_input,\n      valid_records,\n      invalid_records,\n      invalid_reasons: invalidReasons,\n      run_id,\n      truncated,\n      max_rows_cap: MAX_ROWS\n    }\n  }\n}];\n"
+      },
+      "id": "370cc2c2-5798-4c1c-9a95-edd60edae12a",
+      "name": "Normalize & Validate Data",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        640,
+        560
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "cond-valid",
+              "leftValue": "={{ $json.meta.valid }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "6cc0ba6e-94ae-42c0-bd83-b0ee696fdd18",
+      "name": "IF - Has Usable Records",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        860,
+        560
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const meta = $json.meta;\nreturn [{\n  json: {\n    product: 'ReturnShield AI',\n    error: true,\n    run_id: meta.run_id,\n    message: meta.parse_error || 'No usable return/RTO records found in the payload.',\n    details: {\n      total_input: meta.total_input,\n      valid_records: meta.valid_records,\n      invalid_records: meta.invalid_records,\n      invalid_reasons: meta.invalid_reasons\n    },\n    expected_format: {\n      returns: [\n        {\n          order_id: 'string (required)',\n          sku: 'string',\n          order_value: 'number',\n          journey_outcome: 'delivered|returned|rto|cancelled (optional - inferred from order_status/is_rto if omitted)'\n        }\n      ],\n      order_summary: '(optional) { total_shipped_orders, total_delivered_orders, cod_shipped_orders, prepaid_shipped_orders } - enables true rate calculations instead of within-dataset shares'\n    },\n    generated_at: new Date().toISOString()\n  }\n}];\n"
+      },
+      "id": "664693cb-c7a4-40ef-a4c4-f269ea11c544",
+      "name": "Build Validation Error Response",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1080,
+        760
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const { records, order_summary, meta } = $json;\n\nconst TRACKED_FIELDS = [\n  'order_date', 'product_category', 'size', 'return_reason_raw', 'rto_reason_raw',\n  'customer_comment', 'payment_method', 'courier', 'pincode', 'shipping_zone',\n  'delivery_attempts', 'refund_amount', 'forward_shipping_cost', 'return_shipping_cost'\n];\n\nconst UNKNOWN_SENTINELS = new Set(['UNKNOWN', 'UNKNOWN_COURIER', 'UNKNOWN_PINCODE', 'UNKNOWN_ZONE', 'UNKNOWN_CATEGORY']);\n\nfunction isPresent(v) {\n  if (v === undefined || v === null || v === '') return false;\n  if (typeof v === 'string' && UNKNOWN_SENTINELS.has(v)) return false;\n  if (typeof v === 'number' && v === 0) return false;\n  return true;\n}\n\nconst fieldCompleteness = {};\nTRACKED_FIELDS.forEach(f => {\n  const presentCount = records.filter(r => isPresent(r[f])).length;\n  fieldCompleteness[f] = records.length ? Math.round((presentCount / records.length) * 100) : 0;\n});\n\nconst avgCompleteness = TRACKED_FIELDS.length\n  ? Math.round(TRACKED_FIELDS.reduce((s, f) => s + fieldCompleteness[f], 0) / TRACKED_FIELDS.length)\n  : 0;\n\nlet confidence = 'low';\nif (records.length >= 30 && avgCompleteness >= 60) confidence = 'high';\nelse if (records.length >= 10 && avgCompleteness >= 35) confidence = 'medium';\n\nconst fields_largely_missing = TRACKED_FIELDS.filter(f => fieldCompleteness[f] < 20);\n\nconst data_quality = {\n  run_id: meta.run_id,\n  input_truncated: meta.truncated || false,\n  max_rows_cap: meta.max_rows_cap,\n  records_analyzed: records.length,\n  invalid_records: meta.invalid_records,\n  invalid_reasons: meta.invalid_reasons,\n  field_completeness_pct: fieldCompleteness,\n  fields_largely_missing,\n  average_completeness_pct: avgCompleteness,\n  has_order_summary: !!order_summary,\n  analysis_confidence: confidence,\n  stage_failures: []\n};\n\nreturn [{ json: { records, order_summary, data_quality } }];\n"
+      },
+      "id": "b5247ceb-cf24-4909-8f0d-7a5884b0565b",
+      "name": "Data Quality Check",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1080,
+        380
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const { records, order_summary, data_quality } = $json;\n\n// ---- Configurable thresholds ----\nconst MIN_SAMPLE = 10; // minimum segment size before we call something a pattern\nconst ESTIMATED_HANDLING_COST_INR = 220; // fallback ONLY when no real cost fields exist - always labeled \"estimated\"\nconst HOTSPOT_UPLIFT_THRESHOLD = 1.5; // segment ratio must be >=1.5x baseline to flag as a hotspot\n\nfunction safeDiv(n, d) { return d > 0 ? n / d : null; }\nfunction pct(x) { return x === null ? null : Math.round(x * 1000) / 10; }\nfunction sum(arr, field) { return arr.reduce((s, r) => s + (r[field] || 0), 0); }\n\nconst returned = records.filter(r => r.journey_outcome === 'returned');\nconst rto = records.filter(r => r.journey_outcome === 'rto');\nconst delivered = records.filter(r => r.journey_outcome === 'delivered');\nconst cancelled = records.filter(r => r.journey_outcome === 'cancelled');\nconst unknown = records.filter(r => r.journey_outcome === 'unknown');\n\nconst return_value = sum(returned, 'order_value');\nconst rto_value = sum(rto, 'order_value');\nconst affected_order_value = return_value + rto_value;\n\n// ---- Actual vs estimated cost (never fake precision) ----\nconst hasRefundData = records.some(r => r.refund_amount !== null);\nconst hasShippingCostData = records.some(r => r.forward_shipping_cost !== null || r.return_shipping_cost !== null);\nconst failed = returned.concat(rto);\n\nconst actual_cost_inr = (hasRefundData || hasShippingCostData)\n  ? sum(failed, 'refund_amount') + sum(failed, 'forward_shipping_cost') + sum(failed, 'return_shipping_cost')\n  : null;\n\nconst estimated_cost_inr = actual_cost_inr === null\n  ? failed.length * ESTIMATED_HANDLING_COST_INR\n  : null;\n\n// ---- True rates - only possible with an order_summary denominator ----\nlet rateBlock = {\n  rates_available: false,\n  note: 'order_summary (total_shipped_orders / total_delivered_orders) was not supplied, so true return/RTO rates cannot be computed. Showing event counts and within-dataset shares instead - do not read these as % of all shipped orders.'\n};\n\nif (order_summary && order_summary.total_shipped_orders) {\n  const shipped = order_summary.total_shipped_orders;\n  const deliveredBase = order_summary.total_delivered_orders || null;\n  rateBlock = {\n    rates_available: true,\n    return_rate_pct: deliveredBase ? pct(safeDiv(returned.length, deliveredBase)) : null,\n    rto_rate_pct: pct(safeDiv(rto.length, shipped)),\n    overall_failure_rate_pct: pct(safeDiv(returned.length + rto.length, shipped))\n  };\n  if (order_summary.cod_shipped_orders) {\n    const codRto = rto.filter(r => r.payment_method === 'COD').length;\n    rateBlock.cod_rto_rate_pct = pct(safeDiv(codRto, order_summary.cod_shipped_orders));\n  }\n  if (order_summary.prepaid_shipped_orders) {\n    const prepaidRto = rto.filter(r => r.payment_method === 'Prepaid').length;\n    rateBlock.prepaid_rto_rate_pct = pct(safeDiv(prepaidRto, order_summary.prepaid_shipped_orders));\n  }\n}\n\n// ---- Within-dataset segment analysis (always available, no denominator needed) ----\nconst overallEvents = returned.length + rto.length;\nconst overallRtoShare = safeDiv(rto.length, overallEvents);\n\nfunction buildDimension(dimension, keyFn) {\n  const groups = {};\n  records.forEach(r => {\n    if (r.journey_outcome !== 'returned' && r.journey_outcome !== 'rto') return;\n    const key = keyFn(r);\n    if (!groups[key]) groups[key] = [];\n    groups[key].push(r);\n  });\n\n  return Object.entries(groups).map(([value, items]) => {\n    const segReturned = items.filter(r => r.journey_outcome === 'returned').length;\n    const segRto = items.filter(r => r.journey_outcome === 'rto').length;\n    const segEvents = items.length;\n    const segRtoShare = safeDiv(segRto, segEvents);\n    const uplift = (segRtoShare !== null && overallRtoShare) ? segRtoShare / overallRtoShare : null;\n    const sufficientEvidence = segEvents >= MIN_SAMPLE;\n\n    let status = 'normal';\n    if (uplift !== null && uplift >= HOTSPOT_UPLIFT_THRESHOLD) {\n      status = sufficientEvidence ? 'hotspot_sufficient_evidence' : 'hotspot_hypothesis_insufficient_sample';\n    }\n\n    return {\n      dimension,\n      value,\n      returned_count: segReturned,\n      rto_count: segRto,\n      count: segEvents,\n      order_value_lost_inr: sum(items, 'order_value'),\n      rto_share_within_segment_pct: pct(segRtoShare),\n      overall_rto_share_pct: pct(overallRtoShare),\n      uplift_vs_baseline: uplift !== null ? Math.round(uplift * 100) / 100 : null,\n      sufficient_evidence: sufficientEvidence,\n      status\n    };\n  }).sort((a, b) => b.count - a.count);\n}\n\nconst bySku = buildDimension('sku', r => r.sku);\nconst byCourier = buildDimension('courier', r => r.courier);\nconst byPincode = buildDimension('pincode', r => r.pincode);\nconst byZone = buildDimension('zone', r => r.shipping_zone);\nconst byCategory = buildDimension('category', r => r.product_category);\nconst byPayment = buildDimension('payment_method', r => r.payment_method);\n\n// ---- COD vs Prepaid, within dataset ----\nconst codEvents = records.filter(r => r.payment_method === 'COD' && (r.journey_outcome === 'returned' || r.journey_outcome === 'rto'));\nconst prepaidEvents = records.filter(r => r.payment_method === 'Prepaid' && (r.journey_outcome === 'returned' || r.journey_outcome === 'rto'));\nconst codRtoShareWithin = safeDiv(codEvents.filter(r => r.journey_outcome === 'rto').length, codEvents.length);\nconst prepaidRtoShareWithin = safeDiv(prepaidEvents.filter(r => r.journey_outcome === 'rto').length, prepaidEvents.length);\n\n// ---- Time trend (only if order_date present on enough records) ----\nlet timeTrend = { available: false, note: 'order_date missing on most records - trend analysis skipped.' };\nconst datedEvents = records.filter(r => r.order_date && (r.journey_outcome === 'returned' || r.journey_outcome === 'rto'));\nif (datedEvents.length >= MIN_SAMPLE * 2) {\n  const byWeek = {};\n  datedEvents.forEach(r => {\n    const d = new Date(r.order_date);\n    if (isNaN(d.getTime())) return;\n    const weekStart = new Date(d);\n    weekStart.setDate(d.getDate() - d.getDay());\n    const key = weekStart.toISOString().slice(0, 10);\n    if (!byWeek[key]) byWeek[key] = { returned: 0, rto: 0, total: 0 };\n    byWeek[key].total += 1;\n    if (r.journey_outcome === 'rto') byWeek[key].rto += 1; else byWeek[key].returned += 1;\n  });\n  const weeks = Object.keys(byWeek).sort();\n  if (weeks.length >= 2) {\n    const last = byWeek[weeks[weeks.length - 1]];\n    const prev = byWeek[weeks[weeks.length - 2]];\n    const lastRtoShare = safeDiv(last.rto, last.total);\n    const prevRtoShare = safeDiv(prev.rto, prev.total);\n    timeTrend = {\n      available: true,\n      weeks_observed: weeks.length,\n      latest_week: weeks[weeks.length - 1],\n      previous_week: weeks[weeks.length - 2],\n      previous_rto_share_pct: pct(prevRtoShare),\n      latest_rto_share_pct: pct(lastRtoShare),\n      direction: (lastRtoShare !== null && prevRtoShare !== null)\n        ? (lastRtoShare > prevRtoShare * 1.2 ? 'increasing' : (lastRtoShare < prevRtoShare * 0.8 ? 'decreasing' : 'stable'))\n        : 'insufficient data',\n      sufficient_evidence: last.total >= MIN_SAMPLE && prev.total >= MIN_SAMPLE\n    };\n  }\n}\n\nconst analytics = {\n  counts: {\n    total_records: records.length,\n    returned_count: returned.length,\n    rto_count: rto.length,\n    delivered_count: delivered.length,\n    cancelled_count: cancelled.length,\n    unknown_count: unknown.length\n  },\n  financial: {\n    return_value_inr: return_value,\n    rto_value_inr: rto_value,\n    affected_order_value_inr: affected_order_value,\n    actual_cost_inr,\n    estimated_cost_inr,\n    cost_basis: actual_cost_inr !== null\n      ? 'ACTUAL (refund_amount + shipping costs supplied)'\n      : ('ESTIMATED (flat Rs ' + ESTIMATED_HANDLING_COST_INR + '/event - no real cost fields supplied)')\n  },\n  rates: rateBlock,\n  cod_vs_prepaid: {\n    cod_rto_share_within_cod_pct: pct(codRtoShareWithin),\n    prepaid_rto_share_within_prepaid_pct: pct(prepaidRtoShareWithin),\n    cod_sample_size: codEvents.length,\n    prepaid_sample_size: prepaidEvents.length,\n    sufficient_evidence: codEvents.length >= MIN_SAMPLE && prepaidEvents.length >= MIN_SAMPLE\n  },\n  segments: {\n    sku: bySku.slice(0, 15),\n    courier: byCourier.slice(0, 15),\n    pincode: byPincode.slice(0, 15),\n    zone: byZone,\n    category: byCategory,\n    payment_method: byPayment\n  },\n  time_trend: timeTrend,\n  min_sample_threshold: MIN_SAMPLE,\n  hotspot_uplift_threshold: HOTSPOT_UPLIFT_THRESHOLD\n};\n\nreturn [{ json: { records, analytics, data_quality } }];\n"
+      },
+      "id": "1d4c75df-c709-4244-b8e2-6c3aca0d06de",
+      "name": "Deterministic Analytics Engine",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1300,
+        380
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const { records, analytics, data_quality, change_since_last_analysis } = $json;\n\nconst records_to_classify = records\n  .filter(r => r.journey_outcome === 'returned' || r.journey_outcome === 'rto')\n  .map(r => ({\n    order_id: r.order_id,\n    journey_outcome: r.journey_outcome,\n    sku: r.sku,\n    product_category: r.product_category,\n    return_reason_raw: r.return_reason_raw,\n    rto_reason_raw: r.rto_reason_raw,\n    customer_comment: r.customer_comment\n  }));\n// Note: only order_id/sku/category/reason text is sent onward to the LLM -\n// no phone, email, address or other PII ever leaves this node.\n\nreturn [{ json: { records, analytics, data_quality, change_since_last_analysis, records_to_classify } }];\n"
+      },
+      "id": "24133c6c-40c3-4bbe-adc1-aadd9411cf8a",
+      "name": "Select Records To Classify",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1740,
+        380
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ JSON.stringify($json.records_to_classify) }}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "You are a returns/RTO root-cause classification engine for an Indian D2C e-commerce brand.\n\nYou receive a JSON array of records. Each has: order_id, journey_outcome (\"returned\" or \"rto\"), sku, product_category, return_reason_raw, rto_reason_raw, customer_comment. Text may be short, vague, or Hinglish.\n\nClassify EACH record into exactly one category, chosen from the taxonomy that matches its journey_outcome.\n\nIf journey_outcome is \"returned\" (post-delivery return), choose from:\n- Sizing/Fit\n- Quality Defect\n- Wrong Item Shipped\n- Description Mismatch\n- Damaged In Transit\n- Changed Mind / No Longer Needed\n- Late Delivery\n- Packaging Issue\n- Missing Item\n- Color/Variant Mismatch\n- Price/Value Dissatisfaction\n- Other / Unclear\n\nIf journey_outcome is \"rto\" (never delivered, returned to origin), choose from:\n- Customer Unreachable\n- Customer Refused Delivery\n- COD Refusal\n- Address Issue\n- Incomplete Address\n- Delivery Attempt Failure\n- Customer Not Available\n- Courier Issue\n- Dispatch Delay\n- Delivery Delay\n- Possible Low-Intent Order\n- Other / Unclear\n\nRules:\n- Never use a \"returned\" category for an \"rto\" record or vice versa.\n- If the reason text is empty, contradictory, or genuinely ambiguous, use \"Other / Unclear\" - do not guess.\n- Only assign \"Possible Low-Intent Order\" when the text gives explicit signal (e.g. mentions repeated refusal or never intending to accept). Never infer fraud or bad intent from a single vague reason or from silence.\n- confidence is your own calibrated 0-1 estimate for that single classification, not a population statistic.\n- Base every classification only on the text given. Do not invent details not present in the input.\n- Return ONLY valid JSON matching the required schema - no commentary, no markdown fences, no extra fields."
+        }
+      },
+      "id": "3f95af74-c867-4d99-bc1b-16b875f07784",
+      "name": "Reason Classifier",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        1960,
+        380
+      ],
+      "retryOnFail": true,
+      "maxTries": 2,
+      "waitBetweenTries": 2000,
+      "onError": "continueRegularOutput",
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"classifications\": {\n      \"type\": \"array\",\n      \"items\": {\n        \"type\": \"object\",\n        \"properties\": {\n          \"order_id\": {\n            \"type\": \"string\"\n          },\n          \"journey_outcome\": {\n            \"type\": \"string\",\n            \"enum\": [\n              \"returned\",\n              \"rto\"\n            ]\n          },\n          \"category\": {\n            \"type\": \"string\"\n          },\n          \"confidence\": {\n            \"type\": \"number\"\n          }\n        },\n        \"required\": [\n          \"order_id\",\n          \"journey_outcome\",\n          \"category\",\n          \"confidence\"\n        ]\n      }\n    }\n  },\n  \"required\": [\n    \"classifications\"\n  ]\n}"
+      },
+      "id": "c0513b30-2fd4-4b6c-b112-6f4d1648742d",
+      "name": "Classification Schema",
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.2,
+      "position": [
+        1960,
+        600
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const { records, analytics, data_quality, change_since_last_analysis, records_to_classify } =\n  $('Select Records To Classify').first().json;\n\nconst rawAgentItem = $input.first().json;\nconst classifierFailed = !!rawAgentItem.error;\nconst agentOutput = rawAgentItem.output || rawAgentItem;\nconst classifications = agentOutput.classifications || [];\n\nif (classifierFailed) {\n  data_quality.stage_failures = (data_quality.stage_failures || []).concat([\n    'Reason Classifier agent failed after retries - all return/RTO records in this run fall back to \"Other / Unclear\" until the next run.'\n  ]);\n}\n\nconst byOrderId = {};\nclassifications.forEach(c => { byOrderId[c.order_id] = c; });\n\nconst recordsByOrderId = {};\nrecords.forEach(r => { recordsByOrderId[r.order_id] = r; });\n\nconst categoryCounts = { returned: {}, rto: {} };\n\nrecords_to_classify.forEach(rc => {\n  const cls = byOrderId[rc.order_id];\n  const outcome = rc.journey_outcome;\n  const category = (cls && cls.category) ? cls.category : 'Other / Unclear';\n  const fullRecord = recordsByOrderId[rc.order_id];\n  const value = fullRecord ? fullRecord.order_value : 0;\n\n  if (!categoryCounts[outcome][category]) {\n    categoryCounts[outcome][category] = { count: 0, order_value_lost_inr: 0, sample_order_ids: [] };\n  }\n  categoryCounts[outcome][category].count += 1;\n  categoryCounts[outcome][category].order_value_lost_inr += value;\n  if (categoryCounts[outcome][category].sample_order_ids.length < 5) {\n    categoryCounts[outcome][category].sample_order_ids.push(rc.order_id);\n  }\n});\n\nconst MIN_SAMPLE = analytics.min_sample_threshold;\n\nfunction toSortedArray(obj) {\n  return Object.entries(obj)\n    .map(([category, v]) => ({\n      category,\n      count: v.count,\n      order_value_lost_inr: v.order_value_lost_inr,\n      sufficient_evidence: v.count >= MIN_SAMPLE,\n      sample_order_ids: v.sample_order_ids\n    }))\n    .sort((a, b) => b.count - a.count);\n}\n\nconst reason_analysis = {\n  return_categories: toSortedArray(categoryCounts.returned),\n  rto_categories: toSortedArray(categoryCounts.rto),\n  unclassified_count: records_to_classify.length - classifications.length\n};\n\nreturn [{ json: { analytics, reason_analysis, data_quality, change_since_last_analysis } }];\n"
+      },
+      "id": "9d4361a0-f2f6-4d99-aa91-21fdb38f66a1",
+      "name": "Merge Classifications with Analytics",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2180,
+        380
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const { analytics, reason_analysis, data_quality, change_since_last_analysis } = $json;\n\nfunction hotspotsOnly(list) {\n  return list.filter(s => s.status && s.status.startsWith('hotspot'));\n}\n\nconst synthesis_input = {\n  totals: analytics.counts,\n  financial: analytics.financial,\n  rates: analytics.rates,\n  cod_vs_prepaid: analytics.cod_vs_prepaid,\n  time_trend: analytics.time_trend,\n  change_since_last_analysis,\n  hotspots: {\n    sku: hotspotsOnly(analytics.segments.sku),\n    courier: hotspotsOnly(analytics.segments.courier),\n    pincode: hotspotsOnly(analytics.segments.pincode),\n    zone: hotspotsOnly(analytics.segments.zone),\n    category: hotspotsOnly(analytics.segments.category),\n    payment_method: hotspotsOnly(analytics.segments.payment_method)\n  },\n  reason_analysis,\n  min_sample_threshold: analytics.min_sample_threshold,\n  analysis_confidence: data_quality.analysis_confidence\n};\n\nreturn [{ json: { analytics, reason_analysis, data_quality, change_since_last_analysis, synthesis_input } }];\n"
+      },
+      "id": "eafd3f1b-e761-45f8-a455-162fe0e302e0",
+      "name": "Prepare Synthesis Input",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2400,
+        380
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ JSON.stringify($json.synthesis_input) }}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "You are a senior e-commerce operations analyst synthesizing root causes for an Indian D2C brand's Returns + RTO data. You receive already-computed deterministic analytics: hotspot segments (pre-filtered to those with meaningfully elevated RTO/return share), reason-category breakdowns, a COD vs prepaid comparison, a time trend, and change_since_last_analysis (may say no previous run exists yet).\n\nFor each hotspot object AND each sufficient-evidence reason category given to you, produce a synthesis with these exact fields:\n- dimension: one of \"sku\", \"courier\", \"pincode\", \"zone\", \"category\", \"payment_method\", \"reason\" - copy the dimension you were given, or use \"reason\" when synthesizing from reason_analysis\n- segment_value: copy the exact \"value\" (or \"category\") string you were given - this must match verbatim so it can be joined back to the numbers later\n- problem: one line naming the specific issue and segment (e.g. \"Elevated RTO for SKU KURTA-BLUE-M\")\n- evidence: cite the actual numbers given to you (counts, shares, uplift) - never invent numbers not present in the input\n- business_impact: state the order_value_lost_inr figure given, labeled as affected order value (not confirmed loss) unless an actual_cost_inr was supplied in financial\n- likely_cause: your best single-sentence hypothesis for why this is happening, grounded in the evidence and reason categories given\n- alternative_explanation: one plausible alternative explanation a skeptic would raise\n- confidence: \"high\", \"medium\", or \"low\" - this MUST match the sufficient_evidence/status flags given to you. If a hotspot's status says \"hotspot_hypothesis_insufficient_sample\", confidence cannot be \"high\" - cap it at \"low\"\n- status: \"confirmed_pattern\" if sufficient_evidence is true, otherwise \"hypothesis\"\n- hypotheses: an array of 1-3 objects, each a DISTINCT plausible explanation for this specific problem (not restatements of likely_cause/alternative_explanation - think through competing operational causes). Each object has exactly these fields:\n  - hypothesis: one sentence naming the specific candidate cause (e.g. \"COD confirmation failure - customers ordering COD without real purchase intent\")\n  - supporting_evidence: what in the data given to you is consistent with this hypothesis (cite actual numbers/categories given; if nothing in the input specifically supports it beyond the base pattern, say so honestly)\n  - contradicting_evidence: what in the data given to you argues against this hypothesis, or \"none available in current data\" if genuinely nothing contradicts it\n  - confidence: \"high\", \"medium\", or \"low\" for THIS specific hypothesis (independent per-hypothesis judgment, capped the same way as the overall confidence field above - never \"high\" without sufficient_evidence)\n  - next_test: the single most useful additional data point or experiment that would best confirm or rule out this hypothesis (e.g. \"Check whether these pincode's RTOs cluster on first attempt vs after 2+ delivery attempts\")\n  List hypotheses roughly in order of how plausible they are given the evidence, most plausible first.\n\nHard rules:\n- Never call anything \"statistically significant.\" Use \"sufficient evidence\" or \"insufficient evidence\" only.\n- Never label a segment \"Suspected Fraud\" or \"fraudulent\" unless reason_analysis explicitly contains a fraud-adjacent category (e.g. \"Possible Low-Intent Order\") with sufficient_evidence true.\n- Only synthesize a problem for a segment that was actually included in the input - do not invent new segments.\n- Do not state a percentage rate (e.g. \"12% RTO rate\") unless rates.rates_available is true; otherwise describe it as a share within the returns/RTO dataset, not an overall rate.\n- The hypotheses array must contain genuinely different candidate explanations, not the same idea reworded three times. If you can only think of one credible explanation, return just one hypothesis rather than padding.\n- Return ONLY valid JSON matching the schema. No commentary, no markdown fences.\n"
+        }
+      },
+      "id": "08d8d4a2-4ecc-4406-b393-b846d5be592f",
+      "name": "Root-Cause Synthesizer",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        2620,
+        380
+      ],
+      "retryOnFail": true,
+      "maxTries": 2,
+      "waitBetweenTries": 2000,
+      "onError": "continueRegularOutput",
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"root_causes\": {\n      \"type\": \"array\",\n      \"items\": {\n        \"type\": \"object\",\n        \"properties\": {\n          \"dimension\": {\n            \"type\": \"string\",\n            \"enum\": [\n              \"sku\",\n              \"courier\",\n              \"pincode\",\n              \"zone\",\n              \"category\",\n              \"payment_method\",\n              \"reason\"\n            ]\n          },\n          \"segment_value\": {\n            \"type\": \"string\"\n          },\n          \"problem\": {\n            \"type\": \"string\"\n          },\n          \"evidence\": {\n            \"type\": \"string\"\n          },\n          \"business_impact\": {\n            \"type\": \"string\"\n          },\n          \"likely_cause\": {\n            \"type\": \"string\"\n          },\n          \"alternative_explanation\": {\n            \"type\": \"string\"\n          },\n          \"confidence\": {\n            \"type\": \"string\",\n            \"enum\": [\n              \"high\",\n              \"medium\",\n              \"low\"\n            ]\n          },\n          \"status\": {\n            \"type\": \"string\",\n            \"enum\": [\n              \"confirmed_pattern\",\n              \"hypothesis\"\n            ]\n          },\n          \"hypotheses\": {\n            \"type\": \"array\",\n            \"minItems\": 1,\n            \"maxItems\": 3,\n            \"items\": {\n              \"type\": \"object\",\n              \"properties\": {\n                \"hypothesis\": {\n                  \"type\": \"string\"\n                },\n                \"supporting_evidence\": {\n                  \"type\": \"string\"\n                },\n                \"contradicting_evidence\": {\n                  \"type\": \"string\"\n                },\n                \"confidence\": {\n                  \"type\": \"string\",\n                  \"enum\": [\n                    \"high\",\n                    \"medium\",\n                    \"low\"\n                  ]\n                },\n                \"next_test\": {\n                  \"type\": \"string\"\n                }\n              },\n              \"required\": [\n                \"hypothesis\",\n                \"supporting_evidence\",\n                \"contradicting_evidence\",\n                \"confidence\",\n                \"next_test\"\n              ]\n            }\n          }\n        },\n        \"required\": [\n          \"dimension\",\n          \"segment_value\",\n          \"problem\",\n          \"evidence\",\n          \"business_impact\",\n          \"likely_cause\",\n          \"alternative_explanation\",\n          \"confidence\",\n          \"status\",\n          \"hypotheses\"\n        ]\n      }\n    }\n  },\n  \"required\": [\n    \"root_causes\"\n  ]\n}"
+      },
+      "id": "b4ca62d9-5bea-496f-b7dd-d7b5e75d9ad3",
+      "name": "Root Cause Schema",
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.2,
+      "position": [
+        2620,
+        600
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const { analytics, reason_analysis, data_quality, change_since_last_analysis } =\n  $('Prepare Synthesis Input').first().json;\n\nconst rawAgentItem = $input.first().json;\nconst synthesizerFailed = !!rawAgentItem.error;\nconst agentOutput = rawAgentItem.output || rawAgentItem;\nconst rootCauses = agentOutput.root_causes || [];\n\nif (synthesizerFailed) {\n  data_quality.stage_failures = (data_quality.stage_failures || []).concat([\n    'Root-Cause Synthesizer agent failed after retries - no root causes or hypotheses could be produced this run. Deterministic hotspot/anomaly numbers below are still fully valid and computed independently of this failure.'\n  ]);\n}\n\nconst ALL_SEGMENTS = [].concat(\n  analytics.segments.sku, analytics.segments.courier, analytics.segments.pincode,\n  analytics.segments.zone, analytics.segments.category, analytics.segments.payment_method\n);\n\nfunction findSegment(dimension, value) {\n  return ALL_SEGMENTS.find(s => s.dimension === dimension && s.value === value) || null;\n}\nfunction findReasonCategory(value) {\n  return [...reason_analysis.return_categories, ...reason_analysis.rto_categories]\n    .find(c => c.category === value) || null;\n}\n\nconst CONFIDENCE_WEIGHT = { high: 1, medium: 0.6, low: 0.3 };\n\nconst values = rootCauses.map(rc => {\n  const seg = rc.dimension === 'reason' ? findReasonCategory(rc.segment_value) : findSegment(rc.dimension, rc.segment_value);\n  return seg ? (seg.order_value_lost_inr || 0) : 0;\n});\nconst maxValue = Math.max(1, ...values, 0);\n\nconst scored = rootCauses.map(rc => {\n  const seg = rc.dimension === 'reason' ? findReasonCategory(rc.segment_value) : findSegment(rc.dimension, rc.segment_value);\n  const value = seg ? (seg.order_value_lost_inr || 0) : 0;\n  const count = seg ? (seg.count || 0) : 0;\n  const uplift = (seg && seg.uplift_vs_baseline) ? Math.min(seg.uplift_vs_baseline, 5) / 5 : 0.3;\n  const confidenceWeight = CONFIDENCE_WEIGHT[rc.confidence] || 0.3;\n  const sufficientEvidence = seg ? !!seg.sufficient_evidence : (rc.status === 'confirmed_pattern');\n\n  const impact_component = value / maxValue;\n  const priority_score = Math.round((impact_component * 0.45 + uplift * 0.25 + confidenceWeight * 0.30) * 100) / 100;\n\n  let priority_tier = 'P3';\n  if (sufficientEvidence && priority_score >= 0.7) priority_tier = 'P0';\n  else if (sufficientEvidence && priority_score >= 0.5) priority_tier = 'P1';\n  else if (priority_score >= 0.3) priority_tier = 'P2';\n\n  // v3: segment_matched marks whether this root cause could actually be re-joined\n  // to a real deterministic segment. The Self-Verification Engine treats an\n  // unmatched segment as an unverified claim regardless of what the model said.\n  return Object.assign({}, rc, {\n    order_count: count,\n    order_value_lost_inr: value,\n    uplift_vs_baseline: seg ? seg.uplift_vs_baseline : null,\n    sufficient_evidence: sufficientEvidence,\n    segment_matched: !!seg,\n    priority_score,\n    priority_tier\n  });\n});\n\nscored.sort((a, b) => b.priority_score - a.priority_score);\nconst top_problems = scored.slice(0, 5).map((rc, i) => Object.assign({ rank: i + 1 }, rc));\n\nreturn [{ json: { analytics, reason_analysis, data_quality, change_since_last_analysis, root_causes: scored, top_problems } }];\n"
+      },
+      "id": "29da4573-5d97-451e-89a3-35309481e122",
+      "name": "Priority & Impact Engine",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2840,
+        380
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ JSON.stringify($json.top_problems) }}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "You are a senior e-commerce operations analyst for an Indian D2C brand. You receive a JSON array \"top_problems\" - already prioritized, evidence-scored root causes (each with dimension, segment_value, problem, evidence, confidence, priority_tier, order_value_lost_inr, sufficient_evidence, status).\n\nFor EACH problem, produce exactly one concrete recommendation object with these fields:\n- priority: copy the given priority_tier (P0/P1/P2/P3)\n- action: a specific, executable intervention - never generic phrases like \"improve customer experience\" or \"improve quality control\" alone. Name the actual lever (e.g. \"Add OTP confirmation before dispatch for COD orders to this pincode\", \"Re-shoot size chart and product photos for this SKU\", \"Escalate delivery-attempt failure volume with this courier's ops team for this zone\").\n- target: the exact segment this applies to (dimension + segment_value)\n- reason: one sentence tying the action to the evidence\n- evidence: restate the key number from the input - do not invent new numbers\n- expected_metric: phrase as \"expected to reduce X\" or \"hypothesis to test: Y\" - never claim a guaranteed outcome or a specific improved number unless it was given to you\n- effort: \"low\", \"medium\", or \"high\" (your estimate of operational effort to implement)\n- confidence: a 0-1 number, capped to reflect the input's confidence/status (do not report high confidence for a \"hypothesis\" status problem)\n\nRules:\n- If status is \"hypothesis\" or sufficient_evidence is false, the action must be framed as something to pilot/validate first on a small scale, not a full rollout.\n- Never recommend an action targeting a specific customer as an individual; target segments (pincode, SKU, courier, payment method), not named people.\n- Return ONLY valid JSON matching the schema. No commentary, no markdown fences."
+        }
+      },
+      "id": "be456f97-3897-433c-b2b1-15e6ce7df928",
+      "name": "Recommendation Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        3060,
+        380
+      ],
+      "retryOnFail": true,
+      "maxTries": 2,
+      "waitBetweenTries": 2000,
+      "onError": "continueRegularOutput",
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"recommendations\": {\n      \"type\": \"array\",\n      \"items\": {\n        \"type\": \"object\",\n        \"properties\": {\n          \"priority\": {\n            \"type\": \"string\",\n            \"enum\": [\n              \"P0\",\n              \"P1\",\n              \"P2\",\n              \"P3\"\n            ]\n          },\n          \"action\": {\n            \"type\": \"string\"\n          },\n          \"target\": {\n            \"type\": \"string\"\n          },\n          \"reason\": {\n            \"type\": \"string\"\n          },\n          \"evidence\": {\n            \"type\": \"string\"\n          },\n          \"expected_metric\": {\n            \"type\": \"string\"\n          },\n          \"effort\": {\n            \"type\": \"string\",\n            \"enum\": [\n              \"low\",\n              \"medium\",\n              \"high\"\n            ]\n          },\n          \"confidence\": {\n            \"type\": \"number\"\n          }\n        },\n        \"required\": [\n          \"priority\",\n          \"action\",\n          \"target\",\n          \"reason\",\n          \"evidence\",\n          \"expected_metric\",\n          \"effort\",\n          \"confidence\"\n        ]\n      }\n    }\n  },\n  \"required\": [\n    \"recommendations\"\n  ]\n}"
+      },
+      "id": "044fdc4d-c3b5-4300-bc52-87d9f9495a8c",
+      "name": "Recommendation Schema",
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.2,
+      "position": [
+        3060,
+        600
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const {\n  analytics, reason_analysis, data_quality, change_since_last_analysis,\n  root_causes, top_problems, recommendations, hypotheses, verification\n} = $('Self-Verification Engine').first().json;\n\nconst PRIORITY_ORDER = { P0: 0, P1: 1, P2: 2, P3: 3 };\nconst sortedRecommendations = (recommendations || [])\n  .slice()\n  .sort((a, b) => (PRIORITY_ORDER[a.priority] ?? 9) - (PRIORITY_ORDER[b.priority] ?? 9));\n\nconst data_gaps = [];\nif (!analytics.rates.rates_available) {\n  data_gaps.push('No order_summary supplied - return_rate/rto_rate could not be computed against total shipped orders; segment metrics are shares within the returns/RTO dataset only.');\n}\nif (analytics.financial.actual_cost_inr === null) {\n  data_gaps.push('No refund_amount/shipping cost fields supplied - cost figures are ESTIMATED, not actual.');\n}\nif (!analytics.time_trend.available) {\n  data_gaps.push(analytics.time_trend.note);\n}\nif (data_quality.fields_largely_missing && data_quality.fields_largely_missing.length) {\n  data_gaps.push('Sparsely populated fields (<20% of records): ' + data_quality.fields_largely_missing.join(', '));\n}\nif (!sortedRecommendations.length) {\n  data_gaps.push('No prioritized problems met the criteria for a recommendation this run.');\n}\nif (data_quality.input_truncated) {\n  data_gaps.push('Input exceeded ' + data_quality.max_rows_cap + ' rows and was truncated to the first ' + data_quality.max_rows_cap + ' - results reflect a partial dataset.');\n}\nif (data_quality.stage_failures && data_quality.stage_failures.length) {\n  data_gaps.push.apply(data_gaps, data_quality.stage_failures);\n}\nif (!change_since_last_analysis || !change_since_last_analysis.available) {\n  data_gaps.push((change_since_last_analysis && change_since_last_analysis.note) || 'No prior run available for trend comparison yet.');\n}\n\n// Deterministic, data-grounded suggestions for the conversational follow-up\n// endpoint (spec section 24) - not asked of the LLM, generated from the same\n// numbers already in this response so they can never reference a problem\n// that doesn't exist.\nconst next_best_questions = [];\nif (top_problems[0]) {\n  next_best_questions.push('Why is ' + top_problems[0].dimension + ' \"' + top_problems[0].segment_value + '\" our biggest problem right now?');\n}\nif (sortedRecommendations[0]) {\n  next_best_questions.push('What evidence supports the recommendation for \"' + sortedRecommendations[0].target + '\"?');\n}\nif (analytics.cod_vs_prepaid && analytics.cod_vs_prepaid.sufficient_evidence) {\n  next_best_questions.push('Is COD actually driving our RTO more than prepaid?');\n}\nif (change_since_last_analysis && change_since_last_analysis.available) {\n  next_best_questions.push('What changed since the last analysis?');\n}\nnext_best_questions.push('Which action has the highest expected impact for the effort involved?');\n\nconst response = {\n  product: 'ReturnShield AI',\n  run: {\n    id: data_quality.run_id,\n    generated_at: new Date().toISOString(),\n    status: (data_quality.stage_failures && data_quality.stage_failures.length) ? 'partial' : 'success'\n  },\n  analysis: {\n    generated_at: new Date().toISOString(),\n    records_analyzed: analytics.counts.total_records,\n    analysis_confidence: data_quality.analysis_confidence,\n    run_id: data_quality.run_id\n  },\n  metrics: {\n    returned_orders: analytics.counts.returned_count,\n    rto_orders: analytics.counts.rto_count,\n    delivered_orders: analytics.counts.delivered_count,\n    cancelled_orders: analytics.counts.cancelled_count,\n    return_value_inr: analytics.financial.return_value_inr,\n    rto_value_inr: analytics.financial.rto_value_inr,\n    affected_order_value_inr: analytics.financial.affected_order_value_inr,\n    actual_cost_inr: analytics.financial.actual_cost_inr,\n    estimated_cost_inr: analytics.financial.estimated_cost_inr,\n    cost_basis: analytics.financial.cost_basis,\n    rates: analytics.rates\n  },\n  cod_vs_prepaid: analytics.cod_vs_prepaid,\n  segments: analytics.segments,\n  reason_analysis,\n  time_trend: analytics.time_trend,\n  trends: change_since_last_analysis ? [change_since_last_analysis] : [],\n  top_problems,\n  root_causes,\n  hypotheses,\n  recommendations: sortedRecommendations,\n  verification,\n  data_quality,\n  data_gaps,\n  next_best_questions\n};\n\nreturn [{ json: response }];\n"
+      },
+      "id": "a9df7c01-46ff-42d0-865e-3f075ae2eb95",
+      "name": "Final JSON Builder",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3540,
+        380
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {}
+      },
+      "id": "24a0df76-6102-4731-bb6b-7df1ecb2b0ae",
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        3760,
+        280
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "15q_tUQ6aQzuEBBN7Yibtv498u-diCGp2Ajr0Es5dss4",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/15q_tUQ6aQzuEBBN7Yibtv498u-diCGp2Ajr0Es5dss4/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "generated_at": "={{ $json.analysis.generated_at }}",
+            "records_analyzed": "={{ $json.analysis.records_analyzed }}",
+            "affected_order_value_inr": "={{ $json.metrics.affected_order_value_inr }}",
+            "top_problem": "={{ $json.top_problems && $json.top_problems[0] ? $json.top_problems[0].problem : '' }}",
+            "top_recommendation": "={{ $json.recommendations && $json.recommendations[0] ? $json.recommendations[0].action : '' }}",
+            "run_id": "={{ $json.run.id }}"
+          },
+          "matchingColumns": [
+            "generated_at"
+          ],
+          "schema": [
+            {
+              "id": "generated_at",
+              "displayName": "generated_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "records_analyzed",
+              "displayName": "records_analyzed",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "affected_order_value_inr",
+              "displayName": "affected_order_value_inr",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "top_problem",
+              "displayName": "top_problem",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "top_recommendation",
+              "displayName": "top_recommendation",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "run_id",
+              "displayName": "run_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "5fda3c60-4d25-4afe-bd4e-4fa422904819",
+      "name": "Log to Google Sheets",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        3760,
+        500
+      ],
+      "onError": "continueRegularOutput",
+      "continueOnFail": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "qH0Z2CHLsgjEm9p5",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-3.1-flash-lite",
+        "options": {}
+      },
+      "id": "a76feb4f-b657-4591-8a99-271aa6fe2b5d",
+      "name": "Google Gemini Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        2180,
+        700
+      ],
+      "credentials": {
+        "googlePalmApi": {
+          "id": "LNcEpvHtq9IjhORH",
+          "name": "Google Gemini(PaLM) Api account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## ReturnShield AI v3 - Agentic Returns + RTO Intelligence\\n\\nOBSERVE (Normalize/Validate/Data Quality) -> REASON (Deterministic Analytics + Trend Delta + Reason Classifier) -> COMPARE HYPOTHESES (Root-Cause Synthesizer) -> DECIDE (Priority & Impact Engine) -> ACT (Recommendation Agent) -> VERIFY (Self-Verification Engine) -> RESPOND -> LEARN (Record Run In Memory / Store Analysis Snapshot).\\n\\nSetup:\\n1. Confirm the Google Gemini credential on 'Google Gemini Chat Model'.\\n2. Activate the workflow, POST sample_test_payload.json to the webhook URL.\\n3. Google Sheets logging and Store Analysis Snapshot are both optional - neither blocks the response if it fails.\\n4. Create a Data Table named 'returnshield_runs' once (Data tables tab) if you want cross-workflow memory for the companion Ask-Agent / Feedback workflows - everything else works without it.\\n5. Send an 'order_summary' block in the payload for true return/RTO RATES instead of within-dataset shares.\\n6. See RETURN_SHIELD_ARCHITECTURE_V3.md for the full gap audit, schemas, and test suite.",
+        "height": 340,
+        "width": 480
+      },
+      "id": "8d1578b2-a0c0-453a-993c-5cb258b37c05",
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        420,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// NEW in v3 - \"What changed since the last analysis?\" (spec section 24)\n// Uses n8n's built-in workflow static data - persists across executions of THIS workflow\n// on THIS n8n instance, with zero external DB and zero credentials to configure.\n// This is read-only here; the matching write happens in \"Record Run In Memory\" at the\n// end of the pipeline, once top_problems/recommendations actually exist.\n\nconst { records, analytics, data_quality } = $json;\n\nconst staticData = $getWorkflowStaticData('global');\nconst history = Array.isArray(staticData.previous_runs) ? staticData.previous_runs : [];\nconst previous = history.length ? history[history.length - 1] : null;\n\nfunction deltaPct(curr, prev) {\n  if (!prev) return null;\n  return Math.round(((curr - prev) / prev) * 1000) / 10;\n}\n\nlet change_since_last_analysis;\nif (!previous) {\n  change_since_last_analysis = {\n    available: false,\n    note: 'No previous run found in this workflow\\'s memory yet - this is either the first run, or workflow static data was reset. Trend comparison will be available starting next run.'\n  };\n} else {\n  change_since_last_analysis = {\n    available: true,\n    compared_to_run_id: previous.run_id,\n    compared_to_generated_at: previous.generated_at,\n    returned_count_change: analytics.counts.returned_count - previous.returned_count,\n    rto_count_change: analytics.counts.rto_count - previous.rto_count,\n    affected_order_value_change_inr: analytics.financial.affected_order_value_inr - previous.affected_order_value_inr,\n    affected_order_value_change_pct: deltaPct(analytics.financial.affected_order_value_inr, previous.affected_order_value_inr),\n    previous_top_problem: previous.top_problem || null,\n    note: 'Comparison is against the most recent prior run recorded by this workflow instance.'\n  };\n}\n\nreturn [{ json: { records, analytics, data_quality, change_since_last_analysis } }];\n"
+      },
+      "id": "87f48eee-fd28-4c52-ab44-3e5229090742",
+      "name": "Compute Trend Delta",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1300,
+        560
+      ],
+      "notes": "Reads workflow static data - no external DB needed. Paired with 'Record Run In Memory' at the end of the pipeline."
+    },
+    {
+      "parameters": {
+        "jsCode": "// NEW in v3 - deterministic self-verification stage (spec section 20) plus\n// human-in-the-loop flagging for consequential actions (spec section 16).\n// This node NEVER trusts the LLM's own confidence claims - it re-derives what\n// it can from the deterministic numbers already computed upstream, and\n// repairs/downgrades anything it can't verify rather than passing it through.\n\nconst prior = $('Priority & Impact Engine').first().json;\nconst { analytics, reason_analysis, data_quality, change_since_last_analysis } = prior;\nlet root_causes = prior.root_causes || [];\nlet top_problems = prior.top_problems || [];\n\nconst rawAgentItem = $input.first().json;\nconst recAgentFailed = !!rawAgentItem.error;\nconst agentOutput = rawAgentItem.output || rawAgentItem;\nlet recommendations = agentOutput.recommendations || [];\n\nconst issues = [];\nconst corrections = [];\n\nif (recAgentFailed) {\n  data_quality.stage_failures = (data_quality.stage_failures || []).concat([\n    'Recommendation Agent failed after retries - no recommendations could be generated this run. top_problems/root_causes below are unaffected.'\n  ]);\n  issues.push('Recommendation Agent call failed after retries - recommendations list is empty this run.');\n}\n\n// ---- Check 1+2: every recommendation must trace to a real, scored problem,\n// and its confidence can never exceed what the underlying evidence supports. ----\nrecommendations = recommendations.map(rec => {\n  const matched = top_problems.find(p =>\n    rec.target && p.segment_value && rec.target.toLowerCase().includes(String(p.segment_value).toLowerCase())\n  );\n\n  if (!matched) {\n    issues.push('Recommendation targeting \"' + (rec.target || 'unknown target') + '\" could not be traced back to a scored problem - confidence capped and flagged unverified.');\n    corrections.push({ field: 'confidence', target: rec.target || null, from: rec.confidence, to: Math.min(rec.confidence || 0.3, 0.3) });\n    return Object.assign({}, rec, { confidence: Math.min(rec.confidence || 0.3, 0.3), unverified_target: true });\n  }\n\n  const cap = matched.sufficient_evidence ? 1 : 0.5;\n  if ((rec.confidence || 0) > cap) {\n    corrections.push({ field: 'confidence', target: rec.target, from: rec.confidence, to: cap });\n    return Object.assign({}, rec, { confidence: cap, unverified_target: false });\n  }\n  return Object.assign({}, rec, { unverified_target: false });\n});\n\n// ---- Check 3: root-cause confidence label must match the deterministic\n// sufficient_evidence flag computed in Priority & Impact Engine. ----\nroot_causes = root_causes.map(rc => {\n  if (rc.sufficient_evidence === false && rc.confidence === 'high') {\n    issues.push('Root cause for \"' + rc.segment_value + '\" claimed high confidence without sufficient evidence - downgraded to low.');\n    corrections.push({ field: 'confidence', target: rc.segment_value, from: 'high', to: 'low' });\n    return Object.assign({}, rc, { confidence: 'low', status: 'hypothesis' });\n  }\n  if (rc.segment_matched === false) {\n    issues.push('Root cause referenced segment \"' + rc.segment_value + '\" which could not be found in the deterministic analytics - marked unverified.');\n    return Object.assign({}, rc, { unverified_segment: true });\n  }\n  return rc;\n});\n\n// ---- Check 4: required-field presence (schema sanity) ----\nconst REQUIRED_REC_FIELDS = ['priority', 'action', 'target', 'reason', 'evidence', 'expected_metric', 'effort', 'confidence'];\nrecommendations.forEach(rec => {\n  REQUIRED_REC_FIELDS.forEach(f => {\n    if (rec[f] === undefined || rec[f] === null || rec[f] === '') {\n      issues.push('Recommendation for \"' + (rec.target || 'unknown target') + '\" is missing required field \"' + f + '\".');\n    }\n  });\n});\n\n// ---- Check 5: human-in-the-loop flagging (spec section 16) ----\n// Deterministic keyword match, NOT left to the LLM's own judgment - an action\n// is flagged for approval based on what it actually touches, not on how the\n// model chose to describe its own risk level.\nconst CONSEQUENTIAL_PATTERNS = [\n  { rx: /cod eligib|disable cod|remove cod/i, reason: 'Changes COD eligibility for customers.' },\n  { rx: /block(ing)?\\s+(the\\s+)?customer|blacklist/i, reason: 'Blocks or blacklists customers.' },\n  { rx: /courier reassign|switch courier|change courier|drop courier/i, reason: 'Changes live courier routing.' },\n  { rx: /message (the )?customer|whatsapp|sms|email campaign|notify customers/i, reason: 'Sends direct customer communication.' },\n  { rx: /\\brefund\\b|discount|price change|waive/i, reason: 'Affects customer-facing pricing or refunds.' }\n];\nrecommendations = recommendations.map(rec => {\n  const text = (rec.action || '') + ' ' + (rec.target || '');\n  const hit = CONSEQUENTIAL_PATTERNS.find(p => p.rx.test(text));\n  return Object.assign({}, rec, {\n    requires_human_approval: !!hit,\n    approval_reason: hit ? hit.reason + ' Route through human approval before execution (see Section 16 / Record Feedback workflow).' : null\n  });\n});\n\n// ---- Assemble hypotheses (spec section 11) surfaced as a flat top-level list ----\nconst hypotheses = root_causes.flatMap(rc =>\n  (rc.hypotheses || []).map(h => Object.assign({\n    source_problem: rc.problem,\n    dimension: rc.dimension,\n    segment_value: rc.segment_value\n  }, h))\n);\n\nconst verification = {\n  checks_performed: [\n    'recommendation_target_traceability',\n    'recommendation_confidence_vs_evidence_cap',\n    'root_cause_confidence_vs_sufficient_evidence',\n    'root_cause_segment_traceability',\n    'required_field_presence',\n    'consequential_action_flagging'\n  ],\n  issues_found: issues,\n  corrections_applied: corrections,\n  status: issues.length === 0 ? 'passed' : 'passed_with_corrections'\n};\n\nreturn [{\n  json: {\n    analytics, reason_analysis, data_quality, change_since_last_analysis,\n    root_causes, top_problems, recommendations, hypotheses, verification\n  }\n}];\n"
+      },
+      "id": "8009deef-add6-47cb-8dfa-da98f387fe75",
+      "name": "Self-Verification Engine",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2840,
+        560
+      ],
+      "notes": "Deterministic self-check: traces every recommendation/root-cause back to real numbers, downgrades unsupported confidence, flags consequential actions for human approval."
+    },
+    {
+      "parameters": {
+        "jsCode": "// NEW in v3 - \"Learn / store state\" (spec section 19). Writes the outcome of\n// THIS run into workflow static data so the NEXT run's \"Compute Trend Delta\"\n// node can answer \"what changed since the last analysis?\". Runs in parallel\n// with Respond to Webhook, so it can never delay or block the response.\n\nconst response = $json;\nconst staticData = $getWorkflowStaticData('global');\nif (!Array.isArray(staticData.previous_runs)) staticData.previous_runs = [];\n\nstaticData.previous_runs.push({\n  run_id: response.run.id,\n  generated_at: response.run.generated_at,\n  returned_count: response.metrics.returned_orders,\n  rto_count: response.metrics.rto_orders,\n  affected_order_value_inr: response.metrics.affected_order_value_inr,\n  top_problem: response.top_problems && response.top_problems[0] ? response.top_problems[0].problem : null,\n  analysis_confidence: response.analysis.analysis_confidence\n});\n\n// Keep only the most recent 20 runs so static data doesn't grow unbounded.\nif (staticData.previous_runs.length > 20) {\n  staticData.previous_runs = staticData.previous_runs.slice(-20);\n}\n\nreturn [{ json: { stored: true, run_id: response.run.id, history_length: staticData.previous_runs.length } }];\n"
+      },
+      "id": "76aa34cf-0682-4bda-ac5f-5d3e173476cc",
+      "name": "Record Run In Memory",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3280,
+        700
+      ],
+      "notes": "Writes this run's summary to workflow static data for the next run's trend comparison."
+    },
+    {
+      "parameters": {
+        "operation": "insert",
+        "dataTableId": {
+          "__rl": true,
+          "value": "returnshield_runs",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "run_id": "={{ $json.run.id }}",
+            "generated_at": "={{ $json.run.generated_at }}",
+            "analysis_confidence": "={{ $json.analysis.analysis_confidence }}",
+            "top_problem": "={{ $json.top_problems && $json.top_problems[0] ? $json.top_problems[0].problem : '' }}",
+            "affected_order_value_inr": "={{ $json.metrics.affected_order_value_inr }}",
+            "snapshot_json": "={{ JSON.stringify($json) }}"
+          },
+          "matchingColumns": [
+            "run_id"
+          ]
+        },
+        "options": {}
+      },
+      "id": "7b472451-ebbf-4909-a6de-cc902b683059",
+      "name": "Store Analysis Snapshot",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1,
+      "position": [
+        3500,
+        500
+      ],
+      "onError": "continueRegularOutput",
+      "continueOnFail": true,
+      "alwaysOutputData": true,
+      "notes": "Optional cross-workflow memory: lets the Ask-Agent and Feedback workflows look up a past run by run_id. Create the 'returnshield_runs' Data Table once in the n8n UI before first use. Never blocks the main response."
+    },
+    {
+      "parameters": {
+        "content": "## NEW in v3\\nCompute Trend Delta reads/writes workflow static data (no external DB) to answer \\\"what changed since the last analysis?\\\"",
+        "height": 160,
+        "width": 260
+      },
+      "id": "f8d5c758-71a3-41fe-b86e-9f349066320c",
+      "name": "Sticky Note - Trend Delta",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1300,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## NEW in v3\\nSelf-Verification Engine re-derives sufficient_evidence, caps confidence the model can't back up, and flags consequential actions for human approval - never trusts the LLM's own claims.",
+        "height": 180,
+        "width": 280
+      },
+      "id": "abbb629b-484c-4c01-bdbf-08c6ec7e166c",
+      "name": "Sticky Note - Verification",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2840,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## NEW in v3 - LEARN\\nStore Analysis Snapshot (Data Table, optional) + Record Run In Memory (static data) close the OBSERVE->REASON->DECIDE->ACT->VERIFY->LEARN loop. Neither blocks Respond to Webhook.",
+        "height": 160,
+        "width": 280
+      },
+      "id": "a62b301b-798a-469b-9d4a-46a277204ecc",
+      "name": "Sticky Note - Learn",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        3500,
+        780
+      ]
+    }
+  ],
+  "connections": {
+    "Webhook - Returns In": {
+      "main": [
+        [
+          {
+            "node": "Normalize & Validate Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize & Validate Data": {
+      "main": [
+        [
+          {
+            "node": "IF - Has Usable Records",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF - Has Usable Records": {
+      "main": [
+        [
+          {
+            "node": "Data Quality Check",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Build Validation Error Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Data Quality Check": {
+      "main": [
+        [
+          {
+            "node": "Deterministic Analytics Engine",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Deterministic Analytics Engine": {
+      "main": [
+        [
+          {
+            "node": "Compute Trend Delta",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Select Records To Classify": {
+      "main": [
+        [
+          {
+            "node": "Reason Classifier",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Classification Schema": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Reason Classifier",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Reason Classifier": {
+      "main": [
+        [
+          {
+            "node": "Merge Classifications with Analytics",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge Classifications with Analytics": {
+      "main": [
+        [
+          {
+            "node": "Prepare Synthesis Input",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Synthesis Input": {
+      "main": [
+        [
+          {
+            "node": "Root-Cause Synthesizer",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Root Cause Schema": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Root-Cause Synthesizer",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Root-Cause Synthesizer": {
+      "main": [
+        [
+          {
+            "node": "Priority & Impact Engine",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Priority & Impact Engine": {
+      "main": [
+        [
+          {
+            "node": "Recommendation Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Recommendation Schema": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Recommendation Agent",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Recommendation Agent": {
+      "main": [
+        [
+          {
+            "node": "Self-Verification Engine",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Final JSON Builder": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Log to Google Sheets",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Store Analysis Snapshot",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Record Run In Memory",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Validation Error Response": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Reason Classifier",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Root-Cause Synthesizer",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Recommendation Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Compute Trend Delta": {
+      "main": [
+        [
+          {
+            "node": "Select Records To Classify",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Self-Verification Engine": {
+      "main": [
+        [
+          {
+            "node": "Final JSON Builder",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "29cd7584f340365985471be141f172c46f710c8a1a8b6a67fd542b7e1b683e06"
+  }
+}

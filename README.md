@@ -1,270 +1,200 @@
-# 🛡️ ReturnShield AI — Autonomous Return & RTO Defense Platform
+# 🛡️ ReturnShield AI — Production Return Intelligence & Action Engine
 
-> **Transform unstructured e-commerce returns into persistent root-cause diagnostics, problem SKU leaderboards, and automated return & RTO prevention for Indian D2C brands.**
+> **Human-Authored Operational Product for Indian D2C & E-Commerce Brands**  
+> *Built for BharatThreads Lifestyle Pvt. Ltd. | Powered by Published n8n AI Agent Workflows + Google Gemini 3.1 Flash Lite*
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-indigo.svg)](https://opensource.org/licenses/MIT)
-[![React](https://img.shields.io/badge/Frontend-React%2018%20%2B%20Vite-61dafb.svg)](https://reactjs.org/)
-[![Node.js](https://img.shields.io/badge/Backend-Node.js%20%2B%20Express-339933.svg)](https://nodejs.org/)
-[![Tailwind CSS](https://img.shields.io/badge/Styling-Tailwind%20CSS-38bdf8.svg)](https://tailwindcss.com/)
-[![n8n Integration](https://img.shields.io/badge/AI%20Pipeline-n8n%20Workflow%20v2-ea4b71.svg)](https://n8n.io/)
-[![Persistence](https://img.shields.io/badge/DB-MongoDB%20%2F%20Persistent%20JSON-10b981.svg)](https://www.mongodb.com/)
-[![Currency](https://img.shields.io/badge/Currency-INR%20(%E2%82%B9)-orange.svg)](https://en.wikipedia.org/wiki/Indian_rupee)
+[![Architecture: Production](https://img.shields.io/badge/Architecture-n8n%20%2B%20Express%20%2B%20React-indigo.svg)](https://github.com/gintama1018/AGENTIC-AI-HACKATHON)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![UI: Anti--AI--Template](https://img.shields.io/badge/Design-Anti--AI--Template%20Workstation-emerald.svg)](DESIGN.md)
 
 ---
 
-## 📌 Executive Summary (Indian E-Commerce Context)
+## 🧭 Executive Overview
 
-In Indian e-commerce (Shopify India, Myntra, Meesho, Amazon India, Ajio), brands lose **25% to 40% of their net margins** to recurring customer returns and Cash-On-Delivery (COD) **Return-To-Origin (RTO)** failures. High reverse courier freight (Delhivery, BlueDart, Shadowfax, Xpressbees), sizing mismatch in ethnic & western wear, studio photo color discrepancies, and fragile transit damage are silent margin killers.
+**ReturnShield AI** is a purpose-built return investigation and action system for e-commerce operators, logistics directors, and merchandising leads. 
 
-Pure webhook-only AI automations suffer from a critical limitation: **without persistent cross-time data storage, they cannot detect recurring patterns across multi-week batches or track whether implemented corrective actions actually reduced return rates.**
+Unlike conventional "analytics dashboards" that merely chart return rates, ReturnShield separates **RTO (Return to Origin)** from **Customer-Initiated Returns**, detects cross-dimensional problem hotspots, compares competing hypotheses with supporting and contradicting evidence, executes self-verification against model overclaiming, provides a **tool-using conversational investigation agent**, and closes the loop with **human-in-the-loop approvals and outcome tracking**.
 
-**ReturnShield AI** solves this by wrapping an intelligent multi-tenant web application around the **n8n AI Engine ("ReturnShield AI v2")**, persisting return history across time, calculating dynamic **Product Priority Scores**, and closing the feedback loop with actionable recommendation tracking in **₹ INR**.
-
----
-
-## 🏗️ System Architecture
-
-```mermaid
-graph TD
-    subgraph ClientLayer ["Frontend Client (React 18 + Vite + Tailwind + Recharts)"]
-        Landing["Landing Page & Live AI Demo (/)"]
-        AuthPages["Auth: Login & Signup (/login, /signup)"]
-        Dashboard["Overview Dashboard (/dashboard)"]
-        Explorer["Returns Explorer & Diagnostic Modal (/dashboard/returns)"]
-        Detail["Single Return Diagnostic View (/dashboard/returns/:id)"]
-        Patterns["Cross-Time Trend Patterns (/dashboard/patterns)"]
-        Products["Problem SKUs Leaderboard (/dashboard/products)"]
-        Recs["AI Action Hub & Recs (/dashboard/recommendations)"]
-        Import["CSV & Manual Data Studio (/dashboard/import)"]
-        Settings["Integrations & n8n Config (/dashboard/settings)"]
-        Reports["Executive Intelligence Brief (/dashboard/reports)"]
-    end
-
-    subgraph APILayer ["Backend REST API (Node.js + Express)"]
-        AuthCtrl["Auth Controller & JWT Auth"]
-        ReturnsCtrl["Returns Controller & CSV Parser"]
-        AnalyticsCtrl["Analytics & Trajectory Engine (INR)"]
-        RecsCtrl["Recommendations Manager"]
-        SettingsCtrl["Integrations & Webhook Ping Tool"]
-        WebhookCtrl["Async Webhook Callback (/api/webhook/results)"]
-    end
-
-    subgraph DataLayer ["Persistence Engine"]
-        MongoStore[("MongoDB Atlas Database")]
-        LocalStore[("Zero-Config Persistent Engine (db.json)")]
-    end
-
-    subgraph AIEngine ["Dual Intelligence Layer"]
-        N8NWebhook["External n8n AI Pipeline (ReturnShield AI v2)"]
-        BuiltinNLP["Integrated Indian NLP Taxonomy & Diagnostics"]
-    end
-
-    ClientLayer -->|REST API / JWT| APILayer
-    APILayer -->|Read / Write / Upsert| MongoStore
-    APILayer -->|Fallback Atomic Persistence| LocalStore
-    APILayer -->|Batch Dispatch| N8NWebhook
-    APILayer -->|Autonomous Fallback Processing| BuiltinNLP
-    N8NWebhook -.->|Async Results Callback| WebhookCtrl
+```
+USER UPLOADS DATA → EXPRESS (validate & normalize) → N8N WORKFLOW 1 (deterministic analytics + Gemini + self-verify) 
+                                                  → STORE RUN & ANALYSIS IN DB 
+                                                  → WORKSTATION (briefing, hypotheses, actions)
+                                                  → N8N WORKFLOW 2 (6 LangChain tools for conversational Q&A)
+                                                  → N8N WORKFLOW 3 (human approval & outcome learning)
 ```
 
 ---
 
-## 🔄 End-to-End Data Pipeline Flow
+## 🏛️ End-to-End System Architecture
 
 ```mermaid
-sequenceDiagram
-    autonumber
-    actor Merchant as Indian D2C Merchant / Ops Lead
-    participant UI as ReturnShield Web SPA
-    participant Server as Express Backend
-    participant DB as Persistent Database
-    participant AI as n8n AI Engine (or Local Fallback)
+flowchart TD
+    subgraph Client["System A — Frontend Workstation (React / Vite)"]
+        UI_Overview["Operational Briefing\n(5-Part Narrative)"]
+        UI_Returns["Evidence Dossier\n(Returns Table)"]
+        UI_Patterns["Longitudinal Patterns\n(Shift & Trajectory)"]
+        UI_Products["Problem SKU Profiles\n(Case Files)"]
+        UI_Actions["Actions Hub\n(Approve & Execute)"]
+        UI_Ask["Ask ReturnShield Drawer\n(Tool-Using AI Agent)"]
+    end
 
-    Merchant->>UI: Uploads Return CSV (or submits manual return)
-    UI->>Server: POST /api/returns/import (Multi-tenant)
-    Server->>DB: Save raw return records (status: pending_analysis)
-    Server->>AI: POST batch payload to n8n Webhook
-    AI->>AI: Normalize → Extract Sentiment → Classify → Root-Cause Diagnosis
-    AI-->>Server: Return classified JSON payload
-    Server->>DB: Upsert analyzed diagnostics & recalculate product stats
-    Server->>DB: Generate smart corrective action recommendations
-    Server-->>UI: Live response with refreshed KPIs & trajectories (₹ INR)
-    Merchant->>UI: Reviews /dashboard/patterns & implements recommendations
-    Merchant->>UI: Marks action as "Resolved" → tracks profit recovered
+    subgraph Backend["System A — Express Server (Node.js)"]
+        API_Import["POST /api/returns/import\n(Batch Ingest)"]
+        API_Analytics["GET /api/analytics/*\n(Single Source of Truth)"]
+        API_Ask["POST /api/ask\n(Run Context Grounding)"]
+        API_Approve["POST /api/recommendations/:id/approve\n(Intervention Trigger)"]
+        DB[(Persistent Store:\nruns, analyses, recs,\ninterventions, feedback)]
+    end
+
+    subgraph n8n["System B — Published n8n Agent System"]
+        W1["Workflow 1: Main Analysis Pipeline\n(Webhook: /returns-agent)\nDeterministic Analytics + Gemini 3.1 + Self-Verification + Trend Memory"]
+        W2["Workflow 2: Ask ReturnShield Follow-up Agent\n(Webhook: /returnshield-ask)\nConversational Agent + 6 LangChain Code Tools"]
+        W3["Workflow 3: Human Feedback & Outcome Recording\n(Webhook: /returnshield-feedback)\nAction Approval + Outcome Memory"]
+    end
+
+    UI_Overview --> API_Analytics
+    UI_Returns --> API_Analytics
+    UI_Patterns --> API_Analytics
+    UI_Products --> API_Analytics
+    UI_Actions --> API_Approve
+    UI_Ask --> API_Ask
+
+    API_Import --> W1
+    W1 --> API_Import
+    API_Import --> DB
+    DB --> API_Analytics
+
+    API_Ask --> W2
+    W2 --> API_Ask
+
+    API_Approve --> W3
+    W3 --> API_Approve
+    API_Approve --> DB
 ```
 
 ---
 
-## 🧠 Dual AI Engine Architecture
+## ⚡ The 3 Published n8n Workflows
 
-ReturnShield AI features a **dual-engine architecture** ensuring 100% operational uptime:
+### 1. Main Ingest & Analysis Pipeline (`return_shield_workflow_v3.json`)
+- **Webhook Endpoint**: `POST /webhook/returns-agent`
+- **Execution Chain**:
+  1. `Normalize & Validate Data`: Generates unique `run_id`, caps input at 5,000 rows with truncation flag, resolves 25+ alias headers.
+  2. `Data Quality Check`: Audits missing fields, identifies data gaps without blocking execution.
+  3. `Deterministic Analytics Engine`: Calculates SKU, courier, pincode, zone, and payment method aggregations and uplift ratios.
+  4. `Compute Trend Delta`: Reads `$getWorkflowStaticData('global')` and computes `change_since_last_analysis`.
+  5. `Reason Classifier (Gemini 3.1 Flash Lite)`: Multilingual classification (including Hinglish) with retry/backoff.
+  6. `Root-Cause Synthesizer`: Produces 1–3 competing hypotheses per problem with supporting vs. contradicting evidence and `next_test`.
+  7. `Priority & Impact Engine`: Assigns P0–P3 priority tiers gated on `MIN_SAMPLE` sufficiency thresholds.
+  8. `Recommendation Agent`: Generates data-backed actions with expected metrics and measurement plans.
+  9. `Self-Verification Engine`: Deterministic 6-check audit that demotes unverified claims and flags consequential actions for human approval.
+  10. `Final JSON Builder`: Assembles canonical response payload and logs run snapshots.
 
-1. **n8n Workflow Connector (`ReturnShield AI v2`)**:
-   - Dispatches return batches to external n8n workflows configured in `/dashboard/settings`.
-   - Supports asynchronous callback via `POST /api/webhook/results`.
-   - Includes a built-in **"Test Connection"** ping tool measuring round-trip network latency.
+### 2. Tool-Using "Ask ReturnShield" Agent (`return_shield_ask_agent_workflow.json`)
+- **Webhook Endpoint**: `POST /webhook/returnshield-ask`
+- **6 LangChain Code Tools**:
+  - `get_segment_metrics`: Queries specific dimension/value metrics (e.g. `courier:Xpress Logistics`).
+  - `get_reason_distribution`: Returns returned vs. RTO reason category breakdowns.
+  - `get_top_problems`: Queries ranked P0–P3 problems.
+  - `get_recommendations`: Filters prescribed actions by priority tier.
+  - `compare_to_previous_run`: Retrieves trend delta against the prior run.
+  - `get_hypotheses`: Retrieves competing explanations and next test procedures.
+- **Output Schema**: `{ "answer": "...", "confidence": 0.95, "caveats": [...], "tools_used": [...] }`.
 
-2. **Built-in Indian NLP Taxonomy & Diagnostic Engine**:
-   - Runs automatically when external n8n instances are offline or in local demo mode.
-   - Categorizes return comments into 6 distinct root-cause categories:
-     - 📐 `Size & Fit Mismatch` (Kurti bodice, bust/shoulder, waist, inseam length, shoe toe-box)
-     - ⚙️ `Quality / Manufacturing Defect` (Embroidery zari unraveling, button rivet shear, TWS charging pins, sole bonding)
-     - 🎨 `Listing & Color Variance` (Studio strobe lighting hue delta on silk/cotton fabrics)
-     - 📦 `Logistics & Transit Damage` (Courier conveyor crushing on Delhivery/BlueDart routes)
-     - 🏷️ `Warehouse Fulfillment Error` (Barcode SKU staging mismatch)
-     - 💡 `Buyer Remorse / Intent Shift` (Impulse buy consideration gap)
-   - Generates precise engineering root causes and prescribed supplier/listing mitigations.
-
----
-
-## 🗄️ Database Schema & Collections
-
-| Collection | Key Fields | Description |
-|---|---|---|
-| `users` | `_id`, `name`, `email`, `password_hash`, `company_name`, `role`, `created_at` | Multi-tenant tenant accounts |
-| `returns` | `_id`, `user_id`, `order_id`, `customer_name`, `product_id`, `product_name`, `product_price`, `customer_comment`, `return_reason_raw`, `ai_reason_category`, `ai_confidence`, `ai_root_cause`, `ai_mitigation_fix`, `severity`, `status`, `return_date` | Granular return records with full AI diagnostics in ₹ INR |
-| `product_stats` | `_id`, `product_id`, `product_name`, `category`, `total_returns`, `return_rate`, `priority_score`, `estimated_financial_loss`, `top_reason`, `last_updated` | **Cross-time aggregated SKU statistics** (upserted across uploads) |
-| `recommendations` | `_id`, `rule_key`, `product_id`, `product_name`, `text`, `category`, `priority`, `estimated_savings`, `status` (`todo` \| `in_progress` \| `done`), `created_at`, `resolved_at` | Actionable items tracked to closure in ₹ INR |
-| `integrations` | `_id`, `user_id`, `n8n_webhook_url`, `google_sheet_id`, `api_key`, `sync_interval`, `auto_analyze` | Webhook endpoints and external keys |
-
----
-
-## 📱 Page & Feature Guide (All 13 Routes)
-
-### Public Pages
-- **`/` — Landing Page**:
-  - **Interactive Live AI Demo Widget**: Test raw customer complaints against the AI classifier with real-time root-cause synthesis.
-  - **Interactive ROI Cost Savings Calculator in ₹ INR**: Dynamic sliders to estimate recoverable profit based on monthly orders, return rate, and AOV (₹).
-  - **Architecture Flow & Feature Breakdown**.
-  - **Pricing Tiers (₹ INR) & FAQ**.
-- **`/login` — Sign In Page**:
-  - Email/password authentication + **1-Click Demo Login button** for instant evaluation as `Sonu Jangir (BharatThreads Lifestyle)`.
-- **`/signup` — Tenant Registration**:
-  - Create custom brand workspaces with multi-tenant data isolation.
-- **`*` — 404 Page**:
-  - Custom error page with navigational recovery links.
-
-### Authenticated Dashboard Routes
-- **`/dashboard` — Overview Hub**:
-  - Metric cards: Total Returns, RTO Rate %, Net Financial Loss (₹ INR), AI Diagnostic Confidence (95%), Active Recommendations.
-  - Urgent Alert Banner for surging failure modes across Indian deliveries.
-  - 14-day interactive Area Trend Chart (Daily Returns vs Fit Issues vs Defects).
-  - Donut chart of AI Reason Distribution.
-  - Top 4 Problem Products snapshot and live recent returns stream.
-- **`/dashboard/returns` — Returns Diagnostic Explorer**:
-  - Searchable and filterable data table (by Reason, Severity, Product, Date).
-  - **CSV Bulk Export** with full diagnostic metadata in ₹ INR.
-  - **Quick-View Modal** to inspect root-causes without leaving the table.
-- **`/dashboard/returns/:id` — Single Return Diagnostic**:
-  - Customer verbatim comment, AI confidence meter, and defect severity rating.
-  - Diagnosed engineering root-cause and prescribed action.
-  - **Related recurring returns for the same SKU** demonstrating multi-order patterns across time.
-- **`/dashboard/patterns` — Cross-Time Trend Patterns**:
-  - 4-week longitudinal trajectory charts.
-  - Week-over-Week shift radar identifying **Surging**, **Declining**, and **Stable** return drivers.
-  - Root-cause clustering breakdown across products.
-- **`/dashboard/products` — Problem Products Leaderboard**:
-  - SKUs ranked by dynamic **Priority Score** (`Return Rate × Volume × Financial Loss`).
-  - Drill-down modal with primary failure mode analysis and supplier action plans.
-- **`/dashboard/recommendations` — AI Action Hub**:
-  - Corrective actions ranked by priority (Critical, High, Medium).
-  - Status management (`To Do`, `In Progress`, `Resolved / Done`) to close the loop.
-  - Real-time potential vs realized savings tally in ₹ INR.
-- **`/dashboard/import` — Data Ingestion Studio**:
-  - Drag-and-drop CSV batch uploader.
-  - **1-Click "Download Sample CSV Template"** (with Indian apparel, footwear & electronics examples).
-  - **1-Click "Load Pre-Configured Demo Returns"** (50+ realistic Indian records).
-  - Manual single return submission form with immediate live AI classification.
-- **`/dashboard/settings` — Integrations & n8n Manager**:
-  - n8n Webhook URL manager with live **"Test Connection" ping tool** measuring latency.
-  - Google Sheets integration and API key management.
-- **`/dashboard/reports` — Executive Intelligence Brief**:
-  - Printable C-level summary report with Indian reverse logistics cost driver breakdown (courier freight, QC, markdown) and ROI projections.
+### 3. Feedback & Human-in-the-Loop Recording (`return_shield_feedback_workflow.json`)
+- **Webhook Endpoint**: `POST /webhook/returnshield-feedback`
+- **Purpose**: Records human approvals for consequential recommendations (e.g. COD OTP verification, supplier quarantine) and logs closed-loop outcome verifications.
 
 ---
 
-## 🛠️ Tech Stack & Dependencies
+## 🇮🇳 Indian D2C Fashion & Logistics Context
 
-### Frontend
-- **Framework**: React 18 (SPA) with Vite
-- **Styling**: Tailwind CSS (Dark Glassmorphism design system)
-- **Charts & Visualizations**: Recharts
-- **Icons**: Lucide React
-- **Routing**: React Router DOM v6
-
-### Backend
-- **Runtime**: Node.js (ES Modules)
-- **Framework**: Express.js
-- **Authentication**: JWT (JSON Web Tokens) & bcryptjs
-- **File & CSV Processing**: Multer & csv-parser
-- **HTTP Client**: Axios
-- **Persistence**: MongoDB Atlas + Atomic JSON local persistent engine fallback
+ReturnShield is calibrated for Indian retail logistics:
+- **Currency & Denominations**: ₹ INR (₹ Lakhs / ₹ Crores formatting).
+- **Logistics Partners**: BlueDart, Delhivery, Xpressbees, Shadowfax.
+- **Reverse Logistics Math**: Return courier freight (~₹120) + reverse QC & restocking (~₹60) + 25% depreciation markdown.
+- **Payment Split**: Strict separation of Cash on Delivery (COD) NDR/refusal patterns from prepaid returns.
+- **Multilingual Support**: Natural parsing of Hinglish comments (e.g., *"size chhota hai"*, *"quality bekar thi"*, *"delivery boy nahi aaya"*).
 
 ---
 
-## ⚡ Quick Start & Local Installation
+## 🛠️ Project Structure
+
+```
+AGENTIC-AI-HACKATHON/
+├── client/                               # System A: React + Vite Frontend
+│   ├── src/
+│   │   ├── components/
+│   │   │   ├── layout/                   # Left rail DashboardLayout & Navbar
+│   │   │   └── ui/                       # Badge, AskReturnShieldDrawer, etc.
+│   │   ├── pages/dashboard/              # 8 Workstation Pages
+│   │   │   ├── OverviewPage.jsx          # 5-Part Briefing Narrative
+│   │   │   ├── ReturnsPage.jsx           # Returns Investigation Table
+│   │   │   ├── PatternsPage.jsx          # Longitudinal Shift & Trajectories
+│   │   │   ├── ProductsPage.jsx          # Problem SKU Case Files
+│   │   │   ├── RecommendationsPage.jsx   # Actions Hub & Approval Flow
+│   │   │   ├── ImportPage.jsx            # 5-Stage Drag-and-Drop Ingestion
+│   │   │   ├── ReportsPage.jsx           # Executive Brief Export
+│   │   │   └── SettingsPage.jsx          # Webhook & Key Management
+│   │   └── services/api.js               # Unified API Client
+├── server/                               # System A: Express REST Server
+│   ├── src/
+│   │   ├── config/db.js                  # Persistent Storage (runs, analyses, etc.)
+│   │   ├── controllers/                  # Returns, Analytics, Ask, Recommendations
+│   │   ├── routes/                       # Express API Routes
+│   │   └── services/
+│   │       ├── n8nClient.js              # Authoritative n8n Dispatcher & Retry
+│   │       └── aiEngine.js               # Deterministic Fallback Engine
+├── files (4)/                            # System B: Published n8n Workflows
+│   ├── return_shield_workflow_v3.json    # Workflow 1 (Main Ingest & Analytics)
+│   ├── return_shield_ask_agent_workflow.json # Workflow 2 (Tool-Using Ask Agent)
+│   ├── return_shield_feedback_workflow.json  # Workflow 3 (Feedback & Approval)
+│   ├── RETURN_SHIELD_ARCHITECTURE_V3.md  # 35-Section Architecture Spec
+│   └── test_suite.md                     # 12-Case Test Specification (A–L)
+└── README.md
+```
+
+---
+
+## 🚀 Quick Start Guide
 
 ### Prerequisites
-- Node.js (v18 or higher recommended)
-- npm (v9 or higher)
+- Node.js (v18+)
+- npm (v9+)
+- n8n instance (optional for local mock fallback; required for live cloud workflows)
 
-### 1. Clone the Repository
+### 1. Backend Setup
 ```bash
-git clone https://github.com/gintama1018/AGENTIC-AI-HACKATHON.git
-cd AGENTIC-AI-HACKATHON
+cd server
+npm install
+
+# Copy example environment configuration
+cp .env.example .env
+
+# Start backend server
+npm run dev
+# Server running on http://localhost:5000
 ```
 
-### 2. Install Dependencies
+### 2. Frontend Setup
 ```bash
-npm run install:all
+cd client
+npm install
+
+# Start Vite development server
+npm run dev
+# Workstation running on http://localhost:5173
 ```
-
-### 3. Start the Development Servers
-```bash
-# Terminal 1: Start Backend API (Port 5000)
-npm run server:dev
-
-# Terminal 2: Start Frontend App (Port 5173)
-npm run client
-```
-
-### 4. Access the Application
-- **Frontend App**: [http://localhost:5173](http://localhost:5173)
-- **Backend API Health**: [http://localhost:5000/api/health](http://localhost:5000/api/health)
-- **Instant Login**: Click the **"1-Click Demo Login"** button on the sign-in page (`Sonu Jangir - BharatThreads`)!
 
 ---
 
-## 🔌 API Reference
-
-| Method | Endpoint | Description |
-|---|---|---|
-| `POST` | `/api/auth/login` | Sign in (or 1-click demo login) |
-| `POST` | `/api/auth/signup` | Register new tenant profile |
-| `GET` | `/api/auth/me` | Fetch authenticated session |
-| `GET` | `/api/returns` | List returns (supports search, category, severity, pagination) |
-| `GET` | `/api/returns/:id` | Get deep-dive return diagnostic by ID |
-| `POST` | `/api/returns/import` | Upload CSV batch or JSON returns array |
-| `POST` | `/api/returns/single` | Submit single return with instant AI classification |
-| `POST` | `/api/returns/seed-demo` | Seed 50+ pre-configured 4-week Indian demo returns |
-| `GET` | `/api/analytics/overview` | Fetch overview KPIs, timeline, and reason distribution |
-| `GET` | `/api/analytics/patterns` | Fetch 4-week category trajectories and root-cause clusters |
-| `GET` | `/api/analytics/products` | Fetch problem-product priority leaderboard |
-| `GET` | `/api/analytics/financial-impact` | Fetch reverse logistics cost breakdown & savings (₹ INR) |
-| `GET` | `/api/recommendations` | List AI recommendations with summary metrics |
-| `PATCH` | `/api/recommendations/:id` | Update recommendation status (`todo`, `in_progress`, `done`) |
-| `POST` | `/api/recommendations` | Log custom operations initiative |
-| `GET` | `/api/settings/integration` | Fetch n8n webhook and Google Sheet configs |
-| `PUT` | `/api/settings/integration` | Update integration settings |
-| `POST` | `/api/settings/test-webhook` | Ping test target webhook URL and measure latency |
-| `POST` | `/api/webhook/results` | Async callback endpoint for external n8n pipelines |
+## 🔒 Security & Credential Hygiene
+- All n8n webhook URLs, secrets, and API credentials are kept strictly in server-side `.env` configuration (ignored in `.git`).
+- Zero secret leakage in client-side Vite bundles.
+- All requests between Express and n8n use secure header authentication (`X-Webhook-Secret`).
 
 ---
 
-## 👥 Hackathon Submission Details
-
-- **Project Name**: ReturnShield AI
-- **Repository**: [https://github.com/gintama1018/AGENTIC-AI-HACKATHON](https://github.com/gintama1018/AGENTIC-AI-HACKATHON)
-- **Author**: Sonu Jangir (`gintama1018`)
-- **Email**: `Sonu.jangir2024@uem.edu.in`
-- **Hackathon**: Agentic AI Hackathon 2026
+## 👥 Authors & Maintainers
+- **Sonu Jangir** — *Lead Architect & Engineer* (Sonu.jangir2024@uem.edu.in)
+- **Repository**: [gintama1018/AGENTIC-AI-HACKATHON](https://github.com/gintama1018/AGENTIC-AI-HACKATHON)

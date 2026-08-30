@@ -13,10 +13,12 @@ import {
   Menu,
   X,
   RefreshCw,
-  LayoutGrid
+  LayoutGrid,
+  Sparkles
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { api } from '../../services/api';
+import { AskReturnShieldDrawer } from '../ui/AskReturnShieldDrawer';
 
 const SIDEBAR_W = 230;
 
@@ -50,6 +52,7 @@ const pageTitle = (pathname) => {
 export const DashboardLayout = () => {
   const { user, logout } = useAuth();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [askDrawerOpen, setAskDrawerOpen] = useState(false);
   const [seeding, setSeeding]       = useState(false);
   const [seedMsg, setSeedMsg]       = useState('');
   const location = useLocation();
@@ -104,8 +107,22 @@ export const DashboardLayout = () => {
           </Link>
         </div>
 
+        {/* Ask ReturnShield Quick Trigger */}
+        <div className="px-3 pt-4">
+          <button
+            onClick={() => setAskDrawerOpen(true)}
+            className="w-full flex items-center justify-between px-3 py-2 rounded-lg bg-gradient-to-r from-indigo-950/60 to-purple-950/40 border border-indigo-700/60 text-indigo-300 text-xs font-bold hover:border-indigo-500 transition-all group"
+          >
+            <span className="flex items-center gap-2">
+              <Sparkles className="w-3.5 h-3.5 text-indigo-400 group-hover:scale-110 transition-transform" />
+              Ask ReturnShield
+            </span>
+            <span className="text-[10px] px-1.5 py-0.5 rounded bg-indigo-900/60 text-indigo-200">AI</span>
+          </button>
+        </div>
+
         {/* Primary navigation */}
-        <nav className="flex-1 flex flex-col gap-1 px-3 pt-5 overflow-y-auto">
+        <nav className="flex-1 flex flex-col gap-1 px-3 pt-4 overflow-y-auto">
           <p className="px-3 pb-2 text-[10px] font-bold text-slate-500 uppercase tracking-wider">Investigation</p>
           {primaryNav.map((item) => (
             <NavLink key={item.path} to={item.path} className={navLinkClass(item.path)}>
@@ -114,7 +131,7 @@ export const DashboardLayout = () => {
             </NavLink>
           ))}
 
-          <p className="px-3 pb-2 pt-6 text-[10px] font-bold text-slate-500 uppercase tracking-wider">Operations</p>
+          <p className="px-3 pb-2 pt-5 text-[10px] font-bold text-slate-500 uppercase tracking-wider">Operations</p>
           {secondaryNav.map((item) => (
             <NavLink key={item.path} to={item.path} className={navLinkClass(item.path)}>
               <item.icon className="w-4 h-4 flex-shrink-0" />
@@ -158,9 +175,14 @@ export const DashboardLayout = () => {
             </div>
             <span className="font-bold text-sm text-white">ReturnShield</span>
           </Link>
-          <button onClick={() => setMobileOpen(!mobileOpen)} className="p-1.5 rounded-lg text-slate-400 hover:text-white">
-            {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-          </button>
+          <div className="flex items-center gap-2">
+            <button onClick={() => setAskDrawerOpen(true)} className="p-1.5 rounded-lg text-indigo-400 bg-indigo-950/50 border border-indigo-700/60">
+              <Sparkles className="w-4 h-4" />
+            </button>
+            <button onClick={() => setMobileOpen(!mobileOpen)} className="p-1.5 rounded-lg text-slate-400 hover:text-white">
+              {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+            </button>
+          </div>
         </header>
 
         {/* Mobile drawer */}
@@ -192,13 +214,23 @@ export const DashboardLayout = () => {
             <span className="text-slate-600">|</span>
             <span className="text-slate-400">Tenant: <strong className="text-slate-200">{user?.company_name || 'BharatThreads Lifestyle Pvt. Ltd.'}</strong></span>
           </div>
-          <Link
-            to="/dashboard/import"
-            className="rs-btn-primary"
-            style={{ height: 34, padding: '0 14px', fontSize: 12 }}
-          >
-            + Ingest Returns
-          </Link>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setAskDrawerOpen(true)}
+              className="rs-btn-secondary text-xs flex items-center gap-1.5"
+              style={{ height: 34, padding: '0 12px' }}
+            >
+              <Sparkles className="w-3.5 h-3.5 text-indigo-400" />
+              Ask ReturnShield
+            </button>
+            <Link
+              to="/dashboard/import"
+              className="rs-btn-primary"
+              style={{ height: 34, padding: '0 14px', fontSize: 12 }}
+            >
+              + Ingest Returns
+            </Link>
+          </div>
         </div>
 
         {/* Workstation canvas */}
@@ -206,6 +238,13 @@ export const DashboardLayout = () => {
           <Outlet />
         </main>
       </div>
+
+      {/* Ask ReturnShield Drawer */}
+      <AskReturnShieldDrawer
+        isOpen={askDrawerOpen}
+        onClose={() => setAskDrawerOpen(false)}
+        runId="current"
+      />
     </div>
   );
 };

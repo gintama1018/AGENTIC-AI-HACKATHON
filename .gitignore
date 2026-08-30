@@ -11,6 +11,8 @@ dist/
 .env
 .env.local
 .env.*.local
+server/.env
+client/.env
 
 # Logs
 npm-debug.log*

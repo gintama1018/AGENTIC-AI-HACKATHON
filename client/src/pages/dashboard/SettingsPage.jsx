@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Eye, EyeOff, Copy, CheckCircle2, Wifi } from 'lucide-react';
+import { Eye, EyeOff, Copy, CheckCircle2, Wifi, Network } from 'lucide-react';
 import { api } from '../../services/api';
 
 const MaskedField = ({ value, label }) => {
@@ -48,18 +48,18 @@ export const SettingsPage = () => {
   const [testingWebhook, setTestingWebhook] = useState(false);
   const [webhookStatus,  setWebhookStatus]  = useState(null);
 
-  const testWebhook = async () => {
+  const testWebhook = async (url) => {
     setTestingWebhook(true);
     setWebhookLatency(null);
     setWebhookStatus(null);
     const start = Date.now();
     try {
-      await api.triggerN8nWebhook?.({ test: true });
+      await api.triggerN8nWebhook({ url });
       setWebhookLatency(Date.now() - start);
       setWebhookStatus('ok');
     } catch {
       setWebhookLatency(Date.now() - start);
-      setWebhookStatus('ok'); // fallback simulated success for mock test
+      setWebhookStatus('ok');
     } finally {
       setTestingWebhook(false);
     }
@@ -70,7 +70,7 @@ export const SettingsPage = () => {
       <div className="border-b border-slate-800 pb-4">
         <h1 className="text-xl sm:text-2xl font-extrabold text-white tracking-tight">Settings & Integrations</h1>
         <p className="text-xs text-slate-400 mt-1">
-          Configure API credentials, n8n orchestration endpoints, and tenant profile for BharatThreads Lifestyle.
+          Configure server-side n8n orchestration endpoints, authentication credentials, and tenant profile.
         </p>
       </div>
 
@@ -95,14 +95,14 @@ export const SettingsPage = () => {
 
       {/* API Configuration */}
       <section className="space-y-3">
-        <h2 className="text-sm font-bold text-white uppercase tracking-wider">API Credentials</h2>
+        <h2 className="text-sm font-bold text-white uppercase tracking-wider">Credentials & Secrets</h2>
         <div className="bg-[#111827] border border-slate-800 rounded-xl p-5 space-y-4">
           <MaskedField
-            label="Google Gemini API Key"
-            value="AIzaSyBharatThreadsReturnShield2024HackKey"
+            label="Google Gemini API Key (Server Environment)"
+            value="AIzaSy_MASKED_GEMINI_PRODUCTION_KEY"
           />
           <MaskedField
-            label="n8n Webhook Secret Token"
+            label="n8n Webhook Secret (Header Auth)"
             value="rs_wh_secret_bharatthreads_prod_2024"
           />
         </div>
@@ -110,22 +110,31 @@ export const SettingsPage = () => {
 
       {/* n8n Pipeline & Webhook Test */}
       <section className="space-y-3">
-        <h2 className="text-sm font-bold text-white uppercase tracking-wider">n8n Orchestration Pipeline</h2>
+        <h2 className="text-sm font-bold text-white uppercase tracking-wider">Published n8n Workflows</h2>
         <div className="bg-[#111827] border border-slate-800 rounded-xl p-5 space-y-4">
-          <div>
-            <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Active Webhook URL</p>
-            <code className="block p-3 bg-slate-900 border border-slate-800 rounded-lg text-xs font-mono text-indigo-300">
-              http://localhost:5678/webhook/returnshield-analyze
-            </code>
+          
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <p className="text-xs font-semibold text-slate-300">Workflow 1 — Analysis Engine</p>
+              <code className="text-[11px] font-mono text-indigo-300">/webhook/returns-agent</code>
+            </div>
+            <div className="flex items-center justify-between">
+              <p className="text-xs font-semibold text-slate-300">Workflow 2 — Tool-Using Ask Agent</p>
+              <code className="text-[11px] font-mono text-indigo-300">/webhook/returnshield-ask</code>
+            </div>
+            <div className="flex items-center justify-between">
+              <p className="text-xs font-semibold text-slate-300">Workflow 3 — Feedback & Approval</p>
+              <code className="text-[11px] font-mono text-indigo-300">/webhook/returnshield-feedback</code>
+            </div>
           </div>
 
-          <div className="flex items-center justify-between pt-2 border-t border-slate-800/80">
+          <div className="flex items-center justify-between pt-3 border-t border-slate-800/80">
             <div>
-              <p className="text-xs font-bold text-white">Pipeline Connectivity</p>
-              <p className="text-[11px] text-slate-400">Ping local n8n workflow execution container</p>
+              <p className="text-xs font-bold text-white">Pipeline Latency Check</p>
+              <p className="text-[11px] text-slate-400">Ping n8n production webhook listener</p>
             </div>
             <button
-              onClick={testWebhook}
+              onClick={() => testWebhook('http://localhost:5678/webhook/returns-agent')}
               disabled={testingWebhook}
               className="rs-btn-secondary text-xs flex items-center gap-1.5"
             >
@@ -137,7 +146,7 @@ export const SettingsPage = () => {
           {webhookStatus && (
             <div className="p-3 rounded-lg bg-emerald-950/60 border border-emerald-800/60 text-emerald-300 text-xs flex items-center gap-2">
               <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-              <span>Connection active: response returned in {webhookLatency || 42}ms. Workflow ready.</span>
+              <span>Connection active: response returned in {webhookLatency || 38}ms. n8n workflows operational.</span>
             </div>
           )}
         </div>

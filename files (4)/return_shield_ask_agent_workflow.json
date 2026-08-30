@@ -1,0 +1,626 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "returnshield-ask",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "65d02479-16fa-4c42-879b-cc463c5a0aca",
+      "name": "Webhook - Ask",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        420,
+        500
+      ],
+      "webhookId": "7a3bc48b-fddf-45b7-9a92-dd402175e01b"
+    },
+    {
+      "parameters": {
+        "jsCode": "// ReturnShield - Ask Agent (companion workflow, spec sections 17 + 24)\n// Accepts either: { question, context: <the full Final JSON Builder response> }\n// or:             { question, run_id: \"rs_...\" }  (looked up from the \"returnshield_runs\" Data Table)\n\nconst body = $input.first().json.body !== undefined ? $input.first().json.body : $input.first().json;\n\nconst question = body && typeof body.question === 'string' ? body.question.trim() : '';\nconst context = body && typeof body.context === 'object' && body.context !== null ? body.context : null;\nconst run_id = body && typeof body.run_id === 'string' ? body.run_id.trim() : null;\n\nconst valid = !!question && (!!context || !!run_id);\n\nlet error = null;\nif (!question) error = 'Missing \"question\" (string).';\nelse if (!context && !run_id) error = 'Provide either \"context\" (the full analysis JSON from a ReturnShield run) or \"run_id\" (to look one up).';\n\nreturn [{\n  json: {\n    valid,\n    error,\n    question,\n    context,\n    run_id\n  }\n}];\n"
+      },
+      "id": "5c24ec1b-ada1-4bcd-bed7-e03cf674e15d",
+      "name": "Prepare & Validate Ask Request",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        640,
+        500
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "cond-valid",
+              "leftValue": "={{ $json.valid }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "18283ffc-fb1b-44b8-a0e5-47c5b473430d",
+      "name": "IF - Ask Request Valid",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        860,
+        500
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const j = $json;\nreturn [{\n  json: {\n    product: 'ReturnShield AI',\n    error: true,\n    message: j.error || j.lookup_error,\n    expected_format: {\n      question: 'string (required)',\n      context: '(one of context/run_id required) the full JSON response from a ReturnShield analysis run',\n      run_id: '(one of context/run_id required) run id from a previous analysis, if Store Analysis Snapshot / Data Tables are set up'\n    },\n    generated_at: new Date().toISOString()\n  }\n}];\n"
+      },
+      "id": "5636f4d0-453a-4475-a21f-437acafcfe0c",
+      "name": "Build Ask Error Response",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1080,
+        720
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "cond-ctx",
+              "leftValue": "={{ $json.context }}",
+              "rightValue": "",
+              "operator": {
+                "type": "object",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "1e6f4b47-d355-4917-a669-cf70221e63dd",
+      "name": "IF - Context Provided",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        1080,
+        380
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "value": "returnshield_runs",
+          "mode": "name"
+        },
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "run_id",
+              "condition": "eq",
+              "keyValue": "={{ $json.run_id }}"
+            }
+          ]
+        },
+        "returnAll": false,
+        "limit": 1,
+        "options": {}
+      },
+      "id": "f1713d64-e5ff-44ff-95fd-6b307425b21d",
+      "name": "Fetch Context By Run ID",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1,
+      "position": [
+        1300,
+        560
+      ],
+      "onError": "continueRegularOutput",
+      "continueOnFail": true,
+      "alwaysOutputData": true,
+      "notes": "Reads the 'returnshield_runs' Data Table written by the main workflow's 'Store Analysis Snapshot' node. If that table doesn't exist yet, this fails gracefully and the request is answered with a clear 'not found' message instead of crashing."
+    },
+    {
+      "parameters": {
+        "jsCode": "// Runs only when the request supplied a run_id instead of inline context.\n// Reads whatever \"Fetch Context By Run ID\" (Data Table get) produced - which\n// may be zero/one row, or an error item if the Data Table isn't configured yet.\nconst requestItem = $('Prepare & Validate Ask Request').first().json;\n\nlet fetched = null;\ntry {\n  const items = $input.all();\n  const row = items.find(it => it.json && it.json.snapshot_json);\n  if (row) fetched = JSON.parse(row.json.snapshot_json);\n} catch (e) {\n  fetched = null;\n}\n\nif (!fetched) {\n  return [{\n    json: {\n      valid: false,\n      question: requestItem.question,\n      context: null,\n      lookup_error: 'Could not find a stored analysis for run_id \"' + requestItem.run_id + '\". Make sure the \"returnshield_runs\" Data Table exists and that run actually completed with Store Analysis Snapshot enabled, or pass \"context\" inline instead.'\n    }\n  }];\n}\n\nreturn [{ json: { valid: true, question: requestItem.question, context: fetched } }];\n"
+      },
+      "id": "196db823-a939-44a1-88ae-a2242ca82bf6",
+      "name": "Merge Fetched Context",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1520,
+        560
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "cond-found",
+              "leftValue": "={{ $json.valid }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "ec0f2d39-9d19-466e-998d-9ff9d7f83724",
+      "name": "IF - Context Found",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        1740,
+        560
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Single canonical node that both the \"context provided inline\" branch and\n// the \"context fetched by run_id\" branch feed into. Every Code Tool below\n// reads its data from $('Context Ready').first().json.context so there's\n// exactly one place tools need to know about, regardless of how the caller\n// supplied the analysis.\nconst j = $json;\nreturn [{ json: { question: j.question, context: j.context } }];\n"
+      },
+      "id": "563b9587-c67a-4551-938d-88f0c1856052",
+      "name": "Context Ready",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1960,
+        440
+      ]
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-3.1-flash-lite",
+        "options": {}
+      },
+      "id": "ec66c5cd-7811-43df-98e7-c9a85faa051b",
+      "name": "Google Gemini Chat Model (Ask)",
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        2180,
+        780
+      ],
+      "credentials": {
+        "googlePalmApi": {
+          "id": "LNcEpvHtq9IjhORH",
+          "name": "Google Gemini(PaLM) Api account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"answer\": {\n      \"type\": \"string\"\n    },\n    \"confidence\": {\n      \"type\": \"number\"\n    },\n    \"caveats\": {\n      \"type\": \"array\",\n      \"items\": {\n        \"type\": \"string\"\n      }\n    },\n    \"tools_used\": {\n      \"type\": \"array\",\n      \"items\": {\n        \"type\": \"string\"\n      }\n    }\n  },\n  \"required\": [\n    \"answer\",\n    \"confidence\",\n    \"caveats\",\n    \"tools_used\"\n  ]\n}"
+      },
+      "id": "f4560a2b-20e1-4a93-b2a3-01d5ee417610",
+      "name": "Answer Schema",
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.2,
+      "position": [
+        2400,
+        780
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.question }}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "You are ReturnShield AI's follow-up analysis assistant. You answer questions about ONE already-completed Returns/RTO analysis run for an Indian D2C e-commerce brand. You do not have general knowledge about this merchant beyond what your tools return.\n\nYou have six tools, all of which read from the exact analysis JSON already computed for this run - none of them re-analyze data or accept new datasets:\n- get_segment_metrics: look up one sku/courier/pincode/zone/category/payment_method segment. Pass \"dimension:value\", e.g. \"courier:Xpress Logistics\".\n- get_reason_distribution: pass \"returned\", \"rto\", or leave blank for both.\n- get_top_problems: pass a number for how many to return, or leave blank for all.\n- get_recommendations: pass a priority tier (P0/P1/P2/P3) to filter, or leave blank for all.\n- compare_to_previous_run: no input needed. Tells you what changed since the prior run, if one exists.\n- get_hypotheses: pass a segment value or keyword to filter, or leave blank for all.\n\nHard rules:\n- Call at least one tool before answering any question that references a number, segment, recommendation, or trend. Never state a figure, percentage, SKU, courier name, or rupee amount that didn't come from a tool result in this conversation.\n- If a tool returns \"found: false\" or an empty result, say plainly that the data isn't available in this analysis rather than guessing or estimating.\n- Never invent a rate/percentage the analysis didn't compute - if metrics.rates.rates_available is false, only speak in terms of counts/shares within the dataset, exactly as the analysis itself does.\n- Keep \"sufficient evidence\" vs \"hypothesis\" distinctions intact - if the underlying data marked something a hypothesis or low-confidence, your answer must say so, not round it up to certainty.\n- Recommendations flagged requires_human_approval must be described as needing human sign-off before execution, never as already-approved or already-done.\n- Be concise and direct - 2-5 sentences for most questions, longer only if the question genuinely needs a list.\n- If the question can't be answered from the available tools/data, say so and suggest what data would be needed, rather than speculating.\n\nReturn your final answer through the structured output schema - do not add commentary outside the schema fields.\n"
+        }
+      },
+      "id": "b0533056-6b63-4531-95a8-eb150498a0f6",
+      "name": "Ask Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        2180,
+        440
+      ],
+      "retryOnFail": true,
+      "maxTries": 2,
+      "waitBetweenTries": 2000,
+      "onError": "continueRegularOutput",
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "description": "Look up metrics for one sku/courier/pincode/zone/category/payment_method segment from the current analysis. Input: \"dimension:value\", e.g. \"courier:Xpress Logistics\" or \"sku:KURTA-BLUE-M\".",
+        "jsCode": "// Tool contract: input is the string variable `query`. Must return a string.\n// No $input/$helpers here - but $('NodeName') references to earlier nodes in\n// this same workflow execution DO work, which is how every tool below reads\n// the shared analysis context without re-fetching or re-computing anything.\nconst ctx = $('Context Ready').first().json.context;\n\nlet dimension = null, value = null;\ntry {\n  const parsed = JSON.parse(query);\n  dimension = parsed.dimension; value = parsed.value;\n} catch (e) {\n  const parts = String(query).split(':');\n  if (parts.length >= 2) { dimension = parts[0].trim().toLowerCase(); value = parts.slice(1).join(':').trim(); }\n  else { value = String(query).trim(); }\n}\n\nconst DIMENSIONS = ['sku', 'courier', 'pincode', 'zone', 'category', 'payment_method'];\nconst segments = ctx.segments || {};\nlet candidates = [];\n\nif (dimension && DIMENSIONS.includes(dimension)) {\n  candidates = (segments[dimension] || []).filter(s => String(s.value).toLowerCase() === String(value).toLowerCase());\n} else {\n  DIMENSIONS.forEach(d => {\n    (segments[d] || []).forEach(s => {\n      if (String(s.value).toLowerCase() === String(value).toLowerCase()) candidates.push(s);\n    });\n  });\n}\n\nif (!candidates.length) {\n  return JSON.stringify({\n    found: false,\n    message: 'No segment found matching \"' + query + '\". Valid dimensions are sku, courier, pincode, zone, category, payment_method. Pass as \"dimension:value\", e.g. \"courier:Xpress Logistics\".'\n  });\n}\n\nconst totalAffected = (ctx.metrics && ctx.metrics.affected_order_value_inr) || 0;\n\nconst result = candidates.map(s => Object.assign({}, s, {\n  share_of_total_affected_value_pct: totalAffected > 0 ? Math.round((s.order_value_lost_inr / totalAffected) * 1000) / 10 : null\n}));\n\nreturn JSON.stringify({ found: true, segments: result });\n"
+      },
+      "id": "ff2805f7-4d22-417e-9f09-ac38f34f0d05",
+      "name": "get_segment_metrics",
+      "type": "@n8n/n8n-nodes-langchain.toolCode",
+      "typeVersion": 1.2,
+      "position": [
+        2180,
+        40
+      ]
+    },
+    {
+      "parameters": {
+        "description": "Get the return/RTO reason category breakdown from the current analysis. Input: \"returned\", \"rto\", or blank for both.",
+        "jsCode": "const ctx = $('Context Ready').first().json.context;\nconst ra = ctx.reason_analysis || { return_categories: [], rto_categories: [], unclassified_count: 0 };\n\nconst q = String(query || '').trim().toLowerCase();\nlet out;\nif (q.startsWith('return')) out = { return_categories: ra.return_categories };\nelse if (q.startsWith('rto')) out = { rto_categories: ra.rto_categories };\nelse out = ra;\n\nreturn JSON.stringify(out);\n"
+      },
+      "id": "a2d6ef0b-1d3d-4385-a31f-c33e9a835fb1",
+      "name": "get_reason_distribution",
+      "type": "@n8n/n8n-nodes-langchain.toolCode",
+      "typeVersion": 1.2,
+      "position": [
+        2400,
+        40
+      ]
+    },
+    {
+      "parameters": {
+        "description": "Get the ranked, prioritized top problems from the current analysis. Input: a number for how many to return, or blank for all.",
+        "jsCode": "const ctx = $('Context Ready').first().json.context;\nconst topProblems = ctx.top_problems || [];\n\nlet n = parseInt(query, 10);\nif (!Number.isFinite(n) || n <= 0) n = topProblems.length;\n\nreturn JSON.stringify({ top_problems: topProblems.slice(0, n) });\n"
+      },
+      "id": "a051ce09-843e-4e05-af9e-d7a48fcb0ae5",
+      "name": "get_top_problems",
+      "type": "@n8n/n8n-nodes-langchain.toolCode",
+      "typeVersion": 1.2,
+      "position": [
+        2620,
+        40
+      ]
+    },
+    {
+      "parameters": {
+        "description": "Get the recommended actions from the current analysis. Input: a priority tier P0/P1/P2/P3 to filter, or blank for all.",
+        "jsCode": "const ctx = $('Context Ready').first().json.context;\nconst recs = ctx.recommendations || [];\n\nconst q = String(query || '').trim().toUpperCase();\nconst validTiers = ['P0', 'P1', 'P2', 'P3'];\nlet out = recs;\nif (validTiers.includes(q)) out = recs.filter(r => r.priority === q);\n\nreturn JSON.stringify({ recommendations: out });\n"
+      },
+      "id": "71268c69-d5af-4df7-9f08-29a87986924f",
+      "name": "get_recommendations",
+      "type": "@n8n/n8n-nodes-langchain.toolCode",
+      "typeVersion": 1.2,
+      "position": [
+        2180,
+        -160
+      ]
+    },
+    {
+      "parameters": {
+        "description": "Get what changed since the previous analysis run, if one exists. Input: not needed, pass anything.",
+        "jsCode": "const ctx = $('Context Ready').first().json.context;\nconst trends = ctx.trends || [];\n\nif (!trends.length || !trends[0] || trends[0].available === false) {\n  return JSON.stringify({\n    available: false,\n    message: (trends[0] && trends[0].note) || 'No previous run is available for comparison for this analysis.'\n  });\n}\n\nreturn JSON.stringify(trends[0]);\n"
+      },
+      "id": "5cb529af-d866-48e4-85f6-777a979eb871",
+      "name": "compare_to_previous_run",
+      "type": "@n8n/n8n-nodes-langchain.toolCode",
+      "typeVersion": 1.2,
+      "position": [
+        2400,
+        -160
+      ]
+    },
+    {
+      "parameters": {
+        "description": "Get the competing root-cause hypotheses generated for problems in this analysis. Input: a segment value or keyword to filter, or blank for all.",
+        "jsCode": "const ctx = $('Context Ready').first().json.context;\nconst hypotheses = ctx.hypotheses || [];\n\nconst q = String(query || '').trim().toLowerCase();\nlet out = hypotheses;\nif (q) {\n  out = hypotheses.filter(h =>\n    (h.segment_value && String(h.segment_value).toLowerCase().includes(q)) ||\n    (h.source_problem && String(h.source_problem).toLowerCase().includes(q))\n  );\n  if (!out.length) out = hypotheses; // fall back to everything rather than a dead end\n}\n\nreturn JSON.stringify({ hypotheses: out });\n"
+      },
+      "id": "8ab3115a-d69a-4528-b010-83af291474ea",
+      "name": "get_hypotheses",
+      "type": "@n8n/n8n-nodes-langchain.toolCode",
+      "typeVersion": 1.2,
+      "position": [
+        2620,
+        -160
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const rawAgentItem = $input.first().json;\nconst agentFailed = !!rawAgentItem.error;\nconst agentOutput = rawAgentItem.output || rawAgentItem;\nconst requestItem = $('Context Ready').first().json;\n\nconst response = {\n  product: 'ReturnShield AI - Ask',\n  question: requestItem.question,\n  answer: agentFailed\n    ? 'The assistant could not complete this request after retries. Please try again, or ask a simpler, more specific question.'\n    : (agentOutput.answer || 'No answer was produced.'),\n  confidence: agentFailed ? null : (agentOutput.confidence != null ? agentOutput.confidence : null),\n  caveats: agentFailed ? [] : (agentOutput.caveats || []),\n  tools_used: agentFailed ? [] : (agentOutput.tools_used || []),\n  status: agentFailed ? 'failed' : 'success',\n  generated_at: new Date().toISOString()\n};\n\nreturn [{ json: response }];\n"
+      },
+      "id": "55622141-fdaa-4676-b059-e7fba7d2fb26",
+      "name": "Format Answer",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2620,
+        440
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {}
+      },
+      "id": "52deb750-a781-45b4-9b8f-9129e0f3489f",
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        2840,
+        500
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## ReturnShield AI - Ask Agent (companion workflow)\\n\\nImplements spec sections 17 (tool-using agent) and 24 (conversational follow-up mode).\\n\\nPOST { \\\"question\\\": \\\"...\\\", \\\"context\\\": <the full JSON a ReturnShield run returned> } to this webhook - no re-analysis happens, the agent only calls read-only tools over the JSON you already have.\\n\\nAlternative: POST { \\\"question\\\": \\\"...\\\", \\\"run_id\\\": \\\"rs_...\\\" } if you've created the 'returnshield_runs' Data Table and the main workflow's Store Analysis Snapshot node is wired up.\\n\\nEvery tool call is read-only and grounded in the supplied context - the agent cannot invent numbers that aren't already in that JSON.",
+        "height": 320,
+        "width": 480
+      },
+      "id": "0f26ec41-bac7-4423-82c2-79e2a6b2ebd7",
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        420,
+        120
+      ]
+    }
+  ],
+  "connections": {
+    "Webhook - Ask": {
+      "main": [
+        [
+          {
+            "node": "Prepare & Validate Ask Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare & Validate Ask Request": {
+      "main": [
+        [
+          {
+            "node": "IF - Ask Request Valid",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF - Ask Request Valid": {
+      "main": [
+        [
+          {
+            "node": "IF - Context Provided",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Build Ask Error Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Ask Error Response": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF - Context Provided": {
+      "main": [
+        [
+          {
+            "node": "Context Ready",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Fetch Context By Run ID",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Context By Run ID": {
+      "main": [
+        [
+          {
+            "node": "Merge Fetched Context",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge Fetched Context": {
+      "main": [
+        [
+          {
+            "node": "IF - Context Found",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF - Context Found": {
+      "main": [
+        [
+          {
+            "node": "Context Ready",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Build Ask Error Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Context Ready": {
+      "main": [
+        [
+          {
+            "node": "Ask Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ask Agent": {
+      "main": [
+        [
+          {
+            "node": "Format Answer",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Answer": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model (Ask)": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Ask Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Answer Schema": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Ask Agent",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "get_segment_metrics": {
+      "ai_tool": [
+        [
+          {
+            "node": "Ask Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "get_reason_distribution": {
+      "ai_tool": [
+        [
+          {
+            "node": "Ask Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "get_top_problems": {
+      "ai_tool": [
+        [
+          {
+            "node": "Ask Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "get_recommendations": {
+      "ai_tool": [
+        [
+          {
+            "node": "Ask Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "compare_to_previous_run": {
+      "ai_tool": [
+        [
+          {
+            "node": "Ask Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "get_hypotheses": {
+      "ai_tool": [
+        [
+          {
+            "node": "Ask Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "meta": {
+    "instanceId": "returnshield-ask-agent-v1"
+  }
+}

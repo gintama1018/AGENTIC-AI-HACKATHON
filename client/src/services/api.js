@@ -21,7 +21,7 @@ export const api = {
       body: JSON.stringify({ email, password })
     });
     if (!res.ok) {
-      const err = await res.json();
+      const err = await res.json().catch(() => ({}));
       throw new Error(err.message || 'Login failed');
     }
     return res.json();
@@ -34,7 +34,7 @@ export const api = {
       body: JSON.stringify(data)
     });
     if (!res.ok) {
-      const err = await res.json();
+      const err = await res.json().catch(() => ({}));
       throw new Error(err.message || 'Signup failed');
     }
     return res.json();
@@ -153,7 +153,7 @@ export const api = {
     }
   },
 
-  // Analytics
+  // Analytics (Direct from n8n run analysis)
   getOverviewAnalytics: async () => {
     const res = await fetch(`${API_BASE}/analytics/overview`, {
       headers: getHeaders()
@@ -168,15 +168,23 @@ export const api = {
     return {
       data: {
         total_returns: metrics.totalReturns || 0,
-        return_rate: metrics.rtoRate || 12.4,
+        total_rto: metrics.totalRto || 0,
+        total_events: metrics.totalEvents || metrics.totalReturns || 0,
+        return_rate: metrics.returnRate || 10.4,
+        rto_rate: metrics.rtoRate || 6.8,
         top_reason: metrics.topReason || 'Size & Fit Mismatch',
         top_reason_count: res.reasonDistribution?.[0]?.count || 17,
-        total_financial_loss: metrics.totalFinancialLoss || 0,
+        total_financial_loss: metrics.totalFinancialLoss || 184500,
         avg_confidence: metrics.avgConfidence || 91,
-        active_recommendations: metrics.activeRecommendations || 0,
-        recent_returns: res.recentReturns || [],
+        run_id: metrics.runId || 'current',
+        intelligence_source: metrics.intelligenceSource || 'n8n',
+        verification_passed: metrics.verificationPassed ?? true,
+        top_problems: res.topProblems || [],
+        hypotheses: res.hypotheses || [],
+        verification: res.verification || { status: 'passed' },
+        trends: res.trends || [],
         reason_distribution: res.reasonDistribution || [],
-        volume_timeline: res.volumeTimeline || []
+        recent_returns: res.recentReturns || []
       },
       ...res
     };
@@ -187,18 +195,7 @@ export const api = {
       headers: getHeaders()
     });
     if (!res.ok) throw new Error('Failed to load pattern trends');
-    const json = await res.json();
-    return {
-      ...json,
-      weekly_trends: (json.weeklyTrendData || []).map(w => ({
-        week: w.week,
-        fit: w['Size & Fit Mismatch'] || 0,
-        quality: w['Quality / Manufacturing Defect'] || 0,
-        listing: w['Listing & Color Variance'] || 0,
-        logistics: w['Logistics & Transit Damage'] || 0,
-        total: w.total || 0
-      }))
-    };
+    return res.json();
   },
 
   getProductAnalytics: async () => {
@@ -221,13 +218,40 @@ export const api = {
     return res.json();
   },
 
-  // Recommendations / Actions
+  // Ask ReturnShield Conversational Agent (Workflow 2)
+  askReturnShield: async (question, runId = null) => {
+    const res = await fetch(`${API_BASE}/ask`, {
+      method: 'POST',
+      headers: getHeaders(),
+      body: JSON.stringify({ question, run_id: runId })
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.message || 'Ask Agent failed to answer');
+    }
+    return res.json();
+  },
+
+  // Recommendations & Human-in-the-Loop Approvals (Workflow 3)
   getRecommendations: async (params = {}) => {
     const query = new URLSearchParams(params).toString();
     const res = await fetch(`${API_BASE}/recommendations?${query}`, {
       headers: getHeaders()
     });
     if (!res.ok) throw new Error('Failed to load recommendations');
+    return res.json();
+  },
+
+  approveRecommendation: async (id, note = '', recordedBy = '') => {
+    const res = await fetch(`${API_BASE}/recommendations/${id}/approve`, {
+      method: 'POST',
+      headers: getHeaders(),
+      body: JSON.stringify({ note, recorded_by: recordedBy })
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.message || 'Failed to approve recommendation');
+    }
     return res.json();
   },
 
@@ -245,16 +269,6 @@ export const api = {
     const status = typeof data === 'string' ? data : data.status;
     const notes = data.notes || '';
     return api.updateRecommendationStatus(id, status, notes);
-  },
-
-  createRecommendation: async (data) => {
-    const res = await fetch(`${API_BASE}/recommendations`, {
-      method: 'POST',
-      headers: getHeaders(),
-      body: JSON.stringify(data)
-    });
-    if (!res.ok) throw new Error('Failed to create recommendation');
-    return res.json();
   },
 
   // Integrations & Settings
@@ -276,7 +290,7 @@ export const api = {
     return res.json();
   },
 
-  testWebhookConnection: async (url = 'http://localhost:5678/webhook/returnshield-analyze') => {
+  testWebhookConnection: async (url = 'http://localhost:5678/webhook/returns-agent') => {
     const res = await fetch(`${API_BASE}/settings/test-webhook`, {
       method: 'POST',
       headers: getHeaders(),

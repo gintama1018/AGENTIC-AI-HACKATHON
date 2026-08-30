@@ -1,0 +1,236 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "returnshield-feedback",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "fedb5eee-4712-4db9-b826-97e698a97c2d",
+      "name": "Webhook - Feedback",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        420,
+        420
+      ],
+      "webhookId": "f08a78f9-a01b-4b3c-94be-8c807d4e6140"
+    },
+    {
+      "parameters": {
+        "jsCode": "// ReturnShield - Record Feedback (spec sections 16 + 19)\n// Doubles as: (a) the closed-loop feedback store (\"did this recommendation\n// work?\"), and (b) the human-approval record for recommendations the\n// Self-Verification Engine flagged with requires_human_approval = true.\n\nconst body = $input.first().json.body !== undefined ? $input.first().json.body : $input.first().json;\n\nconst VALID_OUTCOMES = ['accepted', 'rejected', 'implemented', 'resolved', 'ineffective', 'incorrect', 'approved', 'denied'];\n\nconst run_id = body && typeof body.run_id === 'string' ? body.run_id.trim() : '';\nconst target = body && typeof body.target === 'string' ? body.target.trim() : '';\nconst outcome = body && typeof body.outcome === 'string' ? body.outcome.trim().toLowerCase() : '';\nconst note = body && typeof body.note === 'string' ? body.note.trim() : '';\nconst recorded_by = body && typeof body.recorded_by === 'string' ? body.recorded_by.trim() : 'unspecified';\n\nconst errors = [];\nif (!run_id) errors.push('Missing \"run_id\" (string) - which analysis run this feedback is about.');\nif (!target) errors.push('Missing \"target\" (string) - which recommendation/problem this refers to, e.g. \"courier: Xpress Logistics\".');\nif (!outcome) errors.push('Missing \"outcome\" (string).');\nelse if (!VALID_OUTCOMES.includes(outcome)) errors.push('\"outcome\" must be one of: ' + VALID_OUTCOMES.join(', ') + '.');\n\nreturn [{\n  json: {\n    valid: errors.length === 0,\n    errors,\n    run_id, target, outcome, note, recorded_by,\n    recorded_at: new Date().toISOString()\n  }\n}];\n"
+      },
+      "id": "3ba4f695-6c85-4021-b9b6-5e99095501b0",
+      "name": "Prepare & Validate Feedback",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        640,
+        420
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "cond-valid",
+              "leftValue": "={{ $json.valid }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "c4ad063e-216f-4f0f-854d-0da53101593e",
+      "name": "IF - Feedback Valid",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        860,
+        420
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const j = $json;\nreturn [{\n  json: {\n    product: 'ReturnShield AI',\n    error: true,\n    messages: j.errors,\n    expected_format: {\n      run_id: 'string (required)',\n      target: 'string (required) - e.g. \"courier: Xpress Logistics\"',\n      outcome: 'one of: accepted, rejected, implemented, resolved, ineffective, incorrect, approved, denied',\n      note: 'string (optional)',\n      recorded_by: 'string (optional) - who is recording this outcome'\n    },\n    generated_at: new Date().toISOString()\n  }\n}];\n"
+      },
+      "id": "36e2c728-df0d-433b-8d6a-48ca2cd0418b",
+      "name": "Build Feedback Error Response",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1080,
+        620
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "insert",
+        "dataTableId": {
+          "__rl": true,
+          "value": "returnshield_feedback",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "run_id": "={{ $json.run_id }}",
+            "target": "={{ $json.target }}",
+            "outcome": "={{ $json.outcome }}",
+            "note": "={{ $json.note }}",
+            "recorded_by": "={{ $json.recorded_by }}",
+            "recorded_at": "={{ $json.recorded_at }}"
+          }
+        },
+        "options": {}
+      },
+      "id": "a29da1be-6264-48a0-b12f-ed9bbe201335",
+      "name": "Store Feedback",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1,
+      "position": [
+        1080,
+        300
+      ],
+      "onError": "continueRegularOutput",
+      "continueOnFail": true,
+      "alwaysOutputData": true,
+      "notes": "Create the 'returnshield_feedback' Data Table once in the n8n UI before first use. If it's missing, this fails gracefully and the response still confirms what was submitted - it just won't be queryable later until the table exists."
+    },
+    {
+      "parameters": {
+        "jsCode": "const j = $json;\nreturn [{\n  json: {\n    product: 'ReturnShield AI',\n    stored: true,\n    run_id: j.run_id,\n    target: j.target,\n    outcome: j.outcome,\n    recorded_at: j.recorded_at,\n    note: 'Feedback recorded. Future analysis runs referencing this run_id can factor this outcome in (spec section 19 closed-loop learning).'\n  }\n}];\n"
+      },
+      "id": "2ad0243c-d0c3-4e56-ba04-e8c925f36302",
+      "name": "Build Success Response",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1300,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {}
+      },
+      "id": "b79a4704-537f-41df-8fe3-20efeac4819d",
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        1520,
+        420
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## ReturnShield AI - Record Feedback (companion workflow)\\n\\nImplements spec sections 16 (human-in-the-loop) and 19 (feedback loop / closed-loop learning).\\n\\nPOST { \\\"run_id\\\", \\\"target\\\", \\\"outcome\\\", \\\"note?\\\", \\\"recorded_by?\\\" }.\\noutcome is one of: accepted, rejected, implemented, resolved, ineffective, incorrect, approved, denied.\\n\\nUse approved/denied to record a human sign-off on a recommendation the main workflow flagged requires_human_approval = true, BEFORE anyone acts on it. Use implemented/resolved/ineffective after the fact to close the loop on whether it worked.\\n\\nCreate a Data Table named 'returnshield_feedback' once (Data tables tab) with columns: run_id, target, outcome, note, recorded_by, recorded_at (all text) before first use.",
+        "height": 320,
+        "width": 480
+      },
+      "id": "4c6d1dbb-9f68-404a-868d-21e77b0e831e",
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        420,
+        60
+      ]
+    }
+  ],
+  "connections": {
+    "Webhook - Feedback": {
+      "main": [
+        [
+          {
+            "node": "Prepare & Validate Feedback",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare & Validate Feedback": {
+      "main": [
+        [
+          {
+            "node": "IF - Feedback Valid",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF - Feedback Valid": {
+      "main": [
+        [
+          {
+            "node": "Store Feedback",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Build Feedback Error Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Store Feedback": {
+      "main": [
+        [
+          {
+            "node": "Build Success Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Success Response": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Feedback Error Response": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "meta": {
+    "instanceId": "returnshield-feedback-v1"
+  }
+}

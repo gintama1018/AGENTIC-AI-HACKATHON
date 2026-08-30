@@ -1,15 +1,16 @@
 import express from 'express';
-import { 
-  getRecommendations, 
-  updateRecommendationStatus, 
-  createRecommendation 
+import {
+  getRecommendations,
+  updateRecommendationStatus,
+  createRecommendation,
+  approveRecommendation
 } from '../controllers/recommendationsController.js';
-import { authMiddleware } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
-router.get('/', authMiddleware, getRecommendations);
-router.patch('/:id', authMiddleware, updateRecommendationStatus);
-router.post('/', authMiddleware, createRecommendation);
+router.get('/', getRecommendations);
+router.post('/', createRecommendation);
+router.patch('/:id', updateRecommendationStatus);
+router.post('/:id/approve', approveRecommendation);
 
 export default router;
