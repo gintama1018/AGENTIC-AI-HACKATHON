@@ -154,8 +154,8 @@ export const DashboardLayout = () => {
 
           <div className="flex items-center justify-between pt-1 px-1">
             <div className="leading-tight min-w-0">
-              <p className="text-xs font-bold text-slate-100 truncate">{user?.name || 'Sonu Jangir'}</p>
-              <p className="text-[11px] text-slate-400 truncate max-w-[130px]">{user?.company_name || 'BharatThreads'}</p>
+              <p className="text-xs font-bold text-slate-100 truncate">{user?.name || 'Operations Lead'}</p>
+              <p className="text-[11px] text-slate-400 truncate max-w-[130px]">{user?.company_name || 'BharatThreads Lifestyle'}</p>
             </div>
             <button onClick={logout} title="Sign Out" className="p-1.5 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-rose-950/40 transition-colors">
               <LogOut className="w-4 h-4" />

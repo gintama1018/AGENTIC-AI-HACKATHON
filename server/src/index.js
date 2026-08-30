@@ -6,7 +6,7 @@ import { fileURLToPath } from 'url';
 
 import { initDb, getDb, saveDb } from './config/db.js';
 import { getInitialSeedData } from './data/seedData.js';
-import { runLocalDeterministicAnalysis } from './services/aiEngine.js';
+import { n8nClient } from './services/n8nClient.js';
 
 import authRoutes from './routes/authRoutes.js';
 import returnsRoutes from './routes/returnsRoutes.js';
@@ -62,7 +62,7 @@ app.use((err, req, res, next) => {
   });
 });
 
-// Initialize DB and Seed Initial Analysis with Realistic Indian D2C Data
+// Initialize DB and Seed Initial Analysis
 const startServer = async () => {
   try {
     await initDb();
@@ -76,7 +76,7 @@ const startServer = async () => {
 
       // Realistic Indian D2C Returns + RTOs batch (50 records)
       const canonicalReturns = seed.returns.map((r, i) => {
-        const isRto = i < 14; // First 14 are RTO events on Xpress Logistics
+        const isRto = i < 14;
         const courier = isRto ? 'Xpress Logistics' : (i < 28 ? 'Delhivery' : (i < 40 ? 'BlueDart' : 'Shadowfax'));
         const pincode = isRto ? '305001' : (i < 25 ? '110001' : (i < 38 ? '400001' : '560001'));
         const sku = i < 17 ? 'BT-KRS-SG-M' : (i < 28 ? 'BT-DPT-RS-OS' : (i < 38 ? 'BT-CHN-DT-32' : r.product_id));
@@ -119,18 +119,19 @@ const startServer = async () => {
         }
       };
 
-      const initialAnalysis = await runLocalDeterministicAnalysis(canonicalPayload);
-      const runId = 'rs_init_baseline_001';
+      // Route through authoritative n8nClient (uses n8n if available, otherwise honest fallback)
+      const initialAnalysis = await n8nClient.analyzeBatch(canonicalPayload);
+      const runId = initialAnalysis.run?.id || 'rs_init_baseline_001';
 
       db.runs = [{
         id: runId,
         merchant_id: 'bharatthreads_prod',
         created_at: new Date().toISOString(),
         source: 'seed_init',
-        status: 'success',
+        status: initialAnalysis.run?.status || 'success',
         records_count: canonicalReturns.length,
-        analysis_confidence: 'high',
-        intelligence_source: 'n8n'
+        analysis_confidence: initialAnalysis.data_quality?.analysis_confidence || 'high',
+        intelligence_source: initialAnalysis.intelligence_source || 'fallback'
       }];
 
       db.analyses = [{ run_id: runId, analysis: initialAnalysis, created_at: new Date().toISOString() }];
@@ -143,7 +144,7 @@ const startServer = async () => {
         category: r.product_category,
         detected_reason: r.return_reason_raw || 'Size & Fit Mismatch',
         ai_reason_category: r.return_reason_raw || 'Size & Fit Mismatch',
-        ai_root_cause: 'Bodice dimensions run 2 - 2.5 inches tighter than standard Indian size matrix specs.',
+        ai_root_cause: initialAnalysis.root_causes?.[0]?.likely_cause || initialAnalysis.hypotheses?.[0]?.hypothesis || 'Identified via baseline analysis',
         confidence_score: 0.95,
         order_value: r.order_value,
         customer_city: `PIN ${r.pincode}`,
@@ -162,7 +163,7 @@ const startServer = async () => {
       }));
 
       saveDb();
-      console.log(`✅ Seeded ${db.returns.length} returns and initialized baseline run (${runId}).`);
+      console.log(`✅ Seeded ${db.returns.length} returns and initialized baseline run (${runId}) via ${initialAnalysis.intelligence_source.toUpperCase()}.`);
     }
 
     app.listen(PORT, () => {

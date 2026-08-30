@@ -26,12 +26,15 @@ const ProtectedRoute = ({ children }) => {
   const { user, loading } = useAuth();
   if (loading) {
     return (
-      <div className="min-h-screen bg-canvas flex items-center justify-center">
-        <div className="w-5 h-5 border-2 border-stone border-t-charcoal rounded-full animate-spin" />
+      <div className="min-h-screen bg-[#080C14] flex items-center justify-center">
+        <div className="w-6 h-6 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
-  // Seamless entry for hackathon demo
+  const token = localStorage.getItem('returnshield_token');
+  if (!user && !token) {
+    return <Navigate to="/login" replace />;
+  }
   return children;
 };
 

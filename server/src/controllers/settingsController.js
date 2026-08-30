@@ -11,9 +11,9 @@ export const getIntegrations = async (req, res) => {
       integration = {
         _id: 'int_default',
         user_id: req.user?._id || 'user_demo_001',
-        n8n_webhook_url: 'https://primary-production-n8n.cloud/webhook/returnshield-ai-v2',
-        google_sheet_id: '1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms',
-        api_key: 'rsh_live_9948fa812bc802f6ae4e',
+        n8n_webhook_url: process.env.N8N_ANALYSIS_WEBHOOK_URL || 'https://sonujangid105.app.n8n.cloud/webhook/returns-agent',
+        google_sheet_id: 'your_google_sheet_id_placeholder',
+        api_key: 'your_api_key_placeholder',
         sync_interval: 'hourly',
         auto_analyze: true,
         last_sync: new Date().toISOString(),
@@ -61,7 +61,7 @@ export const updateIntegrations = async (req, res) => {
 export const testWebhookConnection = async (req, res) => {
   try {
     const { webhook_url } = req.body;
-    const targetUrl = webhook_url || getDb().integrations?.[0]?.n8n_webhook_url;
+    const targetUrl = webhook_url || getDb().integrations?.[0]?.n8n_webhook_url || process.env.N8N_ANALYSIS_WEBHOOK_URL;
 
     if (!targetUrl) {
       return res.status(400).json({ success: false, message: 'No webhook URL provided to test' });
@@ -82,7 +82,12 @@ export const testWebhookConnection = async (req, res) => {
 
     const startTime = Date.now();
     try {
-      const resp = await axios.post(targetUrl, testPayload, { timeout: 7000 });
+      const headers = { 'Content-Type': 'application/json' };
+      if (process.env.N8N_WEBHOOK_SECRET) {
+        headers['X-Webhook-Secret'] = process.env.N8N_WEBHOOK_SECRET;
+      }
+
+      const resp = await axios.post(targetUrl, testPayload, { headers, timeout: 7000 });
       const latencyMs = Date.now() - startTime;
 
       res.json({

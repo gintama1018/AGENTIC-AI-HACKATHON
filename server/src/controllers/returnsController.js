@@ -3,6 +3,7 @@ import csv from 'csv-parser';
 import { v4 as uuidv4 } from 'uuid';
 import { getDb, saveDb } from '../config/db.js';
 import { n8nClient } from '../services/n8nClient.js';
+import { classifyCustomerReturn } from '../services/aiEngine.js';
 import { getInitialSeedData } from '../data/seedData.js';
 
 const toStr = (v, fallback = null) => {
@@ -161,7 +162,7 @@ export const getReturnById = async (req, res) => {
 
 /**
  * Production Ingestion Flow:
- * CSV Upload -> Normalize (NO FAKE DEFAULTS) -> Canonical Payload -> n8n Workflow 1 -> Validate & Persist
+ * CSV Upload -> Normalize (5,000 row guard) -> Canonical Payload -> n8n Workflow 1 -> Validate & Persist
  */
 export const importReturns = async (req, res) => {
   try {
@@ -197,8 +198,14 @@ export const importReturns = async (req, res) => {
       return res.status(400).json({ message: 'No valid return records found in payload' });
     }
 
+    // Enforce 5,000-row ingestion safety guard
+    const cappedItems = rawItems.length > 5000 ? rawItems.slice(0, 5000) : rawItems;
+    if (rawItems.length > 5000) {
+      console.warn(`[importReturns] Truncated payload from ${rawItems.length} to 5000 records per ingestion guard.`);
+    }
+
     // Build Canonical n8n Payload with strict honest value mapping
-    const normalizedReturns = rawItems.map((row, idx) => {
+    const normalizedReturns = cappedItems.map((row, idx) => {
       const is_rto = toBool(row.is_rto || row.rto || row.isRTO);
       const journey_outcome = deriveOutcome(row, is_rto);
       const order_value = toNum(row.order_value || row.product_price || row.price || row['Price'] || row.amount);
@@ -240,7 +247,7 @@ export const importReturns = async (req, res) => {
 
     const canonicalPayload = {
       returns: normalizedReturns,
-      order_summary: req.body?.order_summary || null, // Optional honest denominator
+      order_summary: req.body?.order_summary || null,
       request_context: {
         merchant_id: merchantId,
         source: req.file ? 'csv' : 'api',
@@ -272,27 +279,31 @@ export const importReturns = async (req, res) => {
       ...(db.analyses || []).filter(a => a.run_id !== finalRunId)
     ];
 
-    // Map individual return items for table view
-    const tableItems = normalizedReturns.map((r, i) => ({
-      _id: uuidv4(),
-      id: r.order_id,
-      order_id: r.order_id,
-      sku: r.sku,
-      product_name: r.product_name || r.sku,
-      category: r.product_category,
-      detected_reason: r.return_reason_raw || (r.is_rto ? 'RTO Delivery Failure' : 'Customer Return'),
-      ai_reason_category: r.return_reason_raw || (r.is_rto ? 'RTO Delivery Failure' : 'Customer Return'),
-      ai_root_cause: analysisResult.root_causes?.[0]?.likely_cause || 'Identified via run analysis',
-      confidence_score: 0.90,
-      order_value: r.order_value,
-      customer_city: r.pincode !== 'UNKNOWN_PINCODE' ? `PIN ${r.pincode}` : 'Unknown Location',
-      return_date: r.order_date || new Date().toISOString(),
-      status: 'analyzed',
-      logistics_partner: r.courier,
-      customer_comment: r.customer_comment,
-      run_id: finalRunId,
-      is_rto: r.is_rto
-    }));
+    // Map individual return items for table view with per-record NLP classification
+    const tableItems = normalizedReturns.map((r) => {
+      const cls = classifyCustomerReturn(r.customer_comment, r.return_reason_raw || r.rto_reason_raw, r.product_name, r.product_category);
+
+      return {
+        _id: uuidv4(),
+        id: r.order_id,
+        order_id: r.order_id,
+        sku: r.sku,
+        product_name: r.product_name || r.sku,
+        category: r.product_category,
+        detected_reason: cls.ai_reason_category,
+        ai_reason_category: cls.ai_reason_category,
+        ai_root_cause: cls.ai_root_cause || analysisResult.root_causes?.[0]?.likely_cause || analysisResult.hypotheses?.[0]?.hypothesis || 'Identified via run analysis',
+        confidence_score: cls.ai_confidence || 0.90,
+        order_value: r.order_value,
+        customer_city: r.pincode !== 'UNKNOWN_PINCODE' ? `PIN ${r.pincode}` : 'Unknown Location',
+        return_date: r.order_date || new Date().toISOString(),
+        status: 'analyzed',
+        logistics_partner: r.courier,
+        customer_comment: r.customer_comment,
+        run_id: finalRunId,
+        is_rto: r.is_rto
+      };
+    });
 
     db.returns = [...tableItems, ...(db.returns || [])];
 
@@ -326,7 +337,7 @@ export const importReturns = async (req, res) => {
       run_id: finalRunId,
       total_records: normalizedReturns.length,
       valid_records: normalizedReturns.length,
-      warnings: 0,
+      warnings: rawItems.length > 5000 ? [`Input exceeded 5,000 rows. Capped to 5,000 records.`] : 0,
       data: analysisResult
     });
   } catch (err) {
@@ -339,6 +350,8 @@ export const createSingleReturn = async (req, res) => {
   try {
     const db = getDb();
     const item = req.body;
+    const cls = classifyCustomerReturn(item.customer_comment, item.return_reason_raw, item.product_name, item.category);
+
     const newRecord = {
       _id: uuidv4(),
       id: item.order_id || `ORD-${Math.floor(10000 + Math.random() * 90000)}`,
@@ -346,8 +359,10 @@ export const createSingleReturn = async (req, res) => {
       sku: item.sku || item.product_id || 'UNKNOWN_SKU',
       product_name: item.product_name || 'Unspecified Product',
       category: item.category || 'General',
-      detected_reason: item.return_reason_raw || '',
-      confidence_score: 0.90,
+      detected_reason: cls.ai_reason_category,
+      ai_reason_category: cls.ai_reason_category,
+      ai_root_cause: cls.ai_root_cause,
+      confidence_score: cls.ai_confidence,
       order_value: toNum(item.product_price || item.order_value),
       customer_city: item.city || (item.pincode ? `PIN ${item.pincode}` : 'Unknown Location'),
       return_date: new Date().toISOString(),
@@ -414,9 +429,9 @@ export const seedDemoData = async (req, res) => {
       merchant_id: req.user?.company_name || 'BharatThreads Lifestyle Pvt. Ltd.',
       created_at: new Date().toISOString(),
       source: 'seed_demo',
-      status: 'success',
+      status: analysisResult.run?.status || 'success',
       records_count: seed.returns.length,
-      analysis_confidence: 'high',
+      analysis_confidence: analysisResult.data_quality?.analysis_confidence || 'high',
       intelligence_source: analysisResult.intelligence_source || 'n8n'
     }];
 

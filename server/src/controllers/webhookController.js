@@ -2,11 +2,22 @@ import { getDb, saveDb } from '../config/db.js';
 
 export const handleWebhookResults = async (req, res) => {
   try {
+    // Enforce Webhook Secret Authentication
+    const configuredSecret = process.env.N8N_WEBHOOK_SECRET;
+    if (configuredSecret) {
+      const incomingSecret = req.headers['x-webhook-secret'] || 
+        (req.headers.authorization?.startsWith('Bearer ') ? req.headers.authorization.split(' ')[1] : null);
+
+      if (!incomingSecret || incomingSecret !== configuredSecret) {
+        return res.status(401).json({ error: true, message: 'Unauthorized: Invalid or missing X-Webhook-Secret header.' });
+      }
+    }
+
     const payload = req.body;
     const db = getDb();
 
     // Payload can be a single return analysis result or array of results
-    const results = Array.isArray(payload) ? payload : [payload];
+    const results = Array.isArray(payload) ? payload : (payload?.returns || [payload]);
 
     if (!results || results.length === 0) {
       return res.status(400).json({ message: 'No payload received' });
