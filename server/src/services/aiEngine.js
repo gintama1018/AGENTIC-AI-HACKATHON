@@ -5,7 +5,9 @@ export const recalculateStatsAndRecommendations = async () => {};
 export const processReturnBatch = async (items = []) => items;
 
 /**
- * Deterministic NLP category classifier for Indian E-Commerce returns/RTOs
+ * Deterministic Heuristic Category Classifier (Fallback Engine)
+ * Used when the primary Google Gemini 3.1 Flash Lite LLM agent in n8n is unreachable.
+ * Uses rule-based keyword pattern matching across English and Hinglish vernacular expressions.
  */
 export const classifyCustomerReturn = (comment = '', rawReason = '', productName = '', category = '') => {
   const text = `${comment || ''} ${rawReason || ''} ${productName || ''}`.toLowerCase();
