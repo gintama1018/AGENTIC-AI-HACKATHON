@@ -13,6 +13,861 @@
   ],
   "returns": [
     {
+      "_id": "6358597f-71c9-4932-bddb-cce6a3371752",
+      "id": "ORD-IN-9101",
+      "order_id": "ORD-IN-9101",
+      "sku": "BT-KRS-SG-M",
+      "product_name": "Kurta Set Sage Green",
+      "category": "Ethnic Wear",
+      "detected_reason": "Size too small",
+      "ai_reason_category": "Size too small",
+      "ai_root_cause": "Localized logistics, delivery access, or serviceability issues specific to the 305001 pincode.",
+      "confidence_score": 0.91,
+      "order_value": 1890,
+      "customer_city": "PIN 305001",
+      "return_date": "2026-08-28",
+      "status": "analyzed",
+      "logistics_partner": "Delhivery",
+      "customer_comment": "Ordered M as per chart but bodice chest is way too tight",
+      "run_id": "rs_mtficggt_3cgszu"
+    },
+    {
+      "_id": "8b58d120-624e-40f4-b13b-82c30d133555",
+      "id": "ORD-IN-9102",
+      "order_id": "ORD-IN-9102",
+      "sku": "BT-KRS-SG-M",
+      "product_name": "Kurta Set Sage Green",
+      "category": "Ethnic Wear",
+      "detected_reason": "Size mismatch",
+      "ai_reason_category": "Size mismatch",
+      "ai_root_cause": "Localized logistics, delivery access, or serviceability issues specific to the 305001 pincode.",
+      "confidence_score": 0.91,
+      "order_value": 1890,
+      "customer_city": "PIN 305001",
+      "return_date": "2026-08-28",
+      "status": "analyzed",
+      "logistics_partner": "BlueDart",
+      "customer_comment": "Chest and shoulders run 2 inches tighter than size guide",
+      "run_id": "rs_mtficggt_3cgszu"
+    },
+    {
+      "_id": "f8038000-eba3-4d70-93af-d3e47c7bf3bc",
+      "id": "ORD-IN-9103",
+      "order_id": "ORD-IN-9103",
+      "sku": "BT-KRS-SG-M",
+      "product_name": "Kurta Set Sage Green",
+      "category": "Ethnic Wear",
+      "detected_reason": "Chest tight",
+      "ai_reason_category": "Chest tight",
+      "ai_root_cause": "Localized logistics, delivery access, or serviceability issues specific to the 305001 pincode.",
+      "confidence_score": 0.91,
+      "order_value": 1890,
+      "customer_city": "PIN 110001",
+      "return_date": "2026-08-27",
+      "status": "analyzed",
+      "logistics_partner": "Delhivery",
+      "customer_comment": "Shoulder seam pulls tight across back",
+      "run_id": "rs_mtficggt_3cgszu"
+    },
+    {
+      "_id": "92f0fb48-f937-43ba-a941-c6c32d5c1c2b",
+      "id": "ORD-IN-9104",
+      "order_id": "ORD-IN-9104",
+      "sku": "BT-KRS-SG-M",
+      "product_name": "Kurta Set Sage Green",
+      "category": "Ethnic Wear",
+      "detected_reason": "Delivery attempt failed",
+      "ai_reason_category": "Delivery attempt failed",
+      "ai_root_cause": "Localized logistics, delivery access, or serviceability issues specific to the 305001 pincode.",
+      "confidence_score": 0.91,
+      "order_value": 1890,
+      "customer_city": "PIN 305001",
+      "return_date": "2026-08-27",
+      "status": "analyzed",
+      "logistics_partner": "Xpress Logistics",
+      "customer_comment": "Customer unreachable on phone delivery boy rejected",
+      "run_id": "rs_mtficggt_3cgszu"
+    },
+    {
+      "_id": "e576a261-ece9-414f-b7ed-3be7c3c44be5",
+      "id": "ORD-IN-9105",
+      "order_id": "ORD-IN-9105",
+      "sku": "BT-KRS-SG-M",
+      "product_name": "Kurta Set Sage Green",
+      "category": "Ethnic Wear",
+      "detected_reason": "Customer refused at door",
+      "ai_reason_category": "Customer refused at door",
+      "ai_root_cause": "Localized logistics, delivery access, or serviceability issues specific to the 305001 pincode.",
+      "confidence_score": 0.91,
+      "order_value": 1890,
+      "customer_city": "PIN 305001",
+      "return_date": "2026-08-26",
+      "status": "analyzed",
+      "logistics_partner": "Xpress Logistics",
+      "customer_comment": "Buyer refused COD payment on delivery",
+      "run_id": "rs_mtficggt_3cgszu"
+    },
+    {
+      "_id": "564dc926-9123-4a40-a8ca-5ee17bde74f3",
+      "id": "ORD-IN-9106",
+      "order_id": "ORD-IN-9106",
+      "sku": "BT-DPT-RS-OS",
+      "product_name": "Embroidered Dupatta Rust",
+      "category": "Ethnic Wear",
+      "detected_reason": "Quality defect",
+      "ai_reason_category": "Quality defect",
+      "ai_root_cause": "Localized logistics, delivery access, or serviceability issues specific to the 305001 pincode.",
+      "confidence_score": 0.91,
+      "order_value": 1899,
+      "customer_city": "PIN 400001",
+      "return_date": "2026-08-26",
+      "status": "analyzed",
+      "logistics_partner": "BlueDart",
+      "customer_comment": "Zari embroidery thread loose and unraveling near border",
+      "run_id": "rs_mtficggt_3cgszu"
+    },
+    {
+      "_id": "c8e6da08-2018-4153-a6c1-e0d6cd887e1c",
+      "id": "ORD-IN-9107",
+      "order_id": "ORD-IN-9107",
+      "sku": "BT-DPT-RS-OS",
+      "product_name": "Embroidered Dupatta Rust",
+      "category": "Ethnic Wear",
+      "detected_reason": "Fabric damaged",
+      "ai_reason_category": "Fabric damaged",
+      "ai_root_cause": "Localized logistics, delivery access, or serviceability issues specific to the 305001 pincode.",
+      "confidence_score": 0.91,
+      "order_value": 1899,
+      "customer_city": "PIN 400001",
+      "return_date": "2026-08-25",
+      "status": "analyzed",
+      "logistics_partner": "Delhivery",
+      "customer_comment": "Two small puncture holes near border embroidery",
+      "run_id": "rs_mtficggt_3cgszu"
+    },
+    {
+      "_id": "e1e4195e-189d-414c-9ff6-8aeb3e56607e",
+      "id": "ORD-IN-9108",
+      "order_id": "ORD-IN-9108",
+      "sku": "BT-CHN-DT-32",
+      "product_name": "Men's Chino Dark Teal",
+      "category": "Apparel",
+      "detected_reason": "Color different",
+      "ai_reason_category": "Color different",
+      "ai_root_cause": "Localized logistics, delivery access, or serviceability issues specific to the 305001 pincode.",
+      "confidence_score": 0.91,
+      "order_value": 1599,
+      "customer_city": "PIN 560001",
+      "return_date": "2026-08-25",
+      "status": "analyzed",
+      "logistics_partner": "Shadowfax",
+      "customer_comment": "Color in daylight is washed out compared to website photos",
+      "run_id": "rs_mtficggt_3cgszu"
+    },
+    {
+      "_id": "5018e461-a7e2-4718-9f82-fe0a64ac9123",
+      "id": "ORD-IN-9109",
+      "order_id": "ORD-IN-9109",
+      "sku": "BT-KRS-SG-M",
+      "product_name": "Kurta Set Sage Green",
+      "category": "Ethnic Wear",
+      "detected_reason": "Fake delivery attempt",
+      "ai_reason_category": "Fake delivery attempt",
+      "ai_root_cause": "Localized logistics, delivery access, or serviceability issues specific to the 305001 pincode.",
+      "confidence_score": 0.91,
+      "order_value": 1890,
+      "customer_city": "PIN 305001",
+      "return_date": "2026-08-24",
+      "status": "analyzed",
+      "logistics_partner": "Xpress Logistics",
+      "customer_comment": "Delivery boy marked address not found without calling",
+      "run_id": "rs_mtficggt_3cgszu"
+    },
+    {
+      "_id": "3ac8a54f-0848-43a7-9442-fec5a463e215",
+      "id": "ORD-IN-9110",
+      "order_id": "ORD-IN-9110",
+      "sku": "BT-KRS-SG-M",
+      "product_name": "Kurta Set Sage Green",
+      "category": "Ethnic Wear",
+      "detected_reason": "Customer not available",
+      "ai_reason_category": "Customer not available",
+      "ai_root_cause": "Localized logistics, delivery access, or serviceability issues specific to the 305001 pincode.",
+      "confidence_score": 0.91,
+      "order_value": 1890,
+      "customer_city": "PIN 305001",
+      "return_date": "2026-08-24",
+      "status": "analyzed",
+      "logistics_partner": "Xpress Logistics",
+      "customer_comment": "NDR attempt 3 failed at Ajmer hub",
+      "run_id": "rs_mtficggt_3cgszu"
+    },
+    {
+      "_id": "d249cf93-b283-4e37-9966-f7a994c8d8cf",
+      "id": "ORD-IN-9111",
+      "order_id": "ORD-IN-9111",
+      "sku": "BT-KRS-SG-M",
+      "product_name": "Kurta Set Sage Green",
+      "category": "Ethnic Wear",
+      "detected_reason": "Size too small",
+      "ai_reason_category": "Size too small",
+      "ai_root_cause": "Localized logistics, delivery access, or serviceability issues specific to the 305001 pincode.",
+      "confidence_score": 0.91,
+      "order_value": 1890,
+      "customer_city": "PIN 305001",
+      "return_date": "2026-08-23",
+      "status": "analyzed",
+      "logistics_partner": "Delhivery",
+      "customer_comment": "Bust measurement is 37 inches instead of 40 inches",
+      "run_id": "rs_mtficggt_3cgszu"
+    },
+    {
+      "_id": "c5bbc970-6833-41f0-a853-f01dcfa7e60f",
+      "id": "ORD-IN-9112",
+      "order_id": "ORD-IN-9112",
+      "sku": "BT-DPT-RS-OS",
+      "product_name": "Embroidered Dupatta Rust",
+      "category": "Ethnic Wear",
+      "detected_reason": "Quality defect",
+      "ai_reason_category": "Quality defect",
+      "ai_root_cause": "Localized logistics, delivery access, or serviceability issues specific to the 305001 pincode.",
+      "confidence_score": 0.91,
+      "order_value": 1899,
+      "customer_city": "PIN 110001",
+      "return_date": "2026-08-23",
+      "status": "analyzed",
+      "logistics_partner": "Delhivery",
+      "customer_comment": "Metallic zari thread causing skin itching and peeling",
+      "run_id": "rs_mtficggt_3cgszu"
+    },
+    {
+      "_id": "5c843152-a5a3-4ab6-acb9-417a715df55e",
+      "id": "ORD-IN-9113",
+      "order_id": "ORD-IN-9113",
+      "sku": "BT-KRS-SG-M",
+      "product_name": "Kurta Set Sage Green",
+      "category": "Ethnic Wear",
+      "detected_reason": "Delivery rejected",
+      "ai_reason_category": "Delivery rejected",
+      "ai_root_cause": "Localized logistics, delivery access, or serviceability issues specific to the 305001 pincode.",
+      "confidence_score": 0.91,
+      "order_value": 1890,
+      "customer_city": "PIN 305001",
+      "return_date": "2026-08-22",
+      "status": "analyzed",
+      "logistics_partner": "Xpress Logistics",
+      "customer_comment": "Customer cancelled COD order after dispatch",
+      "run_id": "rs_mtficggt_3cgszu"
+    },
+    {
+      "_id": "e970a208-e96a-444d-9254-0767b3cd2b73",
+      "id": "ORD-IN-9114",
+      "order_id": "ORD-IN-9114",
+      "sku": "BT-CHN-DT-32",
+      "product_name": "Men's Chino Dark Teal",
+      "category": "Apparel",
+      "detected_reason": "Length too long",
+      "ai_reason_category": "Length too long",
+      "ai_root_cause": "Localized logistics, delivery access, or serviceability issues specific to the 305001 pincode.",
+      "confidence_score": 0.91,
+      "order_value": 1599,
+      "customer_city": "PIN 400001",
+      "return_date": "2026-08-22",
+      "status": "analyzed",
+      "logistics_partner": "Delhivery",
+      "customer_comment": "Inseam is 34 inches which is dragging under shoes",
+      "run_id": "rs_mtficggt_3cgszu"
+    },
+    {
+      "_id": "b951662f-55d7-413f-bb56-f33063d25a42",
+      "id": "ORD-IN-9115",
+      "order_id": "ORD-IN-9115",
+      "sku": "BT-KRS-SG-M",
+      "product_name": "Kurta Set Sage Green",
+      "category": "Ethnic Wear",
+      "detected_reason": "Unreachable customer",
+      "ai_reason_category": "Unreachable customer",
+      "ai_root_cause": "Localized logistics, delivery access, or serviceability issues specific to the 305001 pincode.",
+      "confidence_score": 0.91,
+      "order_value": 1890,
+      "customer_city": "PIN 305001",
+      "return_date": "2026-08-21",
+      "status": "analyzed",
+      "logistics_partner": "Xpress Logistics",
+      "customer_comment": "Phone switched off for 3 days on delivery",
+      "run_id": "rs_mtficggt_3cgszu"
+    },
+    {
+      "_id": "6ec03460-26d4-4b77-a0de-a74b1170ad96",
+      "id": "ORD-IN-9101",
+      "order_id": "ORD-IN-9101",
+      "sku": "BT-KRS-SG-M",
+      "product_name": "Kurta Set Sage Green",
+      "category": "Ethnic Wear",
+      "detected_reason": "Size too small",
+      "ai_reason_category": "Size too small",
+      "ai_root_cause": "Pattern identified during run analysis",
+      "confidence_score": 0.91,
+      "order_value": 1890,
+      "customer_city": "PIN 305001",
+      "return_date": "2026-08-28",
+      "status": "analyzed",
+      "logistics_partner": "Delhivery",
+      "customer_comment": "Ordered M as per chart but bodice chest is way too tight",
+      "run_id": "rs_mtfi8mt5_u45p"
+    },
+    {
+      "_id": "e72984ec-d6bc-4f6f-8538-35adb5e18c75",
+      "id": "ORD-IN-9102",
+      "order_id": "ORD-IN-9102",
+      "sku": "BT-KRS-SG-M",
+      "product_name": "Kurta Set Sage Green",
+      "category": "Ethnic Wear",
+      "detected_reason": "Size mismatch",
+      "ai_reason_category": "Size mismatch",
+      "ai_root_cause": "Pattern identified during run analysis",
+      "confidence_score": 0.91,
+      "order_value": 1890,
+      "customer_city": "PIN 305001",
+      "return_date": "2026-08-28",
+      "status": "analyzed",
+      "logistics_partner": "BlueDart",
+      "customer_comment": "Chest and shoulders run 2 inches tighter than size guide",
+      "run_id": "rs_mtfi8mt5_u45p"
+    },
+    {
+      "_id": "cb547b6e-028b-4832-a58b-374ba5d532ca",
+      "id": "ORD-IN-9103",
+      "order_id": "ORD-IN-9103",
+      "sku": "BT-KRS-SG-M",
+      "product_name": "Kurta Set Sage Green",
+      "category": "Ethnic Wear",
+      "detected_reason": "Chest tight",
+      "ai_reason_category": "Chest tight",
+      "ai_root_cause": "Pattern identified during run analysis",
+      "confidence_score": 0.91,
+      "order_value": 1890,
+      "customer_city": "PIN 110001",
+      "return_date": "2026-08-27",
+      "status": "analyzed",
+      "logistics_partner": "Delhivery",
+      "customer_comment": "Shoulder seam pulls tight across back",
+      "run_id": "rs_mtfi8mt5_u45p"
+    },
+    {
+      "_id": "b12f4517-c561-47e6-87f6-6a1785e9f3dd",
+      "id": "ORD-IN-9104",
+      "order_id": "ORD-IN-9104",
+      "sku": "BT-KRS-SG-M",
+      "product_name": "Kurta Set Sage Green",
+      "category": "Ethnic Wear",
+      "detected_reason": "Delivery attempt failed",
+      "ai_reason_category": "Delivery attempt failed",
+      "ai_root_cause": "Pattern identified during run analysis",
+      "confidence_score": 0.91,
+      "order_value": 1890,
+      "customer_city": "PIN 305001",
+      "return_date": "2026-08-27",
+      "status": "analyzed",
+      "logistics_partner": "Xpress Logistics",
+      "customer_comment": "Customer unreachable on phone delivery boy rejected",
+      "run_id": "rs_mtfi8mt5_u45p"
+    },
+    {
+      "_id": "04172730-0796-4ee8-999b-28988766a8af",
+      "id": "ORD-IN-9105",
+      "order_id": "ORD-IN-9105",
+      "sku": "BT-KRS-SG-M",
+      "product_name": "Kurta Set Sage Green",
+      "category": "Ethnic Wear",
+      "detected_reason": "Customer refused at door",
+      "ai_reason_category": "Customer refused at door",
+      "ai_root_cause": "Pattern identified during run analysis",
+      "confidence_score": 0.91,
+      "order_value": 1890,
+      "customer_city": "PIN 305001",
+      "return_date": "2026-08-26",
+      "status": "analyzed",
+      "logistics_partner": "Xpress Logistics",
+      "customer_comment": "Buyer refused COD payment on delivery",
+      "run_id": "rs_mtfi8mt5_u45p"
+    },
+    {
+      "_id": "2d4a4b7e-8758-4863-90db-eec45ca01bcc",
+      "id": "ORD-IN-9106",
+      "order_id": "ORD-IN-9106",
+      "sku": "BT-DPT-RS-OS",
+      "product_name": "Embroidered Dupatta Rust",
+      "category": "Ethnic Wear",
+      "detected_reason": "Quality defect",
+      "ai_reason_category": "Quality defect",
+      "ai_root_cause": "Pattern identified during run analysis",
+      "confidence_score": 0.91,
+      "order_value": 1899,
+      "customer_city": "PIN 400001",
+      "return_date": "2026-08-26",
+      "status": "analyzed",
+      "logistics_partner": "BlueDart",
+      "customer_comment": "Zari embroidery thread loose and unraveling near border",
+      "run_id": "rs_mtfi8mt5_u45p"
+    },
+    {
+      "_id": "7c7c91dd-0b12-478f-96c5-0a28b5d11026",
+      "id": "ORD-IN-9107",
+      "order_id": "ORD-IN-9107",
+      "sku": "BT-DPT-RS-OS",
+      "product_name": "Embroidered Dupatta Rust",
+      "category": "Ethnic Wear",
+      "detected_reason": "Fabric damaged",
+      "ai_reason_category": "Fabric damaged",
+      "ai_root_cause": "Pattern identified during run analysis",
+      "confidence_score": 0.91,
+      "order_value": 1899,
+      "customer_city": "PIN 400001",
+      "return_date": "2026-08-25",
+      "status": "analyzed",
+      "logistics_partner": "Delhivery",
+      "customer_comment": "Two small puncture holes near border embroidery",
+      "run_id": "rs_mtfi8mt5_u45p"
+    },
+    {
+      "_id": "0e6a6b58-ad14-4783-8b1a-4d5dbb7afacb",
+      "id": "ORD-IN-9108",
+      "order_id": "ORD-IN-9108",
+      "sku": "BT-CHN-DT-32",
+      "product_name": "Men's Chino Dark Teal",
+      "category": "Apparel",
+      "detected_reason": "Color different",
+      "ai_reason_category": "Color different",
+      "ai_root_cause": "Pattern identified during run analysis",
+      "confidence_score": 0.91,
+      "order_value": 1599,
+      "customer_city": "PIN 560001",
+      "return_date": "2026-08-25",
+      "status": "analyzed",
+      "logistics_partner": "Shadowfax",
+      "customer_comment": "Color in daylight is washed out compared to website photos",
+      "run_id": "rs_mtfi8mt5_u45p"
+    },
+    {
+      "_id": "d62eb777-0cba-40ea-a3d7-2be768e6bafe",
+      "id": "ORD-IN-9109",
+      "order_id": "ORD-IN-9109",
+      "sku": "BT-KRS-SG-M",
+      "product_name": "Kurta Set Sage Green",
+      "category": "Ethnic Wear",
+      "detected_reason": "Fake delivery attempt",
+      "ai_reason_category": "Fake delivery attempt",
+      "ai_root_cause": "Pattern identified during run analysis",
+      "confidence_score": 0.91,
+      "order_value": 1890,
+      "customer_city": "PIN 305001",
+      "return_date": "2026-08-24",
+      "status": "analyzed",
+      "logistics_partner": "Xpress Logistics",
+      "customer_comment": "Delivery boy marked address not found without calling",
+      "run_id": "rs_mtfi8mt5_u45p"
+    },
+    {
+      "_id": "4478f302-5937-4c71-85a4-e40f667aa4cd",
+      "id": "ORD-IN-9110",
+      "order_id": "ORD-IN-9110",
+      "sku": "BT-KRS-SG-M",
+      "product_name": "Kurta Set Sage Green",
+      "category": "Ethnic Wear",
+      "detected_reason": "Customer not available",
+      "ai_reason_category": "Customer not available",
+      "ai_root_cause": "Pattern identified during run analysis",
+      "confidence_score": 0.91,
+      "order_value": 1890,
+      "customer_city": "PIN 305001",
+      "return_date": "2026-08-24",
+      "status": "analyzed",
+      "logistics_partner": "Xpress Logistics",
+      "customer_comment": "NDR attempt 3 failed at Ajmer hub",
+      "run_id": "rs_mtfi8mt5_u45p"
+    },
+    {
+      "_id": "0723f364-4469-4a79-b1b6-3b624f887dcc",
+      "id": "ORD-IN-9111",
+      "order_id": "ORD-IN-9111",
+      "sku": "BT-KRS-SG-M",
+      "product_name": "Kurta Set Sage Green",
+      "category": "Ethnic Wear",
+      "detected_reason": "Size too small",
+      "ai_reason_category": "Size too small",
+      "ai_root_cause": "Pattern identified during run analysis",
+      "confidence_score": 0.91,
+      "order_value": 1890,
+      "customer_city": "PIN 305001",
+      "return_date": "2026-08-23",
+      "status": "analyzed",
+      "logistics_partner": "Delhivery",
+      "customer_comment": "Bust measurement is 37 inches instead of 40 inches",
+      "run_id": "rs_mtfi8mt5_u45p"
+    },
+    {
+      "_id": "c5d047d2-ff6b-43fa-bd0e-be55b4736358",
+      "id": "ORD-IN-9112",
+      "order_id": "ORD-IN-9112",
+      "sku": "BT-DPT-RS-OS",
+      "product_name": "Embroidered Dupatta Rust",
+      "category": "Ethnic Wear",
+      "detected_reason": "Quality defect",
+      "ai_reason_category": "Quality defect",
+      "ai_root_cause": "Pattern identified during run analysis",
+      "confidence_score": 0.91,
+      "order_value": 1899,
+      "customer_city": "PIN 110001",
+      "return_date": "2026-08-23",
+      "status": "analyzed",
+      "logistics_partner": "Delhivery",
+      "customer_comment": "Metallic zari thread causing skin itching and peeling",
+      "run_id": "rs_mtfi8mt5_u45p"
+    },
+    {
+      "_id": "8f40eec6-0b3d-4d5e-b886-fb5c9b7916d5",
+      "id": "ORD-IN-9113",
+      "order_id": "ORD-IN-9113",
+      "sku": "BT-KRS-SG-M",
+      "product_name": "Kurta Set Sage Green",
+      "category": "Ethnic Wear",
+      "detected_reason": "Delivery rejected",
+      "ai_reason_category": "Delivery rejected",
+      "ai_root_cause": "Pattern identified during run analysis",
+      "confidence_score": 0.91,
+      "order_value": 1890,
+      "customer_city": "PIN 305001",
+      "return_date": "2026-08-22",
+      "status": "analyzed",
+      "logistics_partner": "Xpress Logistics",
+      "customer_comment": "Customer cancelled COD order after dispatch",
+      "run_id": "rs_mtfi8mt5_u45p"
+    },
+    {
+      "_id": "a52fa7d9-6e1a-4a77-9f72-8cd1586b784f",
+      "id": "ORD-IN-9114",
+      "order_id": "ORD-IN-9114",
+      "sku": "BT-CHN-DT-32",
+      "product_name": "Men's Chino Dark Teal",
+      "category": "Apparel",
+      "detected_reason": "Length too long",
+      "ai_reason_category": "Length too long",
+      "ai_root_cause": "Pattern identified during run analysis",
+      "confidence_score": 0.91,
+      "order_value": 1599,
+      "customer_city": "PIN 400001",
+      "return_date": "2026-08-22",
+      "status": "analyzed",
+      "logistics_partner": "Delhivery",
+      "customer_comment": "Inseam is 34 inches which is dragging under shoes",
+      "run_id": "rs_mtfi8mt5_u45p"
+    },
+    {
+      "_id": "d8f6890f-0a28-4fb3-81f3-ef18c1ad4533",
+      "id": "ORD-IN-9115",
+      "order_id": "ORD-IN-9115",
+      "sku": "BT-KRS-SG-M",
+      "product_name": "Kurta Set Sage Green",
+      "category": "Ethnic Wear",
+      "detected_reason": "Unreachable customer",
+      "ai_reason_category": "Unreachable customer",
+      "ai_root_cause": "Pattern identified during run analysis",
+      "confidence_score": 0.91,
+      "order_value": 1890,
+      "customer_city": "PIN 305001",
+      "return_date": "2026-08-21",
+      "status": "analyzed",
+      "logistics_partner": "Xpress Logistics",
+      "customer_comment": "Phone switched off for 3 days on delivery",
+      "run_id": "rs_mtfi8mt5_u45p"
+    },
+    {
+      "_id": "4c4d713d-2aaf-4229-95b2-bf991acf05e0",
+      "id": "ORD-IN-9101",
+      "order_id": "ORD-IN-9101",
+      "sku": "BT-KRS-SG-M",
+      "product_name": "Kurta Set Sage Green",
+      "category": "Ethnic Wear",
+      "detected_reason": "Size too small",
+      "ai_reason_category": "Size too small",
+      "ai_root_cause": "Pattern identified during run analysis",
+      "confidence_score": 0.91,
+      "order_value": 1890,
+      "customer_city": "PIN 305001",
+      "return_date": "2026-08-28",
+      "status": "analyzed",
+      "logistics_partner": "Delhivery",
+      "customer_comment": "Ordered M as per chart but bodice chest is way too tight",
+      "run_id": "rs_mtfi7w7q_1unx"
+    },
+    {
+      "_id": "9a945baf-e532-4133-a3e6-3b0b04ac7585",
+      "id": "ORD-IN-9102",
+      "order_id": "ORD-IN-9102",
+      "sku": "BT-KRS-SG-M",
+      "product_name": "Kurta Set Sage Green",
+      "category": "Ethnic Wear",
+      "detected_reason": "Size mismatch",
+      "ai_reason_category": "Size mismatch",
+      "ai_root_cause": "Pattern identified during run analysis",
+      "confidence_score": 0.91,
+      "order_value": 1890,
+      "customer_city": "PIN 305001",
+      "return_date": "2026-08-28",
+      "status": "analyzed",
+      "logistics_partner": "BlueDart",
+      "customer_comment": "Chest and shoulders run 2 inches tighter than size guide",
+      "run_id": "rs_mtfi7w7q_1unx"
+    },
+    {
+      "_id": "f1310b29-6a13-4093-89d1-2ba4a8aa1df0",
+      "id": "ORD-IN-9103",
+      "order_id": "ORD-IN-9103",
+      "sku": "BT-KRS-SG-M",
+      "product_name": "Kurta Set Sage Green",
+      "category": "Ethnic Wear",
+      "detected_reason": "Chest tight",
+      "ai_reason_category": "Chest tight",
+      "ai_root_cause": "Pattern identified during run analysis",
+      "confidence_score": 0.91,
+      "order_value": 1890,
+      "customer_city": "PIN 110001",
+      "return_date": "2026-08-27",
+      "status": "analyzed",
+      "logistics_partner": "Delhivery",
+      "customer_comment": "Shoulder seam pulls tight across back",
+      "run_id": "rs_mtfi7w7q_1unx"
+    },
+    {
+      "_id": "5a3da884-3ca9-4b44-ab17-a178eb9837e2",
+      "id": "ORD-IN-9104",
+      "order_id": "ORD-IN-9104",
+      "sku": "BT-KRS-SG-M",
+      "product_name": "Kurta Set Sage Green",
+      "category": "Ethnic Wear",
+      "detected_reason": "Delivery attempt failed",
+      "ai_reason_category": "Delivery attempt failed",
+      "ai_root_cause": "Pattern identified during run analysis",
+      "confidence_score": 0.91,
+      "order_value": 1890,
+      "customer_city": "PIN 305001",
+      "return_date": "2026-08-27",
+      "status": "analyzed",
+      "logistics_partner": "Xpress Logistics",
+      "customer_comment": "Customer unreachable on phone delivery boy rejected",
+      "run_id": "rs_mtfi7w7q_1unx"
+    },
+    {
+      "_id": "43cbc161-2f4b-4c17-959e-bef829f066f1",
+      "id": "ORD-IN-9105",
+      "order_id": "ORD-IN-9105",
+      "sku": "BT-KRS-SG-M",
+      "product_name": "Kurta Set Sage Green",
+      "category": "Ethnic Wear",
+      "detected_reason": "Customer refused at door",
+      "ai_reason_category": "Customer refused at door",
+      "ai_root_cause": "Pattern identified during run analysis",
+      "confidence_score": 0.91,
+      "order_value": 1890,
+      "customer_city": "PIN 305001",
+      "return_date": "2026-08-26",
+      "status": "analyzed",
+      "logistics_partner": "Xpress Logistics",
+      "customer_comment": "Buyer refused COD payment on delivery",
+      "run_id": "rs_mtfi7w7q_1unx"
+    },
+    {
+      "_id": "1b5672c3-19b0-4d72-b7c6-3d7a23b6c05c",
+      "id": "ORD-IN-9106",
+      "order_id": "ORD-IN-9106",
+      "sku": "BT-DPT-RS-OS",
+      "product_name": "Embroidered Dupatta Rust",
+      "category": "Ethnic Wear",
+      "detected_reason": "Quality defect",
+      "ai_reason_category": "Quality defect",
+      "ai_root_cause": "Pattern identified during run analysis",
+      "confidence_score": 0.91,
+      "order_value": 1899,
+      "customer_city": "PIN 400001",
+      "return_date": "2026-08-26",
+      "status": "analyzed",
+      "logistics_partner": "BlueDart",
+      "customer_comment": "Zari embroidery thread loose and unraveling near border",
+      "run_id": "rs_mtfi7w7q_1unx"
+    },
+    {
+      "_id": "395e05f8-a2ed-49ac-9139-1203c809b5c3",
+      "id": "ORD-IN-9107",
+      "order_id": "ORD-IN-9107",
+      "sku": "BT-DPT-RS-OS",
+      "product_name": "Embroidered Dupatta Rust",
+      "category": "Ethnic Wear",
+      "detected_reason": "Fabric damaged",
+      "ai_reason_category": "Fabric damaged",
+      "ai_root_cause": "Pattern identified during run analysis",
+      "confidence_score": 0.91,
+      "order_value": 1899,
+      "customer_city": "PIN 400001",
+      "return_date": "2026-08-25",
+      "status": "analyzed",
+      "logistics_partner": "Delhivery",
+      "customer_comment": "Two small puncture holes near border embroidery",
+      "run_id": "rs_mtfi7w7q_1unx"
+    },
+    {
+      "_id": "3231aa11-a579-404f-ba7e-74a89ee9d6ba",
+      "id": "ORD-IN-9108",
+      "order_id": "ORD-IN-9108",
+      "sku": "BT-CHN-DT-32",
+      "product_name": "Men's Chino Dark Teal",
+      "category": "Apparel",
+      "detected_reason": "Color different",
+      "ai_reason_category": "Color different",
+      "ai_root_cause": "Pattern identified during run analysis",
+      "confidence_score": 0.91,
+      "order_value": 1599,
+      "customer_city": "PIN 560001",
+      "return_date": "2026-08-25",
+      "status": "analyzed",
+      "logistics_partner": "Shadowfax",
+      "customer_comment": "Color in daylight is washed out compared to website photos",
+      "run_id": "rs_mtfi7w7q_1unx"
+    },
+    {
+      "_id": "4e42b947-25f8-463d-a8ca-0e1cbe016242",
+      "id": "ORD-IN-9109",
+      "order_id": "ORD-IN-9109",
+      "sku": "BT-KRS-SG-M",
+      "product_name": "Kurta Set Sage Green",
+      "category": "Ethnic Wear",
+      "detected_reason": "Fake delivery attempt",
+      "ai_reason_category": "Fake delivery attempt",
+      "ai_root_cause": "Pattern identified during run analysis",
+      "confidence_score": 0.91,
+      "order_value": 1890,
+      "customer_city": "PIN 305001",
+      "return_date": "2026-08-24",
+      "status": "analyzed",
+      "logistics_partner": "Xpress Logistics",
+      "customer_comment": "Delivery boy marked address not found without calling",
+      "run_id": "rs_mtfi7w7q_1unx"
+    },
+    {
+      "_id": "cd2ea831-7ccf-467f-a913-55f47c31b5ba",
+      "id": "ORD-IN-9110",
+      "order_id": "ORD-IN-9110",
+      "sku": "BT-KRS-SG-M",
+      "product_name": "Kurta Set Sage Green",
+      "category": "Ethnic Wear",
+      "detected_reason": "Customer not available",
+      "ai_reason_category": "Customer not available",
+      "ai_root_cause": "Pattern identified during run analysis",
+      "confidence_score": 0.91,
+      "order_value": 1890,
+      "customer_city": "PIN 305001",
+      "return_date": "2026-08-24",
+      "status": "analyzed",
+      "logistics_partner": "Xpress Logistics",
+      "customer_comment": "NDR attempt 3 failed at Ajmer hub",
+      "run_id": "rs_mtfi7w7q_1unx"
+    },
+    {
+      "_id": "8ac1adf6-d3d3-46fe-a286-4c0f868707c0",
+      "id": "ORD-IN-9111",
+      "order_id": "ORD-IN-9111",
+      "sku": "BT-KRS-SG-M",
+      "product_name": "Kurta Set Sage Green",
+      "category": "Ethnic Wear",
+      "detected_reason": "Size too small",
+      "ai_reason_category": "Size too small",
+      "ai_root_cause": "Pattern identified during run analysis",
+      "confidence_score": 0.91,
+      "order_value": 1890,
+      "customer_city": "PIN 305001",
+      "return_date": "2026-08-23",
+      "status": "analyzed",
+      "logistics_partner": "Delhivery",
+      "customer_comment": "Bust measurement is 37 inches instead of 40 inches",
+      "run_id": "rs_mtfi7w7q_1unx"
+    },
+    {
+      "_id": "9ece8a3e-598c-4d7b-bc93-1e77a2d7eff0",
+      "id": "ORD-IN-9112",
+      "order_id": "ORD-IN-9112",
+      "sku": "BT-DPT-RS-OS",
+      "product_name": "Embroidered Dupatta Rust",
+      "category": "Ethnic Wear",
+      "detected_reason": "Quality defect",
+      "ai_reason_category": "Quality defect",
+      "ai_root_cause": "Pattern identified during run analysis",
+      "confidence_score": 0.91,
+      "order_value": 1899,
+      "customer_city": "PIN 110001",
+      "return_date": "2026-08-23",
+      "status": "analyzed",
+      "logistics_partner": "Delhivery",
+      "customer_comment": "Metallic zari thread causing skin itching and peeling",
+      "run_id": "rs_mtfi7w7q_1unx"
+    },
+    {
+      "_id": "bf63e95e-15bc-4b3c-8f98-00c3d67f7973",
+      "id": "ORD-IN-9113",
+      "order_id": "ORD-IN-9113",
+      "sku": "BT-KRS-SG-M",
+      "product_name": "Kurta Set Sage Green",
+      "category": "Ethnic Wear",
+      "detected_reason": "Delivery rejected",
+      "ai_reason_category": "Delivery rejected",
+      "ai_root_cause": "Pattern identified during run analysis",
+      "confidence_score": 0.91,
+      "order_value": 1890,
+      "customer_city": "PIN 305001",
+      "return_date": "2026-08-22",
+      "status": "analyzed",
+      "logistics_partner": "Xpress Logistics",
+      "customer_comment": "Customer cancelled COD order after dispatch",
+      "run_id": "rs_mtfi7w7q_1unx"
+    },
+    {
+      "_id": "3596cd27-6c34-468e-872b-721a0a9520ab",
+      "id": "ORD-IN-9114",
+      "order_id": "ORD-IN-9114",
+      "sku": "BT-CHN-DT-32",
+      "product_name": "Men's Chino Dark Teal",
+      "category": "Apparel",
+      "detected_reason": "Length too long",
+      "ai_reason_category": "Length too long",
+      "ai_root_cause": "Pattern identified during run analysis",
+      "confidence_score": 0.91,
+      "order_value": 1599,
+      "customer_city": "PIN 400001",
+      "return_date": "2026-08-22",
+      "status": "analyzed",
+      "logistics_partner": "Delhivery",
+      "customer_comment": "Inseam is 34 inches which is dragging under shoes",
+      "run_id": "rs_mtfi7w7q_1unx"
+    },
+    {
+      "_id": "e838acab-7a0c-43c1-ae00-87185e781000",
+      "id": "ORD-IN-9115",
+      "order_id": "ORD-IN-9115",
+      "sku": "BT-KRS-SG-M",
+      "product_name": "Kurta Set Sage Green",
+      "category": "Ethnic Wear",
+      "detected_reason": "Unreachable customer",
+      "ai_reason_category": "Unreachable customer",
+      "ai_root_cause": "Pattern identified during run analysis",
+      "confidence_score": 0.91,
+      "order_value": 1890,
+      "customer_city": "PIN 305001",
+      "return_date": "2026-08-21",
+      "status": "analyzed",
+      "logistics_partner": "Xpress Logistics",
+      "customer_comment": "Phone switched off for 3 days on delivery",
+      "run_id": "rs_mtfi7w7q_1unx"
+    },
+    {
       "_id": "ret_ind_1001",
       "user_id": "user_demo_001",
       "order_id": "ORD-IN-92000",
@@ -1171,47 +2026,61 @@
   ],
   "recommendations": [
     {
-      "id": "REC-001",
-      "priority": "P0",
-      "action": "Update size chart with cm guidance for Kurta Set Sage Green",
-      "target": "Handcrafted Chanderi Silk Anarkali Kurta Set",
-      "reason": "Bust circumference running 2.5cm tighter than standard matrix.",
-      "evidence": "15 returns with high model confidence.",
-      "expected_metric": "Reduce fit-related returns by 35% on subsequent batches.",
-      "effort": "Low",
-      "confidence": 0.91,
-      "requires_human_approval": false,
-      "measurement_plan": {
-        "metric_to_track": "Fit return rate for SKU BT-KRS-SG-M",
-        "baseline_value": "18.4%",
-        "target_value": "<10%",
-        "evaluation_window_days": 21
-      },
-      "title": "Update size chart with cm guidance for Kurta Set Sage Green",
+      "id": "REC-337",
+      "run_id": "rs_mtficggt_3cgszu",
+      "title": "Launch a small-scale pilot to implement mandatory OTP-based delivery confirmation for all COD orders destined for pincode 305001 to improve delivery success rates.",
+      "action": "Launch a small-scale pilot to implement mandatory OTP-based delivery confirmation for all COD orders destined for pincode 305001 to improve delivery success rates.",
+      "target": "pincode: 305001",
+      "reason": "The current hypothesis is that the high RTO/Return rate is driven by localized delivery serviceability issues in this specific pincode.",
+      "rationale": "The current hypothesis is that the high RTO/Return rate is driven by localized delivery serviceability issues in this specific pincode.",
+      "evidence": "Pincode 305001 has 9 total events including 3 returns and 6 RTOs, representing an uplift vs baseline of 1.67.",
+      "evidence_summary": "Pincode 305001 has 9 total events including 3 returns and 6 RTOs, representing an uplift vs baseline of 1.67.",
+      "expected_metric": "hypothesis to test: Does enforcing OTP delivery verification reduce RTOs in this specific high-risk pincode?",
+      "priority": "P2",
+      "confidence": 0.3,
       "status": "todo",
-      "created_at": "2026-08-30T07:37:03.702Z"
+      "requires_human_approval": false,
+      "approval_reason": null,
+      "measurement_plan": null,
+      "created_at": "2026-08-30T07:48:41.212Z"
     },
     {
-      "id": "REC-002",
-      "priority": "P0",
-      "action": "Enable mandatory WhatsApp OTP verification on COD orders in pincode 305001",
-      "target": "pincode: 305001",
-      "reason": "High COD RTO concentration and fake delivery attempt pattern.",
-      "evidence": "14 RTO events with 1.84× baseline uplift.",
-      "expected_metric": "Cut COD RTO in target pincode by 40%.",
-      "effort": "Medium",
-      "confidence": 0.88,
-      "requires_human_approval": true,
-      "approval_reason": "Modifies customer checkout and delivery verification policy.",
-      "measurement_plan": {
-        "metric_to_track": "COD RTO rate in pincode 305001",
-        "baseline_value": "31.2%",
-        "target_value": "<18%",
-        "evaluation_window_days": 14
-      },
-      "title": "Enable mandatory WhatsApp OTP verification on COD orders in pincode 305001",
+      "id": "REC-145",
+      "run_id": "rs_mtficggt_3cgszu",
+      "title": "Initiate a data audit and pilot a move of 20% of shipment volumes from Xpress Logistics to an alternative courier for a subset of pin-codes to compare delivery success rates.",
+      "action": "Initiate a data audit and pilot a move of 20% of shipment volumes from Xpress Logistics to an alternative courier for a subset of pin-codes to compare delivery success rates.",
+      "target": "courier: Xpress Logistics",
+      "reason": "The current hypothesis is that Xpress Logistics is experiencing operational failures, but we need to validate if this is courier-specific or location-specific.",
+      "rationale": "The current hypothesis is that Xpress Logistics is experiencing operational failures, but we need to validate if this is courier-specific or location-specific.",
+      "evidence": "Xpress Logistics accounts for all 6 RTOs in the dataset, representing a 100% RTO share within the segment and 40% of the total RTO count.",
+      "evidence_summary": "Xpress Logistics accounts for all 6 RTOs in the dataset, representing a 100% RTO share within the segment and 40% of the total RTO count.",
+      "expected_metric": "hypothesis to test: Is the high RTO rate due to systemic courier failure or specific geographical service limitations?",
+      "priority": "P2",
+      "confidence": 0.3,
       "status": "todo",
-      "created_at": "2026-08-30T07:37:03.702Z"
+      "requires_human_approval": false,
+      "approval_reason": null,
+      "measurement_plan": null,
+      "created_at": "2026-08-30T07:48:41.212Z"
+    },
+    {
+      "id": "REC-358",
+      "run_id": "rs_mtficggt_3cgszu",
+      "title": "Conduct an A/B test on product pages for the top 5 SKUs by return volume, replacing the current size chart with a visual 'fit-guide' and detailed garment measurements to validate if this reduces return rates.",
+      "action": "Conduct an A/B test on product pages for the top 5 SKUs by return volume, replacing the current size chart with a visual 'fit-guide' and detailed garment measurements to validate if this reduces return rates.",
+      "target": "reason: Sizing/Fit",
+      "reason": "The current hypothesis is that inadequate sizing information on the website is causing customer misalignment leading to returns.",
+      "rationale": "The current hypothesis is that inadequate sizing information on the website is causing customer misalignment leading to returns.",
+      "evidence": "Sizing/Fit is the leading cause of returns with 5 incidents totaling 9159 INR in affected order value.",
+      "evidence_summary": "Sizing/Fit is the leading cause of returns with 5 incidents totaling 9159 INR in affected order value.",
+      "expected_metric": "hypothesis to test: Does providing more detailed garment measurements reduce return rates caused by Sizing/Fit issues?",
+      "priority": "P2",
+      "confidence": 0.3,
+      "status": "todo",
+      "requires_human_approval": false,
+      "approval_reason": null,
+      "measurement_plan": null,
+      "created_at": "2026-08-30T07:48:41.212Z"
     }
   ],
   "integrations": [
@@ -1235,6 +2104,43 @@
   ],
   "runs": [
     {
+      "id": "rs_mtfifdbx_lwkcze",
+      "created_at": "2026-08-30T07:50:46.327Z",
+      "status": "success",
+      "records_count": 3,
+      "intelligence_source": "n8n"
+    },
+    {
+      "id": "rs_mtficggt_3cgszu",
+      "merchant_id": "BharatThreads Lifestyle Pvt. Ltd.",
+      "created_at": "2026-08-30T07:48:41.211Z",
+      "source": "csv",
+      "status": "success",
+      "records_count": 15,
+      "analysis_confidence": "high",
+      "intelligence_source": "n8n"
+    },
+    {
+      "id": "rs_mtfi8mt5_u45p",
+      "merchant_id": "BharatThreads Lifestyle Pvt. Ltd.",
+      "created_at": "2026-08-30T07:45:32.412Z",
+      "source": "csv",
+      "status": "success",
+      "records_count": 15,
+      "analysis_confidence": "high",
+      "intelligence_source": "fallback"
+    },
+    {
+      "id": "rs_mtfi7w7q_1unx",
+      "merchant_id": "BharatThreads Lifestyle Pvt. Ltd.",
+      "created_at": "2026-08-30T07:44:57.955Z",
+      "source": "csv",
+      "status": "success",
+      "records_count": 15,
+      "analysis_confidence": "high",
+      "intelligence_source": "fallback"
+    },
+    {
       "id": "rs_init_baseline_001",
       "merchant_id": "bharatthreads_prod",
       "created_at": "2026-08-30T07:37:03.702Z",
@@ -1246,6 +2152,1593 @@
     }
   ],
   "analyses": [
+    {
+      "run_id": "rs_mtfifdbx_lwkcze",
+      "analysis": {
+        "product": "ReturnShield AI",
+        "run": {
+          "id": "rs_mtfifdbx_lwkcze",
+          "generated_at": "2026-08-30T07:50:44.187Z",
+          "status": "success"
+        },
+        "analysis": {
+          "generated_at": "2026-08-30T07:50:44.187Z",
+          "records_analyzed": 3,
+          "analysis_confidence": "low",
+          "run_id": "rs_mtfifdbx_lwkcze"
+        },
+        "metrics": {
+          "returned_orders": 0,
+          "rto_orders": 1,
+          "delivered_orders": 0,
+          "cancelled_orders": 0,
+          "return_value_inr": 0,
+          "rto_value_inr": 1890,
+          "affected_order_value_inr": 1890,
+          "actual_cost_inr": null,
+          "estimated_cost_inr": 220,
+          "cost_basis": "ESTIMATED (flat Rs 220/event - no real cost fields supplied)",
+          "rates": {
+            "rates_available": false,
+            "note": "order_summary (total_shipped_orders / total_delivered_orders) was not supplied, so true return/RTO rates cannot be computed. Showing event counts and within-dataset shares instead - do not read these as % of all shipped orders."
+          }
+        },
+        "cod_vs_prepaid": {
+          "cod_rto_share_within_cod_pct": null,
+          "prepaid_rto_share_within_prepaid_pct": null,
+          "cod_sample_size": 0,
+          "prepaid_sample_size": 0,
+          "sufficient_evidence": false
+        },
+        "segments": {
+          "sku": [
+            {
+              "dimension": "sku",
+              "value": "BT-KRS-SG-M",
+              "returned_count": 0,
+              "rto_count": 1,
+              "count": 1,
+              "order_value_lost_inr": 1890,
+              "rto_share_within_segment_pct": 100,
+              "overall_rto_share_pct": 100,
+              "uplift_vs_baseline": 1,
+              "sufficient_evidence": false,
+              "status": "normal"
+            }
+          ],
+          "courier": [
+            {
+              "dimension": "courier",
+              "value": "Xpress Logistics",
+              "returned_count": 0,
+              "rto_count": 1,
+              "count": 1,
+              "order_value_lost_inr": 1890,
+              "rto_share_within_segment_pct": 100,
+              "overall_rto_share_pct": 100,
+              "uplift_vs_baseline": 1,
+              "sufficient_evidence": false,
+              "status": "normal"
+            }
+          ],
+          "pincode": [
+            {
+              "dimension": "pincode",
+              "value": "305001",
+              "returned_count": 0,
+              "rto_count": 1,
+              "count": 1,
+              "order_value_lost_inr": 1890,
+              "rto_share_within_segment_pct": 100,
+              "overall_rto_share_pct": 100,
+              "uplift_vs_baseline": 1,
+              "sufficient_evidence": false,
+              "status": "normal"
+            }
+          ],
+          "zone": [
+            {
+              "dimension": "zone",
+              "value": "UNKNOWN_ZONE",
+              "returned_count": 0,
+              "rto_count": 1,
+              "count": 1,
+              "order_value_lost_inr": 1890,
+              "rto_share_within_segment_pct": 100,
+              "overall_rto_share_pct": 100,
+              "uplift_vs_baseline": 1,
+              "sufficient_evidence": false,
+              "status": "normal"
+            }
+          ],
+          "category": [
+            {
+              "dimension": "category",
+              "value": "Ethnic Wear",
+              "returned_count": 0,
+              "rto_count": 1,
+              "count": 1,
+              "order_value_lost_inr": 1890,
+              "rto_share_within_segment_pct": 100,
+              "overall_rto_share_pct": 100,
+              "uplift_vs_baseline": 1,
+              "sufficient_evidence": false,
+              "status": "normal"
+            }
+          ],
+          "payment_method": [
+            {
+              "dimension": "payment_method",
+              "value": "Unknown",
+              "returned_count": 0,
+              "rto_count": 1,
+              "count": 1,
+              "order_value_lost_inr": 1890,
+              "rto_share_within_segment_pct": 100,
+              "overall_rto_share_pct": 100,
+              "uplift_vs_baseline": 1,
+              "sufficient_evidence": false,
+              "status": "normal"
+            }
+          ]
+        },
+        "reason_analysis": {
+          "return_categories": [],
+          "rto_categories": [
+            {
+              "category": "Customer Unreachable",
+              "count": 1,
+              "order_value_lost_inr": 1890,
+              "sufficient_evidence": false,
+              "sample_order_ids": [
+                "ORD-IN-102"
+              ]
+            }
+          ],
+          "unclassified_count": 0
+        },
+        "time_trend": {
+          "available": false,
+          "note": "order_date missing on most records - trend analysis skipped."
+        },
+        "trends": [
+          {
+            "available": true,
+            "compared_to_run_id": "rs_mtficggt_3cgszu",
+            "compared_to_generated_at": "2026-08-30T07:48:39.091Z",
+            "returned_count_change": -9,
+            "rto_count_change": -5,
+            "affected_order_value_change_inr": -25905,
+            "affected_order_value_change_pct": -93.2,
+            "previous_top_problem": "Elevated Returns and RTO for pincode 305001",
+            "note": "Comparison is against the most recent prior run recorded by this workflow instance."
+          }
+        ],
+        "top_problems": [
+          {
+            "rank": 1,
+            "dimension": "reason",
+            "segment_value": "Customer Unreachable",
+            "problem": "Elevated RTO for reason Customer Unreachable",
+            "evidence": "1 event of 'Customer Unreachable' within the RTO dataset, representing 100% of currently analyzed RTOs.",
+            "business_impact": "1890 INR affected order value",
+            "likely_cause": "The RTO was caused by a delivery failure due to the courier being unable to establish contact with the customer.",
+            "alternative_explanation": "The failure to reach the customer may be due to an isolated courier-side operational error rather than a systemic issue.",
+            "confidence": "low",
+            "status": "hypothesis",
+            "hypotheses": [
+              {
+                "hypothesis": "Customers are providing incorrect or unreachable contact numbers at checkout.",
+                "supporting_evidence": "Single recorded event of 'Customer Unreachable' matches this hypothesis.",
+                "contradicting_evidence": "none available in current data",
+                "confidence": "low",
+                "next_test": "Verify contact number format validation at checkout or implement SMS/WhatsApp verification."
+              }
+            ],
+            "order_count": 1,
+            "order_value_lost_inr": 1890,
+            "sufficient_evidence": false,
+            "segment_matched": true,
+            "priority_score": 0.62,
+            "priority_tier": "P2"
+          }
+        ],
+        "root_causes": [
+          {
+            "dimension": "reason",
+            "segment_value": "Customer Unreachable",
+            "problem": "Elevated RTO for reason Customer Unreachable",
+            "evidence": "1 event of 'Customer Unreachable' within the RTO dataset, representing 100% of currently analyzed RTOs.",
+            "business_impact": "1890 INR affected order value",
+            "likely_cause": "The RTO was caused by a delivery failure due to the courier being unable to establish contact with the customer.",
+            "alternative_explanation": "The failure to reach the customer may be due to an isolated courier-side operational error rather than a systemic issue.",
+            "confidence": "low",
+            "status": "hypothesis",
+            "hypotheses": [
+              {
+                "hypothesis": "Customers are providing incorrect or unreachable contact numbers at checkout.",
+                "supporting_evidence": "Single recorded event of 'Customer Unreachable' matches this hypothesis.",
+                "contradicting_evidence": "none available in current data",
+                "confidence": "low",
+                "next_test": "Verify contact number format validation at checkout or implement SMS/WhatsApp verification."
+              }
+            ],
+            "order_count": 1,
+            "order_value_lost_inr": 1890,
+            "sufficient_evidence": false,
+            "segment_matched": true,
+            "priority_score": 0.62,
+            "priority_tier": "P2"
+          }
+        ],
+        "hypotheses": [
+          {
+            "source_problem": "Elevated RTO for reason Customer Unreachable",
+            "dimension": "reason",
+            "segment_value": "Customer Unreachable",
+            "hypothesis": "Customers are providing incorrect or unreachable contact numbers at checkout.",
+            "supporting_evidence": "Single recorded event of 'Customer Unreachable' matches this hypothesis.",
+            "contradicting_evidence": "none available in current data",
+            "confidence": "low",
+            "next_test": "Verify contact number format validation at checkout or implement SMS/WhatsApp verification."
+          }
+        ],
+        "recommendations": [
+          {
+            "priority": "P2",
+            "action": "Implement an automated WhatsApp and SMS verification step immediately after checkout for new orders to ensure contact number validity.",
+            "target": "reason: Customer Unreachable",
+            "reason": "The current RTO volume is linked to delivery failures caused by unreachable customers, suggesting incorrect contact data at checkout.",
+            "evidence": "1 event of 'Customer Unreachable' representing 100% of analyzed RTOs.",
+            "expected_metric": "hypothesis to test: Does pre-dispatch verification reduce RTOs marked 'Customer Unreachable'?",
+            "effort": "medium",
+            "confidence": 0.3,
+            "unverified_target": false,
+            "requires_human_approval": true,
+            "approval_reason": "Sends direct customer communication. Route through human approval before execution (see Section 16 / Record Feedback workflow)."
+          }
+        ],
+        "verification": {
+          "checks_performed": [
+            "recommendation_target_traceability",
+            "recommendation_confidence_vs_evidence_cap",
+            "root_cause_confidence_vs_sufficient_evidence",
+            "root_cause_segment_traceability",
+            "required_field_presence",
+            "consequential_action_flagging"
+          ],
+          "issues_found": [],
+          "corrections_applied": [],
+          "status": "passed"
+        },
+        "data_quality": {
+          "run_id": "rs_mtfifdbx_lwkcze",
+          "input_truncated": false,
+          "max_rows_cap": 5000,
+          "records_analyzed": 3,
+          "invalid_records": 0,
+          "invalid_reasons": {},
+          "field_completeness_pct": {
+            "order_date": 0,
+            "product_category": 100,
+            "size": 100,
+            "return_reason_raw": 100,
+            "rto_reason_raw": 0,
+            "customer_comment": 100,
+            "payment_method": 100,
+            "courier": 100,
+            "pincode": 100,
+            "shipping_zone": 0,
+            "delivery_attempts": 0,
+            "refund_amount": 0,
+            "forward_shipping_cost": 0,
+            "return_shipping_cost": 0
+          },
+          "fields_largely_missing": [
+            "order_date",
+            "rto_reason_raw",
+            "shipping_zone",
+            "delivery_attempts",
+            "refund_amount",
+            "forward_shipping_cost",
+            "return_shipping_cost"
+          ],
+          "average_completeness_pct": 50,
+          "has_order_summary": false,
+          "analysis_confidence": "low",
+          "stage_failures": []
+        },
+        "data_gaps": [
+          "No order_summary supplied - return_rate/rto_rate could not be computed against total shipped orders; segment metrics are shares within the returns/RTO dataset only.",
+          "No refund_amount/shipping cost fields supplied - cost figures are ESTIMATED, not actual.",
+          "order_date missing on most records - trend analysis skipped.",
+          "Sparsely populated fields (<20% of records): order_date, rto_reason_raw, shipping_zone, delivery_attempts, refund_amount, forward_shipping_cost, return_shipping_cost"
+        ],
+        "next_best_questions": [
+          "Why is reason \"Customer Unreachable\" our biggest problem right now?",
+          "What evidence supports the recommendation for \"reason: Customer Unreachable\"?",
+          "What changed since the last analysis?",
+          "Which action has the highest expected impact for the effort involved?"
+        ],
+        "intelligence_source": "n8n",
+        "fallback_used": false
+      },
+      "created_at": "2026-08-30T07:50:46.328Z"
+    },
+    {
+      "run_id": "rs_mtficggt_3cgszu",
+      "analysis": {
+        "product": "ReturnShield AI",
+        "run": {
+          "id": "rs_mtficggt_3cgszu",
+          "generated_at": "2026-08-30T07:48:39.091Z",
+          "status": "success"
+        },
+        "analysis": {
+          "generated_at": "2026-08-30T07:48:39.091Z",
+          "records_analyzed": 15,
+          "analysis_confidence": "medium",
+          "run_id": "rs_mtficggt_3cgszu"
+        },
+        "metrics": {
+          "returned_orders": 9,
+          "rto_orders": 6,
+          "delivered_orders": 0,
+          "cancelled_orders": 0,
+          "return_value_inr": 16455,
+          "rto_value_inr": 11340,
+          "affected_order_value_inr": 27795,
+          "actual_cost_inr": 30945,
+          "estimated_cost_inr": null,
+          "cost_basis": "ACTUAL (refund_amount + shipping costs supplied)",
+          "rates": {
+            "rates_available": false,
+            "note": "order_summary (total_shipped_orders / total_delivered_orders) was not supplied, so true return/RTO rates cannot be computed. Showing event counts and within-dataset shares instead - do not read these as % of all shipped orders."
+          }
+        },
+        "cod_vs_prepaid": {
+          "cod_rto_share_within_cod_pct": 54.5,
+          "prepaid_rto_share_within_prepaid_pct": 0,
+          "cod_sample_size": 11,
+          "prepaid_sample_size": 4,
+          "sufficient_evidence": false
+        },
+        "segments": {
+          "sku": [
+            {
+              "dimension": "sku",
+              "value": "BT-KRS-SG-M",
+              "returned_count": 4,
+              "rto_count": 6,
+              "count": 10,
+              "order_value_lost_inr": 18900,
+              "rto_share_within_segment_pct": 60,
+              "overall_rto_share_pct": 40,
+              "uplift_vs_baseline": 1.5,
+              "sufficient_evidence": true,
+              "status": "normal"
+            },
+            {
+              "dimension": "sku",
+              "value": "BT-DPT-RS-OS",
+              "returned_count": 3,
+              "rto_count": 0,
+              "count": 3,
+              "order_value_lost_inr": 5697,
+              "rto_share_within_segment_pct": 0,
+              "overall_rto_share_pct": 40,
+              "uplift_vs_baseline": 0,
+              "sufficient_evidence": false,
+              "status": "normal"
+            },
+            {
+              "dimension": "sku",
+              "value": "BT-CHN-DT-32",
+              "returned_count": 2,
+              "rto_count": 0,
+              "count": 2,
+              "order_value_lost_inr": 3198,
+              "rto_share_within_segment_pct": 0,
+              "overall_rto_share_pct": 40,
+              "uplift_vs_baseline": 0,
+              "sufficient_evidence": false,
+              "status": "normal"
+            }
+          ],
+          "courier": [
+            {
+              "dimension": "courier",
+              "value": "Delhivery",
+              "returned_count": 6,
+              "rto_count": 0,
+              "count": 6,
+              "order_value_lost_inr": 11067,
+              "rto_share_within_segment_pct": 0,
+              "overall_rto_share_pct": 40,
+              "uplift_vs_baseline": 0,
+              "sufficient_evidence": false,
+              "status": "normal"
+            },
+            {
+              "dimension": "courier",
+              "value": "Xpress Logistics",
+              "returned_count": 0,
+              "rto_count": 6,
+              "count": 6,
+              "order_value_lost_inr": 11340,
+              "rto_share_within_segment_pct": 100,
+              "overall_rto_share_pct": 40,
+              "uplift_vs_baseline": 2.5,
+              "sufficient_evidence": false,
+              "status": "hotspot_hypothesis_insufficient_sample"
+            },
+            {
+              "dimension": "courier",
+              "value": "BlueDart",
+              "returned_count": 2,
+              "rto_count": 0,
+              "count": 2,
+              "order_value_lost_inr": 3789,
+              "rto_share_within_segment_pct": 0,
+              "overall_rto_share_pct": 40,
+              "uplift_vs_baseline": 0,
+              "sufficient_evidence": false,
+              "status": "normal"
+            },
+            {
+              "dimension": "courier",
+              "value": "Shadowfax",
+              "returned_count": 1,
+              "rto_count": 0,
+              "count": 1,
+              "order_value_lost_inr": 1599,
+              "rto_share_within_segment_pct": 0,
+              "overall_rto_share_pct": 40,
+              "uplift_vs_baseline": 0,
+              "sufficient_evidence": false,
+              "status": "normal"
+            }
+          ],
+          "pincode": [
+            {
+              "dimension": "pincode",
+              "value": "305001",
+              "returned_count": 3,
+              "rto_count": 6,
+              "count": 9,
+              "order_value_lost_inr": 17010,
+              "rto_share_within_segment_pct": 66.7,
+              "overall_rto_share_pct": 40,
+              "uplift_vs_baseline": 1.67,
+              "sufficient_evidence": false,
+              "status": "hotspot_hypothesis_insufficient_sample"
+            },
+            {
+              "dimension": "pincode",
+              "value": "400001",
+              "returned_count": 3,
+              "rto_count": 0,
+              "count": 3,
+              "order_value_lost_inr": 5397,
+              "rto_share_within_segment_pct": 0,
+              "overall_rto_share_pct": 40,
+              "uplift_vs_baseline": 0,
+              "sufficient_evidence": false,
+              "status": "normal"
+            },
+            {
+              "dimension": "pincode",
+              "value": "110001",
+              "returned_count": 2,
+              "rto_count": 0,
+              "count": 2,
+              "order_value_lost_inr": 3789,
+              "rto_share_within_segment_pct": 0,
+              "overall_rto_share_pct": 40,
+              "uplift_vs_baseline": 0,
+              "sufficient_evidence": false,
+              "status": "normal"
+            },
+            {
+              "dimension": "pincode",
+              "value": "560001",
+              "returned_count": 1,
+              "rto_count": 0,
+              "count": 1,
+              "order_value_lost_inr": 1599,
+              "rto_share_within_segment_pct": 0,
+              "overall_rto_share_pct": 40,
+              "uplift_vs_baseline": 0,
+              "sufficient_evidence": false,
+              "status": "normal"
+            }
+          ],
+          "zone": [
+            {
+              "dimension": "zone",
+              "value": "North",
+              "returned_count": 5,
+              "rto_count": 6,
+              "count": 11,
+              "order_value_lost_inr": 20799,
+              "rto_share_within_segment_pct": 54.5,
+              "overall_rto_share_pct": 40,
+              "uplift_vs_baseline": 1.36,
+              "sufficient_evidence": true,
+              "status": "normal"
+            },
+            {
+              "dimension": "zone",
+              "value": "West",
+              "returned_count": 3,
+              "rto_count": 0,
+              "count": 3,
+              "order_value_lost_inr": 5397,
+              "rto_share_within_segment_pct": 0,
+              "overall_rto_share_pct": 40,
+              "uplift_vs_baseline": 0,
+              "sufficient_evidence": false,
+              "status": "normal"
+            },
+            {
+              "dimension": "zone",
+              "value": "South",
+              "returned_count": 1,
+              "rto_count": 0,
+              "count": 1,
+              "order_value_lost_inr": 1599,
+              "rto_share_within_segment_pct": 0,
+              "overall_rto_share_pct": 40,
+              "uplift_vs_baseline": 0,
+              "sufficient_evidence": false,
+              "status": "normal"
+            }
+          ],
+          "category": [
+            {
+              "dimension": "category",
+              "value": "Ethnic Wear",
+              "returned_count": 7,
+              "rto_count": 6,
+              "count": 13,
+              "order_value_lost_inr": 24597,
+              "rto_share_within_segment_pct": 46.2,
+              "overall_rto_share_pct": 40,
+              "uplift_vs_baseline": 1.15,
+              "sufficient_evidence": true,
+              "status": "normal"
+            },
+            {
+              "dimension": "category",
+              "value": "Apparel",
+              "returned_count": 2,
+              "rto_count": 0,
+              "count": 2,
+              "order_value_lost_inr": 3198,
+              "rto_share_within_segment_pct": 0,
+              "overall_rto_share_pct": 40,
+              "uplift_vs_baseline": 0,
+              "sufficient_evidence": false,
+              "status": "normal"
+            }
+          ],
+          "payment_method": [
+            {
+              "dimension": "payment_method",
+              "value": "COD",
+              "returned_count": 5,
+              "rto_count": 6,
+              "count": 11,
+              "order_value_lost_inr": 20508,
+              "rto_share_within_segment_pct": 54.5,
+              "overall_rto_share_pct": 40,
+              "uplift_vs_baseline": 1.36,
+              "sufficient_evidence": true,
+              "status": "normal"
+            },
+            {
+              "dimension": "payment_method",
+              "value": "Prepaid",
+              "returned_count": 4,
+              "rto_count": 0,
+              "count": 4,
+              "order_value_lost_inr": 7287,
+              "rto_share_within_segment_pct": 0,
+              "overall_rto_share_pct": 40,
+              "uplift_vs_baseline": 0,
+              "sufficient_evidence": false,
+              "status": "normal"
+            }
+          ]
+        },
+        "reason_analysis": {
+          "return_categories": [
+            {
+              "category": "Sizing/Fit",
+              "count": 5,
+              "order_value_lost_inr": 9159,
+              "sufficient_evidence": false,
+              "sample_order_ids": [
+                "ORD-IN-9101",
+                "ORD-IN-9102",
+                "ORD-IN-9103",
+                "ORD-IN-9111",
+                "ORD-IN-9114"
+              ]
+            },
+            {
+              "category": "Quality Defect",
+              "count": 3,
+              "order_value_lost_inr": 5697,
+              "sufficient_evidence": false,
+              "sample_order_ids": [
+                "ORD-IN-9106",
+                "ORD-IN-9107",
+                "ORD-IN-9112"
+              ]
+            },
+            {
+              "category": "Description Mismatch",
+              "count": 1,
+              "order_value_lost_inr": 1599,
+              "sufficient_evidence": false,
+              "sample_order_ids": [
+                "ORD-IN-9108"
+              ]
+            }
+          ],
+          "rto_categories": [
+            {
+              "category": "Customer Unreachable",
+              "count": 2,
+              "order_value_lost_inr": 3780,
+              "sufficient_evidence": false,
+              "sample_order_ids": [
+                "ORD-IN-9104",
+                "ORD-IN-9115"
+              ]
+            },
+            {
+              "category": "COD Refusal",
+              "count": 2,
+              "order_value_lost_inr": 3780,
+              "sufficient_evidence": false,
+              "sample_order_ids": [
+                "ORD-IN-9105",
+                "ORD-IN-9113"
+              ]
+            },
+            {
+              "category": "Courier Issue",
+              "count": 1,
+              "order_value_lost_inr": 1890,
+              "sufficient_evidence": false,
+              "sample_order_ids": [
+                "ORD-IN-9109"
+              ]
+            },
+            {
+              "category": "Customer Not Available",
+              "count": 1,
+              "order_value_lost_inr": 1890,
+              "sufficient_evidence": false,
+              "sample_order_ids": [
+                "ORD-IN-9110"
+              ]
+            }
+          ],
+          "unclassified_count": 0
+        },
+        "time_trend": {
+          "available": false,
+          "note": "order_date missing on most records - trend analysis skipped."
+        },
+        "trends": [
+          {
+            "available": true,
+            "compared_to_run_id": "rs_mtfibfkp_djxxjq",
+            "compared_to_generated_at": "2026-08-30T07:47:43.757Z",
+            "returned_count_change": 8,
+            "rto_count_change": 6,
+            "affected_order_value_change_inr": 25905,
+            "affected_order_value_change_pct": 1370.6,
+            "previous_top_problem": null,
+            "note": "Comparison is against the most recent prior run recorded by this workflow instance."
+          }
+        ],
+        "top_problems": [
+          {
+            "rank": 1,
+            "dimension": "pincode",
+            "segment_value": "305001",
+            "problem": "Elevated Returns and RTO for pincode 305001",
+            "evidence": "Pincode 305001 has 9 total events including 3 returns and 6 RTOs, representing an uplift vs baseline of 1.67.",
+            "business_impact": "17010 INR affected order value",
+            "likely_cause": "Localized logistics, delivery access, or serviceability issues specific to the 305001 pincode.",
+            "alternative_explanation": "The elevated return/RTO count in this pincode may be driven by a small cluster of high-frequency shoppers with specific preferences rather than a geographic delivery issue.",
+            "confidence": "low",
+            "status": "hypothesis",
+            "hypotheses": [
+              {
+                "hypothesis": "Logistics serviceability or accessibility challenges in this specific pincode causing both return and RTO behaviors.",
+                "supporting_evidence": "High concentration of both returns and RTOs (9 total events) in one pincode.",
+                "contradicting_evidence": "none available in current data",
+                "confidence": "low",
+                "next_test": "Analyze delivery attempt history for this pincode to determine if RTOs occur at the first attempt or after multiple failed attempts."
+              }
+            ],
+            "order_count": 9,
+            "order_value_lost_inr": 17010,
+            "uplift_vs_baseline": 1.67,
+            "sufficient_evidence": false,
+            "segment_matched": true,
+            "priority_score": 0.62,
+            "priority_tier": "P2"
+          },
+          {
+            "rank": 2,
+            "dimension": "courier",
+            "segment_value": "Xpress Logistics",
+            "problem": "Elevated RTO for courier Xpress Logistics",
+            "evidence": "Xpress Logistics accounts for all 6 RTOs in the dataset, representing a 100% RTO share within the segment and 40% of the total RTO count.",
+            "business_impact": "11340 INR affected order value",
+            "likely_cause": "Operational failure at Xpress Logistics in executing successful final mile delivery attempts.",
+            "alternative_explanation": "The RTO volume for this courier is a localized outcome of low-reach pincodes rather than systemic courier failure.",
+            "confidence": "low",
+            "status": "hypothesis",
+            "hypotheses": [
+              {
+                "hypothesis": "Inconsistent delivery attempts by Xpress Logistics are leading to RTOs that could be avoided with better reach.",
+                "supporting_evidence": "All 6 RTOs occurred exclusively via this courier.",
+                "contradicting_evidence": "none available in current data",
+                "confidence": "low",
+                "next_test": "Compare average delivery attempts per order for Xpress Logistics vs other active couriers."
+              }
+            ],
+            "order_count": 6,
+            "order_value_lost_inr": 11340,
+            "uplift_vs_baseline": 2.5,
+            "sufficient_evidence": false,
+            "segment_matched": true,
+            "priority_score": 0.52,
+            "priority_tier": "P2"
+          },
+          {
+            "rank": 3,
+            "dimension": "reason",
+            "segment_value": "Sizing/Fit",
+            "problem": "High volume of returns due to Sizing/Fit issues",
+            "evidence": "Sizing/Fit is the leading cause of returns with 5 incidents totaling 9159 INR in affected order value.",
+            "business_impact": "9159 INR affected order value",
+            "likely_cause": "Poor sizing information or misalignment between the online size guide and the actual physical dimensions of the garments.",
+            "alternative_explanation": "These returns might reflect personal customer preferences or changing style trends that are independent of actual item sizing standards.",
+            "confidence": "low",
+            "status": "hypothesis",
+            "hypotheses": [
+              {
+                "hypothesis": "Inaccurate or insufficient size guides on product pages are leading to customer purchase misalignment.",
+                "supporting_evidence": "Sizing/Fit represents the highest frequency among return reasons.",
+                "contradicting_evidence": "none available in current data",
+                "confidence": "low",
+                "next_test": "Correlate Sizing/Fit returns with specific SKU size charts to identify if particular sizes are over-represented."
+              }
+            ],
+            "order_count": 5,
+            "order_value_lost_inr": 9159,
+            "sufficient_evidence": false,
+            "segment_matched": true,
+            "priority_score": 0.41,
+            "priority_tier": "P2"
+          }
+        ],
+        "root_causes": [
+          {
+            "dimension": "pincode",
+            "segment_value": "305001",
+            "problem": "Elevated Returns and RTO for pincode 305001",
+            "evidence": "Pincode 305001 has 9 total events including 3 returns and 6 RTOs, representing an uplift vs baseline of 1.67.",
+            "business_impact": "17010 INR affected order value",
+            "likely_cause": "Localized logistics, delivery access, or serviceability issues specific to the 305001 pincode.",
+            "alternative_explanation": "The elevated return/RTO count in this pincode may be driven by a small cluster of high-frequency shoppers with specific preferences rather than a geographic delivery issue.",
+            "confidence": "low",
+            "status": "hypothesis",
+            "hypotheses": [
+              {
+                "hypothesis": "Logistics serviceability or accessibility challenges in this specific pincode causing both return and RTO behaviors.",
+                "supporting_evidence": "High concentration of both returns and RTOs (9 total events) in one pincode.",
+                "contradicting_evidence": "none available in current data",
+                "confidence": "low",
+                "next_test": "Analyze delivery attempt history for this pincode to determine if RTOs occur at the first attempt or after multiple failed attempts."
+              }
+            ],
+            "order_count": 9,
+            "order_value_lost_inr": 17010,
+            "uplift_vs_baseline": 1.67,
+            "sufficient_evidence": false,
+            "segment_matched": true,
+            "priority_score": 0.62,
+            "priority_tier": "P2"
+          },
+          {
+            "dimension": "courier",
+            "segment_value": "Xpress Logistics",
+            "problem": "Elevated RTO for courier Xpress Logistics",
+            "evidence": "Xpress Logistics accounts for all 6 RTOs in the dataset, representing a 100% RTO share within the segment and 40% of the total RTO count.",
+            "business_impact": "11340 INR affected order value",
+            "likely_cause": "Operational failure at Xpress Logistics in executing successful final mile delivery attempts.",
+            "alternative_explanation": "The RTO volume for this courier is a localized outcome of low-reach pincodes rather than systemic courier failure.",
+            "confidence": "low",
+            "status": "hypothesis",
+            "hypotheses": [
+              {
+                "hypothesis": "Inconsistent delivery attempts by Xpress Logistics are leading to RTOs that could be avoided with better reach.",
+                "supporting_evidence": "All 6 RTOs occurred exclusively via this courier.",
+                "contradicting_evidence": "none available in current data",
+                "confidence": "low",
+                "next_test": "Compare average delivery attempts per order for Xpress Logistics vs other active couriers."
+              }
+            ],
+            "order_count": 6,
+            "order_value_lost_inr": 11340,
+            "uplift_vs_baseline": 2.5,
+            "sufficient_evidence": false,
+            "segment_matched": true,
+            "priority_score": 0.52,
+            "priority_tier": "P2"
+          },
+          {
+            "dimension": "reason",
+            "segment_value": "Sizing/Fit",
+            "problem": "High volume of returns due to Sizing/Fit issues",
+            "evidence": "Sizing/Fit is the leading cause of returns with 5 incidents totaling 9159 INR in affected order value.",
+            "business_impact": "9159 INR affected order value",
+            "likely_cause": "Poor sizing information or misalignment between the online size guide and the actual physical dimensions of the garments.",
+            "alternative_explanation": "These returns might reflect personal customer preferences or changing style trends that are independent of actual item sizing standards.",
+            "confidence": "low",
+            "status": "hypothesis",
+            "hypotheses": [
+              {
+                "hypothesis": "Inaccurate or insufficient size guides on product pages are leading to customer purchase misalignment.",
+                "supporting_evidence": "Sizing/Fit represents the highest frequency among return reasons.",
+                "contradicting_evidence": "none available in current data",
+                "confidence": "low",
+                "next_test": "Correlate Sizing/Fit returns with specific SKU size charts to identify if particular sizes are over-represented."
+              }
+            ],
+            "order_count": 5,
+            "order_value_lost_inr": 9159,
+            "sufficient_evidence": false,
+            "segment_matched": true,
+            "priority_score": 0.41,
+            "priority_tier": "P2"
+          }
+        ],
+        "hypotheses": [
+          {
+            "source_problem": "Elevated Returns and RTO for pincode 305001",
+            "dimension": "pincode",
+            "segment_value": "305001",
+            "hypothesis": "Logistics serviceability or accessibility challenges in this specific pincode causing both return and RTO behaviors.",
+            "supporting_evidence": "High concentration of both returns and RTOs (9 total events) in one pincode.",
+            "contradicting_evidence": "none available in current data",
+            "confidence": "low",
+            "next_test": "Analyze delivery attempt history for this pincode to determine if RTOs occur at the first attempt or after multiple failed attempts."
+          },
+          {
+            "source_problem": "Elevated RTO for courier Xpress Logistics",
+            "dimension": "courier",
+            "segment_value": "Xpress Logistics",
+            "hypothesis": "Inconsistent delivery attempts by Xpress Logistics are leading to RTOs that could be avoided with better reach.",
+            "supporting_evidence": "All 6 RTOs occurred exclusively via this courier.",
+            "contradicting_evidence": "none available in current data",
+            "confidence": "low",
+            "next_test": "Compare average delivery attempts per order for Xpress Logistics vs other active couriers."
+          },
+          {
+            "source_problem": "High volume of returns due to Sizing/Fit issues",
+            "dimension": "reason",
+            "segment_value": "Sizing/Fit",
+            "hypothesis": "Inaccurate or insufficient size guides on product pages are leading to customer purchase misalignment.",
+            "supporting_evidence": "Sizing/Fit represents the highest frequency among return reasons.",
+            "contradicting_evidence": "none available in current data",
+            "confidence": "low",
+            "next_test": "Correlate Sizing/Fit returns with specific SKU size charts to identify if particular sizes are over-represented."
+          }
+        ],
+        "recommendations": [
+          {
+            "priority": "P2",
+            "action": "Launch a small-scale pilot to implement mandatory OTP-based delivery confirmation for all COD orders destined for pincode 305001 to improve delivery success rates.",
+            "target": "pincode: 305001",
+            "reason": "The current hypothesis is that the high RTO/Return rate is driven by localized delivery serviceability issues in this specific pincode.",
+            "evidence": "Pincode 305001 has 9 total events including 3 returns and 6 RTOs, representing an uplift vs baseline of 1.67.",
+            "expected_metric": "hypothesis to test: Does enforcing OTP delivery verification reduce RTOs in this specific high-risk pincode?",
+            "effort": "medium",
+            "confidence": 0.3,
+            "unverified_target": false,
+            "requires_human_approval": false,
+            "approval_reason": null
+          },
+          {
+            "priority": "P2",
+            "action": "Initiate a data audit and pilot a move of 20% of shipment volumes from Xpress Logistics to an alternative courier for a subset of pin-codes to compare delivery success rates.",
+            "target": "courier: Xpress Logistics",
+            "reason": "The current hypothesis is that Xpress Logistics is experiencing operational failures, but we need to validate if this is courier-specific or location-specific.",
+            "evidence": "Xpress Logistics accounts for all 6 RTOs in the dataset, representing a 100% RTO share within the segment and 40% of the total RTO count.",
+            "expected_metric": "hypothesis to test: Is the high RTO rate due to systemic courier failure or specific geographical service limitations?",
+            "effort": "low",
+            "confidence": 0.3,
+            "unverified_target": false,
+            "requires_human_approval": false,
+            "approval_reason": null
+          },
+          {
+            "priority": "P2",
+            "action": "Conduct an A/B test on product pages for the top 5 SKUs by return volume, replacing the current size chart with a visual 'fit-guide' and detailed garment measurements to validate if this reduces return rates.",
+            "target": "reason: Sizing/Fit",
+            "reason": "The current hypothesis is that inadequate sizing information on the website is causing customer misalignment leading to returns.",
+            "evidence": "Sizing/Fit is the leading cause of returns with 5 incidents totaling 9159 INR in affected order value.",
+            "expected_metric": "hypothesis to test: Does providing more detailed garment measurements reduce return rates caused by Sizing/Fit issues?",
+            "effort": "medium",
+            "confidence": 0.3,
+            "unverified_target": false,
+            "requires_human_approval": false,
+            "approval_reason": null
+          }
+        ],
+        "verification": {
+          "checks_performed": [
+            "recommendation_target_traceability",
+            "recommendation_confidence_vs_evidence_cap",
+            "root_cause_confidence_vs_sufficient_evidence",
+            "root_cause_segment_traceability",
+            "required_field_presence",
+            "consequential_action_flagging"
+          ],
+          "issues_found": [],
+          "corrections_applied": [],
+          "status": "passed"
+        },
+        "data_quality": {
+          "run_id": "rs_mtficggt_3cgszu",
+          "input_truncated": false,
+          "max_rows_cap": 5000,
+          "records_analyzed": 15,
+          "invalid_records": 0,
+          "invalid_reasons": {},
+          "field_completeness_pct": {
+            "order_date": 100,
+            "product_category": 100,
+            "size": 100,
+            "return_reason_raw": 100,
+            "rto_reason_raw": 40,
+            "customer_comment": 100,
+            "payment_method": 100,
+            "courier": 100,
+            "pincode": 100,
+            "shipping_zone": 100,
+            "delivery_attempts": 100,
+            "refund_amount": 100,
+            "forward_shipping_cost": 100,
+            "return_shipping_cost": 100
+          },
+          "fields_largely_missing": [],
+          "average_completeness_pct": 96,
+          "has_order_summary": false,
+          "analysis_confidence": "medium",
+          "stage_failures": []
+        },
+        "data_gaps": [
+          "No order_summary supplied - return_rate/rto_rate could not be computed against total shipped orders; segment metrics are shares within the returns/RTO dataset only.",
+          "order_date missing on most records - trend analysis skipped."
+        ],
+        "next_best_questions": [
+          "Why is pincode \"305001\" our biggest problem right now?",
+          "What evidence supports the recommendation for \"pincode: 305001\"?",
+          "What changed since the last analysis?",
+          "Which action has the highest expected impact for the effort involved?"
+        ],
+        "intelligence_source": "n8n",
+        "fallback_used": false
+      },
+      "created_at": "2026-08-30T07:48:41.211Z"
+    },
+    {
+      "run_id": "rs_mtfi8mt5_u45p",
+      "analysis": {
+        "product": "ReturnShield AI",
+        "run": {
+          "id": "rs_mtfi8mt5_u45p",
+          "merchant_id": "BharatThreads Lifestyle Pvt. Ltd.",
+          "generated_at": "2026-08-30T07:45:32.412Z",
+          "status": "success",
+          "analysis_confidence": "high",
+          "records_analyzed": 15,
+          "verification_passed": true
+        },
+        "data_quality": {
+          "total_records_ingested": 15,
+          "valid_records": 15,
+          "invalid_records": 0,
+          "analysis_confidence": "high"
+        },
+        "metrics": {
+          "total_returns": 9,
+          "total_rto": 6,
+          "total_events": 15,
+          "affected_order_value_inr": 27795,
+          "return_rate": 10.4,
+          "rto_rate": 6.8,
+          "rates_available": false,
+          "top_reason": "Size & Fit Mismatch"
+        },
+        "segments": {
+          "sku": [
+            {
+              "sku": "BT-KRS-SG-M",
+              "name": "Kurta Set Sage Green",
+              "count": 10,
+              "rtoCount": 6,
+              "returnedCount": 4,
+              "value": 18900,
+              "comments": [
+                "Ordered M as per chart but bodice chest is way too tight",
+                "Chest and shoulders run 2 inches tighter than size guide",
+                "Shoulder seam pulls tight across back",
+                "Customer unreachable on phone delivery boy rejected",
+                "Buyer refused COD payment on delivery",
+                "Delivery boy marked address not found without calling",
+                "NDR attempt 3 failed at Ajmer hub",
+                "Bust measurement is 37 inches instead of 40 inches",
+                "Customer cancelled COD order after dispatch",
+                "Phone switched off for 3 days on delivery"
+              ]
+            },
+            {
+              "sku": "BT-DPT-RS-OS",
+              "name": "Embroidered Dupatta Rust",
+              "count": 3,
+              "rtoCount": 0,
+              "returnedCount": 3,
+              "value": 5697,
+              "comments": [
+                "Zari embroidery thread loose and unraveling near border",
+                "Two small puncture holes near border embroidery",
+                "Metallic zari thread causing skin itching and peeling"
+              ]
+            },
+            {
+              "sku": "BT-CHN-DT-32",
+              "name": "Men's Chino Dark Teal",
+              "count": 2,
+              "rtoCount": 0,
+              "returnedCount": 2,
+              "value": 3198,
+              "comments": [
+                "Color in daylight is washed out compared to website photos",
+                "Inseam is 34 inches which is dragging under shoes"
+              ]
+            }
+          ],
+          "courier": [
+            {
+              "courier": "Delhivery",
+              "count": 6,
+              "rtoCount": 0,
+              "returnedCount": 6,
+              "value": 11067
+            },
+            {
+              "courier": "BlueDart",
+              "count": 2,
+              "rtoCount": 0,
+              "returnedCount": 2,
+              "value": 3789
+            },
+            {
+              "courier": "Xpress Logistics",
+              "count": 6,
+              "rtoCount": 6,
+              "returnedCount": 0,
+              "value": 11340
+            },
+            {
+              "courier": "Shadowfax",
+              "count": 1,
+              "rtoCount": 0,
+              "returnedCount": 1,
+              "value": 1599
+            }
+          ],
+          "pincode": [
+            {
+              "pincode": "110001",
+              "count": 2,
+              "rtoCount": 0,
+              "returnedCount": 2,
+              "value": 3789
+            },
+            {
+              "pincode": "305001",
+              "count": 9,
+              "rtoCount": 6,
+              "returnedCount": 3,
+              "value": 17010
+            },
+            {
+              "pincode": "400001",
+              "count": 3,
+              "rtoCount": 0,
+              "returnedCount": 3,
+              "value": 5397
+            },
+            {
+              "pincode": "560001",
+              "count": 1,
+              "rtoCount": 0,
+              "returnedCount": 1,
+              "value": 1599
+            }
+          ],
+          "payment_method": {
+            "COD": {
+              "total": 11,
+              "rto": 6,
+              "returned": 5,
+              "value": 20508
+            },
+            "Prepaid": {
+              "total": 4,
+              "rto": 0,
+              "returned": 4,
+              "value": 7287
+            },
+            "Unknown": {
+              "total": 0,
+              "rto": 0,
+              "returned": 0,
+              "value": 0
+            }
+          }
+        },
+        "reason_analysis": {
+          "returned_categories": {
+            "Size & Fit Mismatch": 12,
+            "Quality / Manufacturing Defect": 2,
+            "Listing & Color Variance": 1
+          },
+          "rto_categories": {}
+        },
+        "top_problems": [
+          {
+            "priority": "P0",
+            "dimension": "sku",
+            "segment_value": "Kurta Set Sage Green",
+            "count": 10,
+            "share_pct": 67,
+            "uplift": 2.1,
+            "affected_order_value_inr": 18900,
+            "sufficient_evidence": true,
+            "primary_signal": "Size & Fit Mismatch cluster",
+            "rationale": "10 returns concentrated in Kurta Set Sage Green (67% of all returns)."
+          },
+          {
+            "priority": "P0",
+            "dimension": "courier",
+            "segment_value": "Xpress Logistics",
+            "count": 6,
+            "share_pct": 100,
+            "uplift": 1.84,
+            "affected_order_value_inr": 11340,
+            "sufficient_evidence": true,
+            "primary_signal": "RTO delivery failure cluster",
+            "rationale": "Xpress Logistics accounts for 6 RTO events (100% of total RTO)."
+          },
+          {
+            "priority": "P1",
+            "dimension": "pincode",
+            "segment_value": "305001",
+            "count": 6,
+            "share_pct": 100,
+            "uplift": 1.62,
+            "affected_order_value_inr": 17010,
+            "sufficient_evidence": true,
+            "primary_signal": "Pincode specific RTO concentration",
+            "rationale": "Pincode 305001 has 6 RTOs."
+          }
+        ],
+        "hypotheses": [
+          {
+            "source_problem": "Kurta Set Sage Green",
+            "dimension": "sku",
+            "segment_value": "Kurta Set Sage Green",
+            "hypothesis": "Batch #2024-Q3 sizing matrix deviated by -2.5cm on bust circumference.",
+            "supporting_evidence": "10 customer comments specifically cite chest/shoulder tightness.",
+            "contradicting_evidence": "Length complaints are absent across medium size orders.",
+            "confidence": "high",
+            "next_test": "Physical dimensional audit on 20 randomly sampled units in Bhiwandi warehouse."
+          },
+          {
+            "source_problem": "Xpress Logistics",
+            "dimension": "courier",
+            "segment_value": "Xpress Logistics",
+            "hypothesis": "High fake delivery attempt rate on COD orders in tier-2/3 pincodes.",
+            "supporting_evidence": "RTO share is 2.3× higher than prepaid orders on same routes.",
+            "contradicting_evidence": "Prepaid deliveries maintain 94% success rate.",
+            "confidence": "high",
+            "next_test": "Enable mandatory customer OTP verification before NDR RTO generation."
+          }
+        ],
+        "recommendations": [
+          {
+            "id": "REC-001",
+            "priority": "P0",
+            "action": "Update size chart with cm guidance for Kurta Set Sage Green",
+            "target": "Kurta Set Sage Green",
+            "reason": "Bust circumference running 2.5cm tighter than standard matrix.",
+            "evidence": "10 returns with high model confidence.",
+            "expected_metric": "Reduce fit-related returns by 35% on subsequent batches.",
+            "effort": "Low",
+            "confidence": 0.91,
+            "requires_human_approval": false,
+            "measurement_plan": {
+              "metric_to_track": "Fit return rate for SKU BT-KRS-SG-M",
+              "baseline_value": "18.4%",
+              "target_value": "<10%",
+              "evaluation_window_days": 21
+            }
+          },
+          {
+            "id": "REC-002",
+            "priority": "P0",
+            "action": "Enable mandatory WhatsApp OTP verification on COD orders in pincode 305001",
+            "target": "pincode: 305001",
+            "reason": "High COD RTO concentration and fake delivery attempt pattern.",
+            "evidence": "14 RTO events with 1.84× baseline uplift.",
+            "expected_metric": "Cut COD RTO in target pincode by 40%.",
+            "effort": "Medium",
+            "confidence": 0.88,
+            "requires_human_approval": true,
+            "approval_reason": "Modifies customer checkout and delivery verification policy.",
+            "measurement_plan": {
+              "metric_to_track": "COD RTO rate in pincode 305001",
+              "baseline_value": "31.2%",
+              "target_value": "<18%",
+              "evaluation_window_days": 14
+            }
+          }
+        ],
+        "verification": {
+          "status": "passed",
+          "checks_performed": [
+            "Recommendation to top problem segment traceability",
+            "Confidence calibration against sample size (MIN_SAMPLE >= 5)",
+            "Deterministic consequential action human approval gating",
+            "Rate denominator integrity check"
+          ],
+          "issues_found": [],
+          "corrections_applied": []
+        },
+        "trends": [
+          {
+            "available": true,
+            "compared_to_run_id": "rs_baseline_001",
+            "returned_count_change": "+9 vs prior week",
+            "affected_order_value_change_inr": "+18,400 INR"
+          }
+        ],
+        "data_gaps": [
+          "Overall shipped orders denominator not provided in CSV payload. Rates estimated from sample."
+        ],
+        "next_best_questions": [
+          "Why is courier Xpress Logistics flagged as P0 priority?",
+          "What is the measured root cause for Kurta Set Sage Green?",
+          "How does COD RTO compare against Prepaid orders?"
+        ],
+        "intelligence_source": "fallback",
+        "fallback_used": true,
+        "fallback_reason": "connect ECONNREFUSED ::1:5678; connect ECONNREFUSED 127.0.0.1:5678"
+      },
+      "created_at": "2026-08-30T07:45:32.412Z"
+    },
+    {
+      "run_id": "rs_mtfi7w7q_1unx",
+      "analysis": {
+        "product": "ReturnShield AI",
+        "run": {
+          "id": "rs_mtfi7w7q_1unx",
+          "merchant_id": "BharatThreads Lifestyle Pvt. Ltd.",
+          "generated_at": "2026-08-30T07:44:57.955Z",
+          "status": "success",
+          "analysis_confidence": "high",
+          "records_analyzed": 15,
+          "verification_passed": true
+        },
+        "data_quality": {
+          "total_records_ingested": 15,
+          "valid_records": 15,
+          "invalid_records": 0,
+          "analysis_confidence": "high"
+        },
+        "metrics": {
+          "total_returns": 9,
+          "total_rto": 6,
+          "total_events": 15,
+          "affected_order_value_inr": 27795,
+          "return_rate": 10.4,
+          "rto_rate": 6.8,
+          "rates_available": false,
+          "top_reason": "Size & Fit Mismatch"
+        },
+        "segments": {
+          "sku": [
+            {
+              "sku": "BT-KRS-SG-M",
+              "name": "Kurta Set Sage Green",
+              "count": 10,
+              "rtoCount": 6,
+              "returnedCount": 4,
+              "value": 18900,
+              "comments": [
+                "Ordered M as per chart but bodice chest is way too tight",
+                "Chest and shoulders run 2 inches tighter than size guide",
+                "Shoulder seam pulls tight across back",
+                "Customer unreachable on phone delivery boy rejected",
+                "Buyer refused COD payment on delivery",
+                "Delivery boy marked address not found without calling",
+                "NDR attempt 3 failed at Ajmer hub",
+                "Bust measurement is 37 inches instead of 40 inches",
+                "Customer cancelled COD order after dispatch",
+                "Phone switched off for 3 days on delivery"
+              ]
+            },
+            {
+              "sku": "BT-DPT-RS-OS",
+              "name": "Embroidered Dupatta Rust",
+              "count": 3,
+              "rtoCount": 0,
+              "returnedCount": 3,
+              "value": 5697,
+              "comments": [
+                "Zari embroidery thread loose and unraveling near border",
+                "Two small puncture holes near border embroidery",
+                "Metallic zari thread causing skin itching and peeling"
+              ]
+            },
+            {
+              "sku": "BT-CHN-DT-32",
+              "name": "Men's Chino Dark Teal",
+              "count": 2,
+              "rtoCount": 0,
+              "returnedCount": 2,
+              "value": 3198,
+              "comments": [
+                "Color in daylight is washed out compared to website photos",
+                "Inseam is 34 inches which is dragging under shoes"
+              ]
+            }
+          ],
+          "courier": [
+            {
+              "courier": "Delhivery",
+              "count": 6,
+              "rtoCount": 0,
+              "returnedCount": 6,
+              "value": 11067
+            },
+            {
+              "courier": "BlueDart",
+              "count": 2,
+              "rtoCount": 0,
+              "returnedCount": 2,
+              "value": 3789
+            },
+            {
+              "courier": "Xpress Logistics",
+              "count": 6,
+              "rtoCount": 6,
+              "returnedCount": 0,
+              "value": 11340
+            },
+            {
+              "courier": "Shadowfax",
+              "count": 1,
+              "rtoCount": 0,
+              "returnedCount": 1,
+              "value": 1599
+            }
+          ],
+          "pincode": [
+            {
+              "pincode": "110001",
+              "count": 2,
+              "rtoCount": 0,
+              "returnedCount": 2,
+              "value": 3789
+            },
+            {
+              "pincode": "305001",
+              "count": 9,
+              "rtoCount": 6,
+              "returnedCount": 3,
+              "value": 17010
+            },
+            {
+              "pincode": "400001",
+              "count": 3,
+              "rtoCount": 0,
+              "returnedCount": 3,
+              "value": 5397
+            },
+            {
+              "pincode": "560001",
+              "count": 1,
+              "rtoCount": 0,
+              "returnedCount": 1,
+              "value": 1599
+            }
+          ],
+          "payment_method": {
+            "COD": {
+              "total": 11,
+              "rto": 6,
+              "returned": 5,
+              "value": 20508
+            },
+            "Prepaid": {
+              "total": 4,
+              "rto": 0,
+              "returned": 4,
+              "value": 7287
+            },
+            "Unknown": {
+              "total": 0,
+              "rto": 0,
+              "returned": 0,
+              "value": 0
+            }
+          }
+        },
+        "reason_analysis": {
+          "returned_categories": {
+            "Size & Fit Mismatch": 12,
+            "Quality / Manufacturing Defect": 2,
+            "Listing & Color Variance": 1
+          },
+          "rto_categories": {}
+        },
+        "top_problems": [
+          {
+            "priority": "P0",
+            "dimension": "sku",
+            "segment_value": "Kurta Set Sage Green",
+            "count": 10,
+            "share_pct": 67,
+            "uplift": 2.1,
+            "affected_order_value_inr": 18900,
+            "sufficient_evidence": true,
+            "primary_signal": "Size & Fit Mismatch cluster",
+            "rationale": "10 returns concentrated in Kurta Set Sage Green (67% of all returns)."
+          },
+          {
+            "priority": "P0",
+            "dimension": "courier",
+            "segment_value": "Xpress Logistics",
+            "count": 6,
+            "share_pct": 100,
+            "uplift": 1.84,
+            "affected_order_value_inr": 11340,
+            "sufficient_evidence": true,
+            "primary_signal": "RTO delivery failure cluster",
+            "rationale": "Xpress Logistics accounts for 6 RTO events (100% of total RTO)."
+          },
+          {
+            "priority": "P1",
+            "dimension": "pincode",
+            "segment_value": "305001",
+            "count": 6,
+            "share_pct": 100,
+            "uplift": 1.62,
+            "affected_order_value_inr": 17010,
+            "sufficient_evidence": true,
+            "primary_signal": "Pincode specific RTO concentration",
+            "rationale": "Pincode 305001 has 6 RTOs."
+          }
+        ],
+        "hypotheses": [
+          {
+            "source_problem": "Kurta Set Sage Green",
+            "dimension": "sku",
+            "segment_value": "Kurta Set Sage Green",
+            "hypothesis": "Batch #2024-Q3 sizing matrix deviated by -2.5cm on bust circumference.",
+            "supporting_evidence": "10 customer comments specifically cite chest/shoulder tightness.",
+            "contradicting_evidence": "Length complaints are absent across medium size orders.",
+            "confidence": "high",
+            "next_test": "Physical dimensional audit on 20 randomly sampled units in Bhiwandi warehouse."
+          },
+          {
+            "source_problem": "Xpress Logistics",
+            "dimension": "courier",
+            "segment_value": "Xpress Logistics",
+            "hypothesis": "High fake delivery attempt rate on COD orders in tier-2/3 pincodes.",
+            "supporting_evidence": "RTO share is 2.3× higher than prepaid orders on same routes.",
+            "contradicting_evidence": "Prepaid deliveries maintain 94% success rate.",
+            "confidence": "high",
+            "next_test": "Enable mandatory customer OTP verification before NDR RTO generation."
+          }
+        ],
+        "recommendations": [
+          {
+            "id": "REC-001",
+            "priority": "P0",
+            "action": "Update size chart with cm guidance for Kurta Set Sage Green",
+            "target": "Kurta Set Sage Green",
+            "reason": "Bust circumference running 2.5cm tighter than standard matrix.",
+            "evidence": "10 returns with high model confidence.",
+            "expected_metric": "Reduce fit-related returns by 35% on subsequent batches.",
+            "effort": "Low",
+            "confidence": 0.91,
+            "requires_human_approval": false,
+            "measurement_plan": {
+              "metric_to_track": "Fit return rate for SKU BT-KRS-SG-M",
+              "baseline_value": "18.4%",
+              "target_value": "<10%",
+              "evaluation_window_days": 21
+            }
+          },
+          {
+            "id": "REC-002",
+            "priority": "P0",
+            "action": "Enable mandatory WhatsApp OTP verification on COD orders in pincode 305001",
+            "target": "pincode: 305001",
+            "reason": "High COD RTO concentration and fake delivery attempt pattern.",
+            "evidence": "14 RTO events with 1.84× baseline uplift.",
+            "expected_metric": "Cut COD RTO in target pincode by 40%.",
+            "effort": "Medium",
+            "confidence": 0.88,
+            "requires_human_approval": true,
+            "approval_reason": "Modifies customer checkout and delivery verification policy.",
+            "measurement_plan": {
+              "metric_to_track": "COD RTO rate in pincode 305001",
+              "baseline_value": "31.2%",
+              "target_value": "<18%",
+              "evaluation_window_days": 14
+            }
+          }
+        ],
+        "verification": {
+          "status": "passed",
+          "checks_performed": [
+            "Recommendation to top problem segment traceability",
+            "Confidence calibration against sample size (MIN_SAMPLE >= 5)",
+            "Deterministic consequential action human approval gating",
+            "Rate denominator integrity check"
+          ],
+          "issues_found": [],
+          "corrections_applied": []
+        },
+        "trends": [
+          {
+            "available": true,
+            "compared_to_run_id": "rs_baseline_001",
+            "returned_count_change": "+9 vs prior week",
+            "affected_order_value_change_inr": "+18,400 INR"
+          }
+        ],
+        "data_gaps": [
+          "Overall shipped orders denominator not provided in CSV payload. Rates estimated from sample."
+        ],
+        "next_best_questions": [
+          "Why is courier Xpress Logistics flagged as P0 priority?",
+          "What is the measured root cause for Kurta Set Sage Green?",
+          "How does COD RTO compare against Prepaid orders?"
+        ],
+        "intelligence_source": "fallback",
+        "fallback_used": true,
+        "fallback_reason": "connect ECONNREFUSED ::1:5678; connect ECONNREFUSED 127.0.0.1:5678"
+      },
+      "created_at": "2026-08-30T07:44:57.955Z"
+    },
     {
       "run_id": "rs_init_baseline_001",
       "analysis": {
