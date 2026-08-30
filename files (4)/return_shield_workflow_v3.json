@@ -19,7 +19,7 @@
     },
     {
       "parameters": {
-        "jsCode": "// Webhook Authentication & Secret Verification\nconst headers = $input.first().json.headers || {};\nconst authHeader = String(headers['authorization'] || headers['Authorization'] || '');\nconst secretHeader = String(headers['x-webhook-secret'] || headers['X-Webhook-Secret'] || '');\nconst incomingSecret = secretHeader || (authHeader.startsWith('Bearer ') ? authHeader.slice(7).trim() : '');\nconst EXPECTED_SECRET = ($env && $env.N8N_WEBHOOK_SECRET) ? $env.N8N_WEBHOOK_SECRET : '';\nif (EXPECTED_SECRET && incomingSecret !== EXPECTED_SECRET) {\n  return [{\n    json: {\n      records: [],\n      order_summary: null,\n      meta: {\n        valid: false,\n        parse_error: 'Unauthorized: Missing or invalid X-Webhook-Secret.',\n        total_input: 0,\n        valid_records: 0,\n        invalid_records: 0,\n        run_id: 'unauthorized',\n        truncated: false\n      }\n    }\n  }];\n}\n\n// Accepts webhook body shaped like:\n// { \"returns\": [ {...records...} ], \"order_summary\": { total_shipped_orders, total_delivered_orders, cod_shipped_orders, prepaid_shipped_orders } (optional) }\n// Also tolerates a bare array as the whole body.\n\nconst body = $input.first().json.body !== undefined ? $input.first().json.body : $input.first().json;\n\n// ---- Run identity (v3: threaded through the whole pipeline via data_quality.run_id) ----\nfunction generateRunId() {\n  const rand = Math.random().toString(36).slice(2, 8);\n  return 'rs_' + Date.now().toString(36) + '_' + rand;\n}\nconst run_id = generateRunId();\n\n// ---- Row-count guard (v3: prevents a huge payload from taking down the demo) ----\nconst MAX_ROWS = 5000;\n\nlet rawRows = [];\nlet orderSummary = null;\nlet parseError = null;\n\nif (Array.isArray(body)) {\n  rawRows = body;\n} else if (body && Array.isArray(body.returns)) {\n  rawRows = body.returns;\n  orderSummary = body.order_summary || null;\n} else {\n  parseError = 'Payload must be an array of records, or an object with a \"returns\" array.';\n}\n\nlet truncated = false;\nif (!parseError && rawRows.length > MAX_ROWS) {\n  truncated = true;\n  rawRows = rawRows.slice(0, MAX_ROWS);\n}\n\nconst ALIASES = {\n  order_id: ['order_id', 'orderId', 'orderid'],\n  order_date: ['order_date', 'orderDate'],\n  sku: ['sku', 'SKU', 'product_sku'],\n  product_name: ['product_name', 'productName', 'name'],\n  product_category: ['product_category', 'category'],\n  product_variant: ['product_variant', 'variant'],\n  size: ['size'],\n  order_value: ['order_value', 'amount', 'order_amount', 'value'],\n  order_status: ['order_status', 'status'],\n  journey_outcome: ['journey_outcome', 'outcome'],\n  return_reason_raw: ['return_reason_raw', 'reason_text', 'reason', 'return_reason'],\n  customer_comment: ['customer_comment', 'comment', 'customerComment'],\n  rto_reason_raw: ['rto_reason_raw', 'rto_reason'],\n  is_rto: ['is_rto', 'rto', 'isRTO'],\n  payment_method: ['payment_method', 'paymentMethod', 'payment'],\n  cod_flag: ['cod_flag', 'is_cod'],\n  courier: ['courier', 'courier_partner', 'courierPartner'],\n  pincode: ['pincode', 'pin_code', 'zip', 'zipcode'],\n  shipping_zone: ['shipping_zone', 'zone'],\n  delivery_attempts: ['delivery_attempts', 'attempts'],\n  dispatch_delay_days: ['dispatch_delay_days'],\n  delivery_delay_days: ['delivery_delay_days'],\n  customer_type: ['customer_type'],\n  is_first_order: ['is_first_order', 'first_order'],\n  refund_amount: ['refund_amount'],\n  forward_shipping_cost: ['forward_shipping_cost'],\n  return_shipping_cost: ['return_shipping_cost'],\n  discount_amount: ['discount_amount'],\n  warehouse: ['warehouse']\n};\n\nfunction pick(row, field) {\n  for (const key of ALIASES[field]) {\n    if (row[key] !== undefined && row[key] !== null && row[key] !== '') return row[key];\n  }\n  return undefined;\n}\nfunction toStr(v, fallback) {\n  if (v === undefined || v === null) return fallback;\n  return String(v).trim();\n}\nfunction toNum(v) {\n  if (v === undefined || v === null || v === '') return 0;\n  const n = Number(String(v).replace(/[,\\u20b9\\s]/g, ''));\n  return Number.isFinite(n) ? n : 0;\n}\nfunction toBool(v) {\n  if (typeof v === 'boolean') return v;\n  if (v === undefined || v === null) return false;\n  const s = String(v).trim().toLowerCase();\n  return ['true', '1', 'yes', 'y', 'rto'].includes(s);\n}\nfunction normalizePayment(v) {\n  if (!v) return 'Unknown';\n  const s = String(v).trim().toLowerCase();\n  if (s.includes('cod') || s.includes('cash')) return 'COD';\n  if (s.includes('prepaid') || s.includes('online') || s.includes('card') || s.includes('upi')) return 'Prepaid';\n  return 'Unknown';\n}\n\n// Deterministic outcome derivation. The AI never touches this decision.\nfunction deriveOutcome(row, isRto) {\n  const explicit = toStr(pick(row, 'journey_outcome'), '').toLowerCase();\n  if (['delivered', 'returned', 'rto', 'cancelled', 'unknown'].includes(explicit)) return explicit;\n\n  const status = toStr(pick(row, 'order_status'), '').toLowerCase();\n  if (isRto || status.includes('rto') || status.includes('return to origin') || status.includes('undelivered')) return 'rto';\n  if (status.includes('cancel')) return 'cancelled';\n  if (status.includes('return')) return 'returned';\n  if (status.includes('deliver')) return 'delivered';\n  return 'unknown';\n}\n\nconst invalidReasons = {};\nconst records = [];\n\nif (!parseError) {\n  rawRows.forEach((row, i) => {\n    if (!row || typeof row !== 'object') {\n      invalidReasons['not_an_object'] = (invalidReasons['not_an_object'] || 0) + 1;\n      return;\n    }\n    const order_id = toStr(pick(row, 'order_id'), null);\n    if (!order_id) {\n      invalidReasons['missing_order_id'] = (invalidReasons['missing_order_id'] || 0) + 1;\n      return;\n    }\n    const is_rto = toBool(pick(row, 'is_rto'));\n    const journey_outcome = deriveOutcome(row, is_rto);\n\n    records.push({\n      order_id,\n      order_date: toStr(pick(row, 'order_date'), null),\n      sku: toStr(pick(row, 'sku'), 'UNKNOWN_SKU'),\n      product_name: toStr(pick(row, 'product_name'), null),\n      product_category: toStr(pick(row, 'product_category'), 'UNKNOWN_CATEGORY'),\n      product_variant: toStr(pick(row, 'product_variant'), null),\n      size: toStr(pick(row, 'size'), 'NA'),\n      order_value: toNum(pick(row, 'order_value')),\n      order_status: toStr(pick(row, 'order_status'), null),\n      journey_outcome,\n      return_reason_raw: toStr(pick(row, 'return_reason_raw'), ''),\n      customer_comment: toStr(pick(row, 'customer_comment'), ''),\n      rto_reason_raw: toStr(pick(row, 'rto_reason_raw'), ''),\n      is_rto,\n      payment_method: normalizePayment(pick(row, 'payment_method') || (toBool(pick(row, 'cod_flag')) ? 'COD' : undefined)),\n      courier: toStr(pick(row, 'courier'), 'UNKNOWN_COURIER'),\n      pincode: toStr(pick(row, 'pincode'), 'UNKNOWN_PINCODE'),\n      shipping_zone: toStr(pick(row, 'shipping_zone'), 'UNKNOWN_ZONE'),\n      delivery_attempts: toNum(pick(row, 'delivery_attempts')),\n      dispatch_delay_days: toNum(pick(row, 'dispatch_delay_days')),\n      delivery_delay_days: toNum(pick(row, 'delivery_delay_days')),\n      customer_type: toStr(pick(row, 'customer_type'), 'UNKNOWN'),\n      is_first_order: toBool(pick(row, 'is_first_order')),\n      refund_amount: pick(row, 'refund_amount') !== undefined ? toNum(pick(row, 'refund_amount')) : null,\n      forward_shipping_cost: pick(row, 'forward_shipping_cost') !== undefined ? toNum(pick(row, 'forward_shipping_cost')) : null,\n      return_shipping_cost: pick(row, 'return_shipping_cost') !== undefined ? toNum(pick(row, 'return_shipping_cost')) : null,\n      discount_amount: pick(row, 'discount_amount') !== undefined ? toNum(pick(row, 'discount_amount')) : null,\n      warehouse: toStr(pick(row, 'warehouse'), null)\n    });\n  });\n}\n\nconst total_input = Array.isArray(rawRows) ? rawRows.length : 0;\nconst valid_records = records.length;\nconst invalid_records = total_input - valid_records;\n\nreturn [{\n  json: {\n    records,\n    order_summary: orderSummary,\n    meta: {\n      valid: !parseError && valid_records > 0,\n      parse_error: parseError,\n      total_input,\n      valid_records,\n      invalid_records,\n      invalid_reasons: invalidReasons,\n      run_id,\n      truncated,\n      max_rows_cap: MAX_ROWS\n    }\n  }\n}];\n"
+        "jsCode": "// Accepts webhook body shaped like:\n// { \"returns\": [ {...records...} ], \"order_summary\": { total_shipped_orders, total_delivered_orders, cod_shipped_orders, prepaid_shipped_orders } (optional) }\n// Also tolerates a bare array as the whole body.\n\nconst body = $input.first().json.body !== undefined ? $input.first().json.body : $input.first().json;\n\n// ---- Run identity (v3: threaded through the whole pipeline via data_quality.run_id) ----\nfunction generateRunId() {\n  const rand = Math.random().toString(36).slice(2, 8);\n  return 'rs_' + Date.now().toString(36) + '_' + rand;\n}\nconst run_id = generateRunId();\n\n// ---- Row-count guard (v3: prevents a huge payload from taking down the demo) ----\nconst MAX_ROWS = 5000;\n\nlet rawRows = [];\nlet orderSummary = null;\nlet parseError = null;\n\nif (Array.isArray(body)) {\n  rawRows = body;\n} else if (body && Array.isArray(body.returns)) {\n  rawRows = body.returns;\n  orderSummary = body.order_summary || null;\n} else {\n  parseError = 'Payload must be an array of records, or an object with a \"returns\" array.';\n}\n\nlet truncated = false;\nif (!parseError && rawRows.length > MAX_ROWS) {\n  truncated = true;\n  rawRows = rawRows.slice(0, MAX_ROWS);\n}\n\nconst ALIASES = {\n  order_id: ['order_id', 'orderId', 'orderid'],\n  order_date: ['order_date', 'orderDate'],\n  sku: ['sku', 'SKU', 'product_sku'],\n  product_name: ['product_name', 'productName', 'name'],\n  product_category: ['product_category', 'category'],\n  product_variant: ['product_variant', 'variant'],\n  size: ['size'],\n  order_value: ['order_value', 'amount', 'order_amount', 'value'],\n  order_status: ['order_status', 'status'],\n  journey_outcome: ['journey_outcome', 'outcome'],\n  return_reason_raw: ['return_reason_raw', 'reason_text', 'reason', 'return_reason'],\n  customer_comment: ['customer_comment', 'comment', 'customerComment'],\n  rto_reason_raw: ['rto_reason_raw', 'rto_reason'],\n  is_rto: ['is_rto', 'rto', 'isRTO'],\n  payment_method: ['payment_method', 'paymentMethod', 'payment'],\n  cod_flag: ['cod_flag', 'is_cod'],\n  courier: ['courier', 'courier_partner', 'courierPartner'],\n  pincode: ['pincode', 'pin_code', 'zip', 'zipcode'],\n  shipping_zone: ['shipping_zone', 'zone'],\n  delivery_attempts: ['delivery_attempts', 'attempts'],\n  dispatch_delay_days: ['dispatch_delay_days'],\n  delivery_delay_days: ['delivery_delay_days'],\n  customer_type: ['customer_type'],\n  is_first_order: ['is_first_order', 'first_order'],\n  refund_amount: ['refund_amount'],\n  forward_shipping_cost: ['forward_shipping_cost'],\n  return_shipping_cost: ['return_shipping_cost'],\n  discount_amount: ['discount_amount'],\n  warehouse: ['warehouse']\n};\n\nfunction pick(row, field) {\n  for (const key of ALIASES[field]) {\n    if (row[key] !== undefined && row[key] !== null && row[key] !== '') return row[key];\n  }\n  return undefined;\n}\nfunction toStr(v, fallback) {\n  if (v === undefined || v === null) return fallback;\n  return String(v).trim();\n}\nfunction toNum(v) {\n  if (v === undefined || v === null || v === '') return 0;\n  const n = Number(String(v).replace(/[,\\u20b9\\s]/g, ''));\n  return Number.isFinite(n) ? n : 0;\n}\nfunction toBool(v) {\n  if (typeof v === 'boolean') return v;\n  if (v === undefined || v === null) return false;\n  const s = String(v).trim().toLowerCase();\n  return ['true', '1', 'yes', 'y', 'rto'].includes(s);\n}\nfunction normalizePayment(v) {\n  if (!v) return 'Unknown';\n  const s = String(v).trim().toLowerCase();\n  if (s.includes('cod') || s.includes('cash')) return 'COD';\n  if (s.includes('prepaid') || s.includes('online') || s.includes('card') || s.includes('upi')) return 'Prepaid';\n  return 'Unknown';\n}\n\nfunction deriveOutcome(row, isRto) {\n  const explicit = toStr(pick(row, 'journey_outcome'), '').toLowerCase();\n  if (['delivered', 'returned', 'rto', 'cancelled', 'unknown'].includes(explicit)) return explicit;\n\n  const status = toStr(pick(row, 'order_status'), '').toLowerCase();\n  if (isRto || status.includes('rto') || status.includes('return to origin') || status.includes('undelivered')) return 'rto';\n  if (status.includes('cancel')) return 'cancelled';\n  if (status.includes('return')) return 'returned';\n  if (status.includes('deliver')) return 'delivered';\n  return 'unknown';\n}\n\nconst invalidReasons = {};\nconst records = [];\n\nif (!parseError) {\n  rawRows.forEach((row, i) => {\n    if (!row || typeof row !== 'object') {\n      invalidReasons['not_an_object'] = (invalidReasons['not_an_object'] || 0) + 1;\n      return;\n    }\n    const order_id = toStr(pick(row, 'order_id'), null);\n    if (!order_id) {\n      invalidReasons['missing_order_id'] = (invalidReasons['missing_order_id'] || 0) + 1;\n      return;\n    }\n    const is_rto = toBool(pick(row, 'is_rto'));\n    const journey_outcome = deriveOutcome(row, is_rto);\n\n    records.push({\n      order_id,\n      order_date: toStr(pick(row, 'order_date'), null),\n      sku: toStr(pick(row, 'sku'), 'UNKNOWN_SKU'),\n      product_name: toStr(pick(row, 'product_name'), null),\n      product_category: toStr(pick(row, 'product_category'), 'UNKNOWN_CATEGORY'),\n      product_variant: toStr(pick(row, 'product_variant'), null),\n      size: toStr(pick(row, 'size'), 'NA'),\n      order_value: toNum(pick(row, 'order_value')),\n      order_status: toStr(pick(row, 'order_status'), null),\n      journey_outcome,\n      return_reason_raw: toStr(pick(row, 'return_reason_raw'), ''),\n      customer_comment: toStr(pick(row, 'customer_comment'), ''),\n      rto_reason_raw: toStr(pick(row, 'rto_reason_raw'), ''),\n      is_rto,\n      payment_method: normalizePayment(pick(row, 'payment_method') || (toBool(pick(row, 'cod_flag')) ? 'COD' : undefined)),\n      courier: toStr(pick(row, 'courier'), 'UNKNOWN_COURIER'),\n      pincode: toStr(pick(row, 'pincode'), 'UNKNOWN_PINCODE'),\n      shipping_zone: toStr(pick(row, 'shipping_zone'), 'UNKNOWN_ZONE'),\n      delivery_attempts: toNum(pick(row, 'delivery_attempts')),\n      dispatch_delay_days: toNum(pick(row, 'dispatch_delay_days')),\n      delivery_delay_days: toNum(pick(row, 'delivery_delay_days')),\n      customer_type: toStr(pick(row, 'customer_type'), 'UNKNOWN'),\n      is_first_order: toBool(pick(row, 'is_first_order')),\n      refund_amount: pick(row, 'refund_amount') !== undefined ? toNum(pick(row, 'refund_amount')) : null,\n      forward_shipping_cost: pick(row, 'forward_shipping_cost') !== undefined ? toNum(pick(row, 'forward_shipping_cost')) : null,\n      return_shipping_cost: pick(row, 'return_shipping_cost') !== undefined ? toNum(pick(row, 'return_shipping_cost')) : null,\n      discount_amount: pick(row, 'discount_amount') !== undefined ? toNum(pick(row, 'discount_amount')) : null,\n      warehouse: toStr(pick(row, 'warehouse'), null)\n    });\n  });\n}\n\nconst total_input = Array.isArray(rawRows) ? rawRows.length : 0;\nconst valid_records = records.length;\nconst invalid_records = total_input - valid_records;\n\nreturn [{\n  json: {\n    records,\n    order_summary: orderSummary,\n    meta: {\n      valid: !parseError && valid_records > 0,\n      parse_error: parseError,\n      total_input,\n      valid_records,\n      invalid_records,\n      invalid_reasons: invalidReasons,\n      run_id,\n      truncated,\n      max_rows_cap: MAX_ROWS\n    }\n  }\n}];\n"
       },
       "id": "370cc2c2-5798-4c1c-9a95-edd60edae12a",
       "name": "Normalize & Validate Data",
@@ -563,6 +563,69 @@
         3500,
         780
       ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Inbound Webhook Authentication Gate\nconst headers = $input.first().json.headers || {};\nconst authHeader = String(headers['authorization'] || headers['Authorization'] || '');\nconst secretHeader = String(headers['x-webhook-secret'] || headers['X-Webhook-Secret'] || '');\nconst incomingSecret = secretHeader || (authHeader.startsWith('Bearer ') ? authHeader.slice(7).trim() : '');\nconst EXPECTED_SECRET = ($env && $env.N8N_WEBHOOK_SECRET) ? $env.N8N_WEBHOOK_SECRET : '';\nconst authorized = !EXPECTED_SECRET || (incomingSecret === EXPECTED_SECRET);\n\nreturn [{\n  json: {\n    ...$input.first().json,\n    _auth: {\n      authorized,\n      error: authorized ? null : 'Unauthorized: Missing or invalid X-Webhook-Secret header.'\n    }\n  }\n}];"
+      },
+      "id": "w1-auth-verify-code",
+      "name": "Verify Webhook Secret",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        480,
+        560
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "cond-w1-auth",
+              "leftValue": "={{ $json._auth.authorized }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "w1-auth-if",
+      "name": "IF - Authorized?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        560,
+        560
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{\n  \"error\": true,\n  \"status\": 401,\n  \"message\": \"Unauthorized: Missing or invalid X-Webhook-Secret header.\"\n}",
+        "options": {
+          "responseCode": 401
+        }
+      },
+      "id": "w1-auth-respond-401",
+      "name": "Respond 401 Unauthorized",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        700,
+        720
+      ]
     }
   ],
   "connections": {
@@ -570,7 +633,7 @@
       "main": [
         [
           {
-            "node": "Normalize & Validate Data",
+            "node": "Verify Webhook Secret",
             "type": "main",
             "index": 0
           }
@@ -812,6 +875,35 @@
         [
           {
             "node": "Final JSON Builder",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Verify Webhook Secret": {
+      "main": [
+        [
+          {
+            "node": "IF - Authorized?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF - Authorized?": {
+      "main": [
+        [
+          {
+            "node": "Normalize & Validate Data",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Respond 401 Unauthorized",
             "type": "main",
             "index": 0
           }

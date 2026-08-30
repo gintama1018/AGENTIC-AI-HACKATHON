@@ -19,7 +19,7 @@
     },
     {
       "parameters": {
-        "jsCode": "// Webhook Authentication & Secret Verification\nconst headers = $input.first().json.headers || {};\nconst authHeader = String(headers['authorization'] || headers['Authorization'] || '');\nconst secretHeader = String(headers['x-webhook-secret'] || headers['X-Webhook-Secret'] || '');\nconst incomingSecret = secretHeader || (authHeader.startsWith('Bearer ') ? authHeader.slice(7).trim() : '');\nconst EXPECTED_SECRET = ($env && $env.N8N_WEBHOOK_SECRET) ? $env.N8N_WEBHOOK_SECRET : '';\nif (EXPECTED_SECRET && incomingSecret !== EXPECTED_SECRET) {\n  return [{\n    json: {\n      valid: false,\n      errors: ['Unauthorized: Missing or invalid X-Webhook-Secret.'],\n      run_id: '',\n      target: '',\n      outcome: '',\n      note: '',\n      recorded_by: '',\n      recorded_at: new Date().toISOString()\n    }\n  }];\n}\n\n// ReturnShield - Record Feedback (spec sections 16 + 19)\n// Doubles as: (a) the closed-loop feedback store (\"did this recommendation\n// work?\"), and (b) the human-approval record for recommendations the\n// Self-Verification Engine flagged with requires_human_approval = true.\n\nconst body = $input.first().json.body !== undefined ? $input.first().json.body : $input.first().json;\n\nconst VALID_OUTCOMES = ['accepted', 'rejected', 'implemented', 'resolved', 'ineffective', 'incorrect', 'approved', 'denied'];\n\nconst run_id = body && typeof body.run_id === 'string' ? body.run_id.trim() : '';\nconst target = body && typeof body.target === 'string' ? body.target.trim() : '';\nconst outcome = body && typeof body.outcome === 'string' ? body.outcome.trim().toLowerCase() : '';\nconst note = body && typeof body.note === 'string' ? body.note.trim() : '';\nconst recorded_by = body && typeof body.recorded_by === 'string' ? body.recorded_by.trim() : 'unspecified';\n\nconst errors = [];\nif (!run_id) errors.push('Missing \"run_id\" (string) - which analysis run this feedback is about.');\nif (!target) errors.push('Missing \"target\" (string) - which recommendation/problem this refers to, e.g. \"courier: Xpress Logistics\".');\nif (!outcome) errors.push('Missing \"outcome\" (string).');\nelse if (!VALID_OUTCOMES.includes(outcome)) errors.push('\"outcome\" must be one of: ' + VALID_OUTCOMES.join(', ') + '.');\n\nreturn [{\n  json: {\n    valid: errors.length === 0,\n    errors,\n    run_id, target, outcome, note, recorded_by,\n    recorded_at: new Date().toISOString()\n  }\n}];\n"
+        "jsCode": "// ReturnShield - Record Feedback (spec sections 16 + 19)\n// Doubles as: (a) the closed-loop feedback store (\"did this recommendation\n// work?\"), and (b) the human-approval record for recommendations the\n// Self-Verification Engine flagged with requires_human_approval = true.\n\nconst body = $input.first().json.body !== undefined ? $input.first().json.body : $input.first().json;\n\nconst VALID_OUTCOMES = ['accepted', 'rejected', 'implemented', 'resolved', 'ineffective', 'incorrect', 'approved', 'denied'];\n\nconst run_id = body && typeof body.run_id === 'string' ? body.run_id.trim() : '';\nconst target = body && typeof body.target === 'string' ? body.target.trim() : '';\nconst outcome = body && typeof body.outcome === 'string' ? body.outcome.trim().toLowerCase() : '';\nconst note = body && typeof body.note === 'string' ? body.note.trim() : '';\nconst recorded_by = body && typeof body.recorded_by === 'string' ? body.recorded_by.trim() : 'unspecified';\n\nconst errors = [];\nif (!run_id) errors.push('Missing \"run_id\" (string) - which analysis run this feedback is about.');\nif (!target) errors.push('Missing \"target\" (string) - which recommendation/problem this refers to, e.g. \"courier: Xpress Logistics\".');\nif (!outcome) errors.push('Missing \"outcome\" (string).');\nelse if (!VALID_OUTCOMES.includes(outcome)) errors.push('\"outcome\" must be one of: ' + VALID_OUTCOMES.join(', ') + '.');\n\nreturn [{\n  json: {\n    valid: errors.length === 0,\n    errors,\n    run_id, target, outcome, note, recorded_by,\n    recorded_at: new Date().toISOString()\n  }\n}];\n"
       },
       "id": "3ba4f695-6c85-4021-b9b6-5e99095501b0",
       "name": "Prepare & Validate Feedback",
@@ -152,6 +152,69 @@
         420,
         60
       ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Inbound Webhook Authentication Gate\nconst headers = $input.first().json.headers || {};\nconst authHeader = String(headers['authorization'] || headers['Authorization'] || '');\nconst secretHeader = String(headers['x-webhook-secret'] || headers['X-Webhook-Secret'] || '');\nconst incomingSecret = secretHeader || (authHeader.startsWith('Bearer ') ? authHeader.slice(7).trim() : '');\nconst EXPECTED_SECRET = ($env && $env.N8N_WEBHOOK_SECRET) ? $env.N8N_WEBHOOK_SECRET : '';\nconst authorized = !EXPECTED_SECRET || (incomingSecret === EXPECTED_SECRET);\n\nreturn [{\n  json: {\n    ...$input.first().json,\n    _auth: {\n      authorized,\n      error: authorized ? null : 'Unauthorized: Missing or invalid X-Webhook-Secret header.'\n    }\n  }\n}];"
+      },
+      "id": "w3-auth-verify-code",
+      "name": "Verify Webhook Secret",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        480,
+        420
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "cond-w3-auth",
+              "leftValue": "={{ $json._auth.authorized }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "w3-auth-if",
+      "name": "IF - Authorized?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        560,
+        420
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{\n  \"error\": true,\n  \"status\": 401,\n  \"message\": \"Unauthorized: Missing or invalid X-Webhook-Secret header.\"\n}",
+        "options": {
+          "responseCode": 401
+        }
+      },
+      "id": "w3-auth-respond-401",
+      "name": "Respond 401 Unauthorized",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        700,
+        580
+      ]
     }
   ],
   "connections": {
@@ -159,7 +222,7 @@
       "main": [
         [
           {
-            "node": "Prepare & Validate Feedback",
+            "node": "Verify Webhook Secret",
             "type": "main",
             "index": 0
           }
@@ -222,6 +285,35 @@
         [
           {
             "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Verify Webhook Secret": {
+      "main": [
+        [
+          {
+            "node": "IF - Authorized?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF - Authorized?": {
+      "main": [
+        [
+          {
+            "node": "Prepare & Validate Feedback",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Respond 401 Unauthorized",
             "type": "main",
             "index": 0
           }
